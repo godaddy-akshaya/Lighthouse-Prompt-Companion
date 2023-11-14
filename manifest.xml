@@ -1,0 +1,5 @@
+<Translation>
+    <File HoPath="public/locales/en-US.json"
+          HbPath="public/locales/{Culture}.json"
+          Cultures="da, da-DK, de, de-AT, de-CH, de-DE, el, el-GR, en-AU, en-CA, en-GB, en-HK, en-IE, en-IN, en-MY, en-NZ, en-PH, en-PK, en-SG, en-US, en-ZA, es, es-AR, es-CL, es-CO, es-ES, es-MX, es-PE, es-US, es-VE, fi, fi-FI, fil-PH, fr, fr-BE, fr-CA, fr-CH, fr-FR, id-ID, it, it-CH, it-IT, ja-JP, ko-KR, ms-MY, nb, nb-NO, nl, nl-BE, nl-NL, pl, pl-PL, pt, pt-BR, pt-PT, ru, ru-RU, sv, sv-SE, th-TH, tr, tr-TR, uk, uk-UA, vi-VN, zh-CN, zh-HK, zh-SG, zh-TW, qa-PS, hi-IN, mr-IN, ta-IN"/>
+</Translation>

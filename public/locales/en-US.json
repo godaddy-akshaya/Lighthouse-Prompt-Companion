@@ -1,0 +1,10 @@
+{
+  "learn_gasket": "Learn Gasket",
+  "learn_gasket_subtitle": "Learn more about working with Gasket",
+  "learn_uxcore2": "Learn UXCore2",
+  "learn_uxcore2_subtitle": "Discover UX components and how to use them",
+  "learn_nextjs": "Learn Next.js",
+  "learn_nextjs_subtitle": "Learn more about Next on Github and in their examples",
+  "gasket_support": "Gasket Support",
+  "gasket_support_subtitle": "Reach out to the {gasket} team in the {gasketChannel} Slack channel"
+}
