@@ -19,8 +19,8 @@ module.exports = {
       host: 'prompt-ui.c3.int.dev-gdcorp.tools',
       'pre-deploy': 'git pull',
       ref: 'origin/main',
-      repo: 'git@github.com:gdcorp-dna/scui-uxcore.git',
-      path: '/var/www/scui-uxcore',
+      repo: 'git@github.com:gdcorp-dna/prompt-ui.git',
+      path: '/var/www/prompt-ui',
       'post-deploy':
         'npm install && pm2 startOrReload ecosystem.config.js --env=development --only prompt-ui-dev',
     },
