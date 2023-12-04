@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+  http: 8080,
   plugins: {
     presets: [
       '@godaddy/webapp'
@@ -13,23 +14,27 @@ module.exports = {
   helmet: {
     contentSecurityPolicy: false
   },
-  // environments: {
-  //   local: {
-  //     hostname: 'local.gasket.dev-godaddy.com',
-  //   },
-  //   devevlopment: {
-  //     https: {
-  //       root: path.join(__dirname, 'certs'),
-  //       key: 'prompt-ui.c3.int.dev-gdcorp.tools.key',
-  //       cert: ['prompt-ui.c3.int.dev-gdcorp.tools.crt']
-  //     },
-  //     hostname: 'prompt-ui.c3.int.dev-gdcorp.tools',
+  environments: {
+    local: {
+      hostname: 'local.gasket.dev-godaddy.com',
+    },
+    development: {
+      hostname: 'localhost',
+      http: 8080,
+    },
+    production: {
+      https: {
+        root: path.join(__dirname, 'certs'),
+        key: 'prompt-ui.c3.int.dev-gdcorp.tools.key',
+        cert: ['prompt-ui.c3.int.dev-gdcorp.tools.crt']
+      },
+      hostname: 'prompt-ui.c3.int.dev-gdcorp.tools',
 
-  //     plugins: {
-  //       remove: []
-  //     }
-  //   }
-  // },
+      plugins: {
+        remove: []
+      }
+    }
+  },
   presentationCentral: {
     params: {
       app: 'prompt-ui',
