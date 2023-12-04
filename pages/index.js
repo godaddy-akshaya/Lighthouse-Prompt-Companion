@@ -21,7 +21,7 @@ const TABLES = [
     'css_score': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
     'nps_score': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
     'repeat_contact_flag': ['TRUE', 'FALSE'],
-    'customer_region': ['Australia', 'Canada', 'United Kingdom', 'United States', 'India', 'China', 'Germany', 'Rest of World (RoW)'],
+    'customer_region_2': ['Australia', 'Canada', 'United Kingdom', 'United States', 'India', 'China', 'Germany', 'Rest of World (RoW)'],
   }
 ]
 
