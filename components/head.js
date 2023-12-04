@@ -1,24 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import NextHead from 'next/head';
 
-const Head = (props) => (
-  <NextHead>
-    <meta charSet='UTF-8'/>
-    <title>{props.title}</title>
-    <meta name='description' content={ props.description }/>
-    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'/>
-  </NextHead>
-);
+
+const Head = (props) => {
+  useEffect(() => {
+    ux.header((err, header) => {
+      if (err) return console.error(err); // handle this as you wish
+      header.updateSidebarNav([
+        {
+          caption: 'Prompt',
+          key: '0',
+          href: '/',
+          eid: 'pep.prompt-ui.nav.prompt.click',
+          icon: 'home',
+          active: true
+        },
+        {
+          caption: 'Results',
+          key: '1',
+          href: '/results',
+          eid: 'pep.prompt-ui.nav.results.click',
+          icon: 'list',
+          active: false
+        }
+      ]);
+    });
+  }, [])
+  return (
+    <NextHead>
+      <meta charSet='UTF-8' />
+      <title>{props.title}</title>
+      <meta name='description' content={props.description} />
+      <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
+    </NextHead>
+  );
+}
 
 Head.propTypes = {
   title: PropTypes.string,
-  description: PropTypes.string
+  description: PropTypes.string,
+  route: PropTypes.string
 };
 
 Head.defaultProps = {
-  title: 'prompt-ui',
-  description: 'Prompt UI '
+  title: 'Prompt UI',
+  description: 'Prompt UI',
+  route: ''
 };
 
 export default Head;

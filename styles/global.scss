@@ -9,3 +9,22 @@ it is recommended to import those directly to `pages/_app.js`
 
 @see: docs/css-imports.md
 */
+.row {
+    display: flex;
+    min-height: 20px;
+.column {
+        flex: 1;/* This makes each column take up an equal amount of space */
+    }
+}
+.m-t-1 {
+    margin-top: 1rem !important;
+}
+
+body.ux-app.gasket-app {
+    background-color: var(--ux-cao06b, white) !important;
+}
+body.ux-app.gasket-app .ux-app__content {
+    background-color: var(--ux-cao06b, white) !important;
+}
+
+
