@@ -18,10 +18,10 @@ const TABLES = [
     key: 0,
     name: 'Top Level Insights',
     columns: ['css_score', 'repeat_contact_flag', 'customer_type_name', 'nps_score'],
-    'css_score': ['1', '0', '8', '4', '7', '5', '9', '6', '2', '10', '3'],
-    'nps_score': ['1', '0', '8', '4', '7', '5', '9', '6', '2', '10', '3'],
+    'css_score': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    'nps_score': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
     'repeat_contact_flag': ['TRUE', 'FALSE'],
-    'customer_type_name': ['Australia', 'Canada', 'United Kingdom', 'United States', 'India', 'China', 'Germany', 'Rest of World (RoW)'],
+    'customer_region': ['Australia', 'Canada', 'United Kingdom', 'United States', 'India', 'China', 'Germany', 'Rest of World (RoW)'],
   }
 ]
 
