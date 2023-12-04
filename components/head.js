@@ -21,7 +21,7 @@ const Head = (props) => {
           key: '1',
           href: '/results',
           eid: 'pep.prompt-ui.nav.results.click',
-          icon: 'list',
+          icon: 'checkbox-list',
           active: false
         }
       ]);

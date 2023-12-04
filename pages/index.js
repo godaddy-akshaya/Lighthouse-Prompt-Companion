@@ -47,7 +47,7 @@ export const IndexPage = () => {
       headers: new Headers({
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'Authorization': 'Token: e2048a70-aa2a-4665-8843-8e24dba61b58'
+        'Authorization': 'token e2048a70-aa2a-4665-8843-8e24dba61b58'
       })
     })
       .then(response => response.json())
@@ -191,5 +191,4 @@ export const IndexPage = () => {
     </div>
   )
 }
-
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);

@@ -13,6 +13,7 @@ import '@ux/checkbox/styles';
 import '@ux/date-input/styles';
 import '@ux/menu/styles';
 import '@ux/filter/styles';
+import '@ux/icon/checkbox-list/index.css';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
