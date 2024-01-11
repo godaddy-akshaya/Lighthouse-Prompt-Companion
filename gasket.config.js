@@ -8,7 +8,7 @@ module.exports = {
     ],
     add: [
       '@gasket/mocha',
-      '@gasket/fetch'
+      '@gasket/fetch',
     ]
   },
   helmet: {
@@ -16,11 +16,12 @@ module.exports = {
   },
   environments: {
     local: {
-      hostname: 'local.gasket.dev-godaddy.com',
+      hostname: 'local.gasket.dev-gdcorp.tools',
+      https: 443,
     },
     development: {
-      hostname: 'localhost',
-      http: 8080,
+      hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
+      https: 443,
     },
     production: {
       https: {

@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import NextHead from 'next/head';
-
+import Logo from './logo';
 
 const Head = (props) => {
   useEffect(() => {
     ux.header((err, header) => {
       if (err) return console.error(err); // handle this as you wish
+      // header.updateNavHeading({ text: 'Lighthouse' });
       header.updateSidebarNav([
         {
           caption: 'Prompt',
@@ -44,7 +45,7 @@ Head.propTypes = {
 };
 
 Head.defaultProps = {
-  title: 'Prompt UI',
+  title: 'Godaddy Lighthouse',
   description: 'Prompt UI',
   route: ''
 };
