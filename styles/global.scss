@@ -13,32 +13,36 @@ it is recommended to import those directly to `pages/_app.js`
     display: flex;
     flex-direction: row;
     padding-top: 0px !important;
-    .lh-start {
+    &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;
     }
-    .lh-between {
+    &.lh-between {
         justify-content: space-between;
-        min-width: 45%;
-        max-width: 30%;
+         // Add this to make all children equal width
+         > * {
+            flex: 1;
+        }
+
     }
 }
 .logo {
-    max-width: 350px;
-    max-height: 100%;
-    object-fit: contain;
+    display: inline-block;
+    max-width: 130px;
+    max-height: 135px;
+    width: 100%;
+    height: 100%;
+    padding: 8px;
+    margin: 16px;
 }
 .right-panel {
     display: flex;
     min-width: 400px;
 }
-.row {
-    display: flex;
-    min-height: 20px;
-.column {
-        flex: 1;/* This makes each column take up an equal amount of space */
-    }
+.grey-card {
+    background-color: var(--ux-1vw9arb, #D4DBE0) !important;
 }
+
 .m-t-1 {
     margin-top: 1rem !important;
 }

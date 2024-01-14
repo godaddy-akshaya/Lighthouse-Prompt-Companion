@@ -9,6 +9,7 @@ module.exports = {
     add: [
       '@gasket/mocha',
       '@gasket/fetch',
+      '@gasket/plugin-config'
     ]
   },
   helmet: {
@@ -17,6 +18,10 @@ module.exports = {
   environments: {
     local: {
       hostname: 'local.gasket.dev-gdcorp.tools',
+      endpoints: {
+        api: 'https://gheg0jyux8.execute-api.us-west-2.amazonaws.com/dev'
+      },
+      http: 80,
       https: 443,
     },
     development: {
@@ -26,10 +31,10 @@ module.exports = {
     production: {
       https: {
         root: path.join(__dirname, 'certs'),
-        key: 'prompt-ui.c3.int.dev-gdcorp.tools.key',
-        cert: ['prompt-ui.c3.int.dev-gdcorp.tools.crt']
+        key: 'lighthouse.c3.int.dev-gdcorp.tools.key',
+        cert: ['lighthouse.c3.int.dev-gdcorp.tools.crt']
       },
-      hostname: 'prompt-ui.c3.int.dev-gdcorp.tools',
+      hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
 
       plugins: {
         remove: []

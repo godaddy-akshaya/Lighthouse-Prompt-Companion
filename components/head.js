@@ -7,7 +7,7 @@ const Head = (props) => {
   useEffect(() => {
     ux.header((err, header) => {
       if (err) return console.error(err); // handle this as you wish
-      // header.updateNavHeading({ text: 'Lighthouse' });
+
       header.updateSidebarNav([
         {
           caption: 'Prompt',
