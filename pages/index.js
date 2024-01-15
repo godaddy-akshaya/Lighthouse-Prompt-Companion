@@ -13,10 +13,14 @@ import SiblingSet from '@ux/sibling-set';
 
 export const IndexPage = () => {
   const [tables, setTables] = useState();
+  const [selectedTable, setSelectedTable] = useState();
+
+  function handleTableSelect(event) {
+    setSelectedTable(event);
+  }
 
   useEffect(() => {
     getTables().then(data => {
-      console.log(data);
       setTables(data);
     });
   }, []);
@@ -27,7 +31,7 @@ export const IndexPage = () => {
         <Logo />
         <Block>
           <Lockup>
-            <text.h1 style={{ 'margin-bottom': '0px', 'padding-bottom': '0px' }} as='heading' text='Lighthouse' />
+            <text.h1 style={{ 'marginBottom': '0px', 'paddingBottom': '0px' }} as='heading' text='Lighthouse' />
             <text.h3 as='title' text='Insights Platform' />
           </Lockup>
         </Block>
@@ -38,33 +42,31 @@ export const IndexPage = () => {
           <Card id='learn-more'>
             <Block orientation='horizontal' >
               <text.h4 as='title' text='What is Lighthouse?' />
-              <text.p as='body' text='GoDaddy Lighthouse is an insights platform powered by large language models. The platform allows users throughout the company to craft, manage and evaluate prompts against any text-based data.' />
+              <text.p as='paragraph' text='GoDaddy Lighthouse is an insights platform powered by large language models. The platform allows users throughout the company to craft, manage and evaluate prompts against any text-based data.' />
               <Button text='Learn More' design='primary' as='cta' href='https://godaddy-corp.atlassian.net/wiki/spaces/BI/pages/3343751333/GoDaddy+Lighthouse+-+an+Insights+Platform' />
             </Block>
           </Card>
         </Block>
-
-
         <Block>
           <Card id='try-prompt-out' className='grey-card'>
             <Block orientation='horizontal' >
               <text.h4 as='title' text='Get Started' />
-              <text.p as='body' text='To get this party started, select a table from the list and select go' />
+              <text.p as='paragraph' text='To get this party started, select a table from the list and select go' />
               <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
-                <SelectInput stretch={true} id='tables' name='select'>
-                  <option value='top-level-insights'>Top Level Insights</option>
+                <SelectInput className='select-table' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
+                  <option value=''>Select a table</option>
+                  <option value='Top Level Insights'>Top Level Insights</option>
                 </SelectInput>
-                <Button text='Go' design='primary' as='cta' />
+                <Button text='Go' design='primary' as='cta' href={`/table/${encodeURIComponent(selectedTable)}`} />
               </SiblingSet>
             </Block>
           </Card>
         </Block>
-
       </div>
-
-
-
     </>
   )
+};
+const options = {
+  realm: 'jomax', ssoRedirectOverride: 'https://sso.dev-gdcorp.tools/?realm=jomax&app=scui-uxcore.c3.int&path='
 };
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);
