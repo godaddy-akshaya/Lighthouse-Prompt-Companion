@@ -19,9 +19,12 @@ import '@ux/icon/wand/index.css';
 import '@ux/icon/play/index.css';
 import '@ux/icon/help/index.css';
 import Checkbox from '@ux/checkbox';
-
+import Select from '@ux/select';
+import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
+import FieldFrame from '@ux/field-frame';
+import '@ux/field-frame/styles';
 import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
@@ -50,18 +53,16 @@ const PromptBuilder = () => {
     function handleNumberOfTransactionChange(e) {
         setNumOfTransactions(e);
     }
-    function handleClick() {
+    function handleClick(e) {
+        e.preventDefault();
         setShowPrompt(true);
-        setNumOfTransactions(200);
-        setCount(200);
     }
     function handleIncludeEval(e) {
         setIncludeEval(!includeEval);
     }
     function toProperJson(str) {
-        let newArray = str.replace('{', '[').replace('}', ']').replace(/'/g, '"');
-        console.log(newArray);
-        return JSON.parse(newArray);
+        let newArray = str.replace('{', '').replace('}', '').replaceAll("'", '');
+        return newArray.split(',');
     }
     function toTitleCase(str) {
         return str.replace(/_/g, ' ')
@@ -76,13 +77,16 @@ const PromptBuilder = () => {
             setGuid(g);
         })();
     }
+    function handleParameterChange(e) {
+        console.log(e);
+    }
     useEffect(() => {
         getTables().then((data) => {
-            console.log(data);
             let columns = [...data].map((column) => {
                 return {
                     ...column,
                     column_values: toProperJson(column.column_distinct_value_list),
+                    is_multi_select: toProperJson(column.column_distinct_value_list).length > 2 ? true : false,
                     label: toTitleCase(column.column_name),
                 }
             })
@@ -100,26 +104,34 @@ const PromptBuilder = () => {
                             <text.h3 text={'Top Level Insights' || 'missing'} as='heading' />
                         </Lockup>
                     </Block>
+
                     <div className='lh-container lh-between'>
                         <Block>
-                            {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                            {columns.map(field =>
+                            <Card id='table-params-card' stretch="true" space={{ inline: true, block: true, as: 'blocks' }} title='Parameters'>
+                                {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
+                                {columns.map(field =>
+                                    <FieldFrame className='field-container'>
+                                        <Select className='select-field' id={field.column_name} multiple={field.is_multi_select} onChange={handleParameterChange} label={field.label}>
+                                            {field.column_values.map(value => <option value={value}>{value}</option>)}
+                                        </Select>
+                                    </FieldFrame>
 
-                                <SelectInput key={field.column_name} id={field.column_name} name="select" multiple="true" label={field.label}>
-                                    {field.column_values.map(value => <option value={value}>{value}</option>)}
-                                </SelectInput>
-                            ) || null}
 
-                            <Block className='lh-container lh-end'>
-                                <Lockup>
-                                    <Button text="Fetch Results" onClick={handleClick} design='primary' />
-                                </Lockup>
-                            </Block>
+                                ) || null}
+                                {/* {columns.map(field =>
+
+                                    <SelectInput key={field.column_name} id={field.column_name} onChange={handleParameterChange} name="select" multiple="true" label={field.label}>
+                                        {field.column_values.map(value => <option value={value}>{value}</option>)}
+                                    </SelectInput>
+                                ) || null} */}
+                                <br />
+                                <Button text="Fetch Results" onClick={handleClick} design='primary' />
+                            </Card>
                         </Block>
                         <Block>
                             {showPrompt &&
-                                <Card id='para-card' stretch="true" space={{ inline: true, block: true, as: 'block' }} title='Parameters'>
-                                    <text.h4 as='title' text='Parameters'></text.h4>
+                                <Card id='para-card' stretch="true" space={{ inline: true, block: true, as: 'blocks' }} title='Parameters'>
+                                    <text.h4 as='title' text='Parameters' />
                                     <SelectInput className='m-t-1' label='Model'>
                                         <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                         <option value='Claude-V2'>Claude-V2</option>
@@ -131,14 +143,11 @@ const PromptBuilder = () => {
                                             {columns.map(field => <MenuItem onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
                                         </MenuList>
                                     </Menu>
-
                                     <TextInput label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
-
                                     <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                                         <Lockup orientation='vertical'>
                                             <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
                                         </Lockup>
-
                                         {includeEval ?
                                             <div className="eval" >
                                                 Evalution Parameters <br />
@@ -158,7 +167,6 @@ const PromptBuilder = () => {
                 </Block>
             </>
             }
-
         </>
     );
 }
