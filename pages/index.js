@@ -55,8 +55,8 @@ export const IndexPage = () => {
               <text.h4 as='title' text='Get Started' />
               <text.p as='paragraph' text='To get this party started, select a table from the list and select go' />
               <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
-                <SelectInput className='select-table' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
-                  <option value=''>Select a table</option>
+                <SelectInput className='select-table' label='' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
+                  <option value=''>Select...</option>
                   {tables?.map(table => <option key={table} value={table}>{table}</option>) || null}
                 </SelectInput>
                 <Button text='Go' design='primary' as='cta' href={`/table/${encodeURIComponent(selectedTable)}`} />
