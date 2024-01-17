@@ -1,7 +1,7 @@
 {
-  "name": "prompt-ui",
+  "name": "lighthouse-ui",
   "version": "0.0.0",
-  "description": "Prompt UI ",
+  "description": "Lighthouse UI ",
   "scripts": {
     "build": "gasket build",
     "start": "gasket start",
@@ -33,7 +33,7 @@
     "@size-limit/preset-big-lib": "^7.0.5",
     "@ux/button": "^2301.2.1",
     "@ux/card": "^2301.2.1",
-    "@ux/checkbox": "^2301.2.1",
+    "@ux/checkbox": "^2301.4.0",
     "@ux/date-input": "^2301.2.1",
     "@ux/filter": "^2301.2.1",
     "@ux/growl": "^2301.4.0",

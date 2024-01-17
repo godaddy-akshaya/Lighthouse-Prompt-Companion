@@ -46,7 +46,7 @@ Head.propTypes = {
 
 Head.defaultProps = {
   title: 'Godaddy Lighthouse',
-  description: 'Prompt UI',
+  description: 'Godaddy Lighthouse',
   route: ''
 };
 

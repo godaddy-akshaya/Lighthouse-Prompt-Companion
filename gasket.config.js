@@ -31,8 +31,8 @@ module.exports = {
     production: {
       https: {
         root: path.join(__dirname, 'certs'),
-        key: 'lighthouse.c3.int.dev-gdcorp.tools.key',
-        cert: ['lighthouse.c3.int.dev-gdcorp.tools.crt']
+        key: '*.c3.int.dev-gdcorp.tools.key',
+        cert: ['*.c3.int.dev-gdcorp.tools.crt']
       },
       hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
 
@@ -43,7 +43,7 @@ module.exports = {
   },
   presentationCentral: {
     params: {
-      app: 'prompt-ui',
+      app: 'lighthouse-ui',
       header: 'internal-sidebar',
       uxcore: '2301',
       theme: 'godaddy-antares'

@@ -11,6 +11,7 @@ import { getTables } from '../lib/api';
 import SiblingSet from '@ux/sibling-set';
 
 
+
 export const IndexPage = () => {
   const [tables, setTables] = useState();
   const [selectedTable, setSelectedTable] = useState();
@@ -21,7 +22,8 @@ export const IndexPage = () => {
 
   useEffect(() => {
     getTables().then(data => {
-      setTables(data);
+      console.log(data.tables);
+      setTables(data.tables);
     });
   }, []);
 
@@ -55,7 +57,7 @@ export const IndexPage = () => {
               <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
                 <SelectInput className='select-table' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
                   <option value=''>Select a table</option>
-                  <option value='Top Level Insights'>Top Level Insights</option>
+                  {tables?.map(table => <option key={table} value={table}>{table}</option>) || null}
                 </SelectInput>
                 <Button text='Go' design='primary' as='cta' href={`/table/${encodeURIComponent(selectedTable)}`} />
               </SiblingSet>
@@ -67,6 +69,6 @@ export const IndexPage = () => {
   )
 };
 const options = {
-  realm: 'jomax', ssoRedirectOverride: 'https://sso.dev-gdcorp.tools/?realm=jomax&app=scui-uxcore.c3.int&path='
+  realm: 'jomax', ssoRedirectOverride: 'https://sso.dev-gdcorp.tools/?realm=jomax&app=lighthouse.c3.int&path='
 };
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);

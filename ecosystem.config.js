@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'prompt-ui-dev',
+      name: 'lighthouse-ui-dev',
       instances: 1,
       port: 8080,
       autorestart: false, // Automatically restart on crashes
@@ -19,10 +19,10 @@ module.exports = {
       host: 'prompt-ui.c3.int.dev-gdcorp.tools',
       'pre-deploy': 'git pull',
       ref: 'origin/main',
-      repo: 'git@github.com:gdcorp-dna/prompt-ui.git',
+      repo: 'git@github.com:gdcorp-dna/lighthouse-ui.git',
       path: '/var/www/prompt-ui',
       'post-deploy':
-        'npm install && pm2 startOrReload ecosystem.config.js --env=development --only prompt-ui-dev',
+        'npm install && pm2 startOrReload ecosystem.config.js --env=development --only lighthouse-ui-dev',
     },
   },
 };
