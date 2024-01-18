@@ -9,10 +9,45 @@ it is recommended to import those directly to `pages/_app.js`
 
 @see: docs/css-imports.md
 */
+.lh-filter-container {
+    display: flex;
+    flex-direction: row;
+    padding-top: 0px !important; 
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    
+}
+.lh-filter-card {
+    margin-bottom: 16px !important;
+    .lh-title {
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+        justify-content: space-between;
+        display: flex;
+        .lh-controls {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;            
+        }
+    }
+    .lh-content {
+        .columns {   
+            overflow-y: auto;
+            &.full-height {
+                height: 100%;
+            }
+            &.restricted-height {
+                max-height: 300px;
+            }
+    }
+     
+    }
+}
 .lh-container {
     display: flex;
     flex-direction: row;
     padding-top: 0px !important;
+ 
     &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;
@@ -38,10 +73,6 @@ it is recommended to import those directly to `pages/_app.js`
     height: 100%;
     padding: 8px;
     margin: 16px;
-}
-.right-panel {
-    display: flex;
-    min-width: 400px;
 }
 .grey-card {
     background-color: var(--ux-1vw9arb, #D4DBE0) !important;

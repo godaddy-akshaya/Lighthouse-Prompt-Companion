@@ -22,13 +22,12 @@ export const IndexPage = () => {
 
   useEffect(() => {
     getTables().then(data => {
-      console.log(data.tables);
       setTables(data.tables);
     });
   }, []);
 
   return (
-    <><Head title='GoDaddy Lighthouse' route='prompt' />
+    <><Head title='GoDaddy Lighthouse' route='home' />
       <div className='lh-container'>
         <Logo />
         <Block>

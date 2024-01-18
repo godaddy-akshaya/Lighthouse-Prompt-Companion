@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import NextHead from 'next/head';
+import CreateForm from '@ux/icon/create-form';
 import Logo from './logo';
 
 const Head = (props) => {
@@ -10,20 +11,28 @@ const Head = (props) => {
 
       header.updateSidebarNav([
         {
-          caption: 'Prompt',
+          caption: 'Home',
           key: '0',
           href: '/',
-          eid: 'pep.prompt-ui.nav.prompt.click',
+          eid: 'pep.prompt-ui.nav.home.click',
           icon: 'home',
-          active: true
+          active: props?.route === 'home' ? true : false
+        },
+        {
+          caption: 'Prompt',
+          key: '1',
+          href: '/table/0',
+          eid: 'pep.prompt-ui.nav.prompt.click',
+          icon: 'create-form',
+          active: props?.route === 'table' ? true : false
         },
         {
           caption: 'Results',
-          key: '1',
+          key: '2',
           href: '/results',
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
-          active: false
+          active: props?.route === 'results' ? true : false
         }
       ]);
     });

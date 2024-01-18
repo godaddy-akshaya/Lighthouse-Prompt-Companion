@@ -34,7 +34,7 @@
     "@ux/button": "^2301.2.1",
     "@ux/card": "^2301.2.1",
     "@ux/checkbox": "^2301.4.0",
-    "@ux/date-input": "^2301.2.1",
+    "@ux/date-input": "^2301.4.0",
     "@ux/filter": "^2301.2.1",
     "@ux/growl": "^2301.4.0",
     "@ux/icon": "^2301.2.1",

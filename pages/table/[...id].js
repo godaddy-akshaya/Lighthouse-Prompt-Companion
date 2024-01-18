@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from '@ux/spinner';
-import { Block, Lockup } from '@ux/layout';
+import { Block, Lockup, Module } from '@ux/layout';
 import Head from '../../components/head';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
@@ -30,17 +30,31 @@ import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import '@ux/menu/styles';
-import { getTableMetaData } from '../../lib/api';
+import SiblingSet from '@ux/sibling-set';
+import { getTableMetaData, getTables } from '../../lib/api';
+import FilterCards from '../../components/filter-cards';
+import DateInput from '@ux/date-input';
+import '@ux/date-input/styles';
 
 const PromptBuilder = () => {
     const [isLoading, setIsLoading] = useState(true);
+    const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
     const [includeEval, setIncludeEval] = useState(false);
+    const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [columns, setColumns] = useState();
+    const [startDateValue, setStartDateValue] = useState([]);
+    const [selectedTable, setSelectedTable] = useState();
+    const [endDateValue, setEndDateValue] = useState([]);
+    const [dateValue, setDateValue] = useState({
+        column_name: 'rpt_mst_date',
+        column_selected_values: ['', ''],
+        column_data_type: 'date',
+    });
     const router = useRouter();
     const [routeParams, setRouteParams] = useState({
-        table: decodeURIComponent(router.query.id[0])
+        table: decodeURIComponent(router.query?.id?.[0] || 'default')
     });
     function insertAction(e) {
         let text = prompt + ` {${e}}`;
@@ -48,6 +62,14 @@ const PromptBuilder = () => {
     }
     function handlePrompt(e) {
         setPrompt(e);
+    }
+    function handleStartDateValue(e) {
+        setStartDateValue(e);
+        setDateValue({ ...dateValue, column_selected_values: [e, endDateValue] });
+    }
+    function handleEndDateValue(e) {
+        setEndDateValue(e);
+        setDateValue({ ...dateValue, column_selected_values: [startDateValue, e] });
     }
     function handleNumberOfTransactionChange(e) {
         setNumOfTransactions(e);
@@ -59,7 +81,34 @@ const PromptBuilder = () => {
     function handleIncludeEval(e) {
         setIncludeEval(!includeEval);
     }
+    function handleTableRouteChange(e) {
+        router.push(`/table/${encodeURIComponent(selectedTable)}`);
+        setRouteParams({ ...routeParams, table: selectedTable });
+    }
+    function handleSelectAll(e) {
+        let _columns = [...columns];
+        e.checkbox_columns.forEach(x => x.value = true);
+        let index = _columns.findIndex(x => x.column_name === e.column_name);
+        _columns[index].checkbox_columns = e.checkbox_columns;
+        _columns[index].column_selected_values = e.checkbox_columns.map(x => x.label);
+        setColumns(_columns);
+    }
+    function handleDeselectAll(e) {
+        let _columns = [...columns];
+        e.checkbox_columns.forEach(x => x.value = false);
+        let index = _columns.findIndex(x => x.column_name === e.column_name);
+        console.log(index, _columns[index]);
+        _columns[index].checkbox_columns = e.checkbox_columns;
+        _columns[index].column_selected_values = [];
+        setColumns(_columns);
 
+    }
+    function handleTableSelect(event) {
+        setSelectedTable(event);
+    }
+    function handleFilterChange(e) {
+        console.log(e);
+    }
     function handleRunClick(e) {
         e.preventDefault();
         (async () => {
@@ -71,15 +120,45 @@ const PromptBuilder = () => {
         console.log(e);
     }
     useEffect(() => {
-        getTableMetaData(routeParams.table).then((data) => {
-            setColumns(data);
-            setIsLoading(false);
-        })
-    }, []);
+        console.log(routeParams.table == 0);
+        if (routeParams.table == 0) {
+            getTables().then(data => {
+                setTables(data.tables);
+                setShowTableSelect(true);
+                setIsLoading(false);
+            });
+
+        } else {
+            getTableMetaData(routeParams.table).then(data => {
+                setColumns(data);
+                setShowTableSelect(false);
+                setIsLoading(false);
+            });
+        }
+
+    }, [routeParams]);
     return (
-        <>  <Head title='Builder' />
+        <>  <Head title='Builder' route='table' />
             {isLoading && <Spinner />}
-            {!isLoading && <>
+            {showTableSelect && <>
+                <Block as='stack' orientation='vertical'>
+                    <Card id='try-prompt-out' className='grey-card'>
+                        <Block orientation='horizontal' >
+                            <text.h4 as='title' text='Get Started' />
+                            <text.p as='paragraph' text='To get this party started, select a table from the list and select go' />
+                            <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
+                                <SelectInput className='select-table' label='' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
+                                    <option value=''>Select...</option>
+                                    {tables?.map(table => <option key={table} value={table}>{table}</option>) || null}
+                                </SelectInput>
+                                <Button text='Go' design='primary' as='cta' onClick={handleTableRouteChange} />
+                            </SiblingSet>
+                        </Block>
+                    </Card>
+
+                </Block>
+            </>}
+            {!isLoading && !showTableSelect && <>
                 <Block as='stack' orientation='vertical'>
                     <Block orientation='horizontal'>
                         <Lockup >
@@ -89,59 +168,63 @@ const PromptBuilder = () => {
 
                     <div className='lh-container lh-between'>
                         <Block>
-                            <Card id='table-params-card' stretch="true" space={{ inline: true, block: true, as: 'blocks' }} title='Parameters'>
-                                {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                                {columns?.map(field =>
-                                    <FieldFrame className='field-container'>
-                                        <Select className='select-field' id={field.column_name} multiple={field.is_multi_select} onChange={handleParameterChange} label={field.label}>
-                                            {field.column_values.map(value => <option value={value}>{value}</option>)}
-                                        </Select>
-                                    </FieldFrame>
-                                ) || null}
-                                {/* {columns?.map(field =>
-                                    <>
-                                        <text.label text={field.label} as='label' />
-                                        <div class='columns'>
-                                            {field.column_values.map(value => <div class='column'><Checkbox label={value} name={value} checked /></div>)}
+                            <Card id='table-params-card' stretch="true" title='Parameters'>
+                                <Module>
+                                    {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
+                                    <Block>
+                                        <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                                        <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                                    </Block>
+                                    <Block>
+                                        <div className='lh-filter-container lh-start'>
+                                            {
+                                                columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
+                                            }
                                         </div>
-                                    </>
-                                ) || null} */}
-                                <br />
-                                <Button text="Fetch Results" onClick={handleClick} design='primary' />
+                                    </Block>
+                                    <Button text="Fetch Results" onClick={handleClick} design='primary' />
+                                </Module>
+
                             </Card>
                         </Block>
                         <Block>
                             {isPromptVisible &&
-                                <Card id='para-card' stretch="true" space={{ inline: true, block: true, as: 'blocks' }} title='Parameters'>
-                                    <text.h4 as='title' text='Parameters' />
-                                    <SelectInput className='m-t-1' label='Model'>
-                                        <option value='Claude-instant-v1'>Claude-instant-v1</option>
-                                        <option value='Claude-V2'>Claude-V2</option>
-                                    </SelectInput>
-                                    <TextInput className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                                    <Menu id='my-menu' className='m-t-1'>
-                                        <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                                        <MenuList design='primary'>
-                                            {columns?.map(field => <MenuItem onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
-                                        </MenuList>
-                                    </Menu>
-                                    <TextInput label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
-                                    <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                                        <Lockup orientation='vertical'>
-                                            <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
-                                        </Lockup>
-                                        {includeEval ?
-                                            <div className="eval" >
-                                                Evalution Parameters <br />
-                                                <SelectInput className='m-t-1' label='Model'>
-                                                    <option value='Claude-instant-v1'>Claude-instant-v1</option>
-                                                    <option value='Claude-V2'>Claude-V2</option>
-                                                </SelectInput>
-                                                <TextInput label='Prompt' name='evalPromp' multiline size={3} />
-                                            </div>
-                                            : null}
-                                    </Card> <br />
-                                    <Button text="Run" onClick={handleRunClick} design='primary' />
+                                <Card id='para-card' stretch="true" title='Parameters'>
+                                    <Module>
+                                        <text.h4 as='title' text='Parameters' />
+                                        <Block>
+                                            <SelectInput className='m-t-1' label='Model'>
+                                                <option value='Claude-instant-v1'>Claude-instant-v1</option>
+                                                <option value='Claude-V2'>Claude-V2</option>
+                                            </SelectInput>
+                                            <TextInput className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+
+
+                                            <Menu id='my-menu' className='m-t-1'>
+                                                <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                                                <MenuList design='primary'>
+                                                    {columns?.map(field => <MenuItem onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
+                                                </MenuList>
+                                            </Menu>
+                                            <TextInput label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
+                                        </Block>
+                                        <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+                                            <Lockup orientation='vertical'>
+                                                <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                                            </Lockup>
+                                            {includeEval ?
+                                                <div className="eval" >
+                                                    Evalution Parameters <br />
+                                                    <SelectInput className='m-t-1' label='Model'>
+                                                        <option value='Claude-instant-v1'>Claude-instant-v1</option>
+                                                        <option value='Claude-V2'>Claude-V2</option>
+                                                    </SelectInput>
+                                                    <TextInput label='Prompt' name='evalPromp' multiline size={3} />
+                                                </div>
+                                                : null}
+                                        </Card> <br />
+                                        <Button text="Run" onClick={handleRunClick} design='primary' />
+                                    </Module>
                                 </Card>
                             }
                         </Block>
