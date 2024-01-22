@@ -11,11 +11,13 @@ it is recommended to import those directly to `pages/_app.js`
 */
 .lh-filter-container {
     display: flex;
-    flex-direction: row;
-    padding-top: 0px !important; 
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    
+    width: 100%;
+    flex-direction: column;
+    overflow-y: auto;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+    flex: 1;
+    flex-grow: 1;
 }
 .lh-filter-card {
     margin-bottom: 16px !important;
@@ -37,7 +39,7 @@ it is recommended to import those directly to `pages/_app.js`
                 height: 100%;
             }
             &.restricted-height {
-                max-height: 300px;
+                max-height: 250px;
             }
     }
      
@@ -95,7 +97,4 @@ body.ux-app.gasket-app .ux-app__content {
 }
 .field-container {
     margin-bottom: 16px !important;
-}
-.select-field {
-    min-width: 100% !important;
 }

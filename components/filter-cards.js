@@ -11,8 +11,13 @@ import Remove from '@ux/icon/remove';
 const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll }) => {
     const [optionSize, setOptionSize] = useState(options.column_values.length > 12 ? 'restricted-height' : 'full-height');
     const handleOnChange = (e) => {
-        console.log(options, e);
-        onChange(e);
+        let model = {
+            label: e.target.id,
+            value: e.target.checked,
+            column: label
+        }
+        console.log(model)
+        onChange(model);
     }
     const handleSelectAll = () => {
         onSelectAll(options);
@@ -25,7 +30,7 @@ const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll 
         <>
             <Card className='lh-filter-card' stretch={true} id={id}>
                 <Block className='lh-title'>
-                    <text.h3 text={label} as='title' />
+                    <text.label text={label} as='label' />
                     <div className='lh-controls'>
                         <SiblingSet gap='sm'>
                             <Button design='inline' onClick={handleSelectAll} size='small' aria-label='Select All' icon={<Checkmark />} />
@@ -36,7 +41,7 @@ const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll 
                 <Block className='lh-content'>
                     <text.label as='caption' text={`${options?.column_selected_values.length} of ${options?.column_values.length}`} />
                     <div className={`columns ${optionSize}`}>
-                        {options?.checkbox_columns?.map(item => <div key={item.label} className='column'><Checkbox id={item.label} label={item.label} name={item.label} checked={item.value} /></div>) || null}
+                        {options?.checkbox_columns?.map(item => <div key={item.label} className='column'><Checkbox key={item.label} id={item.label} label={item.label} name={item.label} onClick={handleOnChange} checked={item.value} /></div>) || null}
                     </div>
                 </Block>
 

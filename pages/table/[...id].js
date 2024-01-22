@@ -97,7 +97,6 @@ const PromptBuilder = () => {
         let _columns = [...columns];
         e.checkbox_columns.forEach(x => x.value = false);
         let index = _columns.findIndex(x => x.column_name === e.column_name);
-        console.log(index, _columns[index]);
         _columns[index].checkbox_columns = e.checkbox_columns;
         _columns[index].column_selected_values = [];
         setColumns(_columns);
@@ -127,7 +126,6 @@ const PromptBuilder = () => {
                 setShowTableSelect(true);
                 setIsLoading(false);
             });
-
         } else {
             getTableMetaData(routeParams.table).then(data => {
                 setColumns(data);
@@ -135,14 +133,13 @@ const PromptBuilder = () => {
                 setIsLoading(false);
             });
         }
-
     }, [routeParams]);
     return (
-        <>  <Head title='Builder' route='table' />
+        <>  <Head title='Prompt Parameters' route='table' />
             {isLoading && <Spinner />}
             {showTableSelect && <>
                 <Block as='stack' orientation='vertical'>
-                    <Card id='try-prompt-out' className='grey-card'>
+                    <Card id='table-select-card' className='grey-card'>
                         <Block orientation='horizontal' >
                             <text.h4 as='title' text='Get Started' />
                             <text.p as='paragraph' text='To get this party started, select a table from the list and select go' />
@@ -165,26 +162,31 @@ const PromptBuilder = () => {
                             <text.h3 text={routeParams.table || 'missing'} as='heading' />
                         </Lockup>
                     </Block>
-
                     <div className='lh-container lh-between'>
                         <Block>
                             <Card id='table-params-card' stretch="true" title='Parameters'>
                                 <Module>
                                     {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                                    <Block>
+                                    <div className='lh-container lh-end'>
+                                        <Button text="Run" size='small' onClick={handleRunClick} design='primary' />
+                                    </div>
+
+
+                                    <div className='lh-filter-container'>
+
                                         <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
                                         <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                                    </Block>
-                                    <Block>
-                                        <div className='lh-filter-container lh-start'>
-                                            {
-                                                columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
-                                            }
-                                        </div>
-                                    </Block>
+
+                                    </div>
+
+                                    <text.h4 as='title' text='Table Columns' />
+                                    <div className='lh-filter-container'>
+                                        {
+                                            columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
+                                        }
+                                    </div>
                                     <Button text="Fetch Results" onClick={handleClick} design='primary' />
                                 </Module>
-
                             </Card>
                         </Block>
                         <Block>
@@ -198,8 +200,6 @@ const PromptBuilder = () => {
                                                 <option value='Claude-V2'>Claude-V2</option>
                                             </SelectInput>
                                             <TextInput className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-
-
                                             <Menu id='my-menu' className='m-t-1'>
                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
                                                 <MenuList design='primary'>
@@ -223,7 +223,7 @@ const PromptBuilder = () => {
                                                 </div>
                                                 : null}
                                         </Card> <br />
-                                        <Button text="Run" onClick={handleRunClick} design='primary' />
+
                                     </Module>
                                 </Card>
                             }

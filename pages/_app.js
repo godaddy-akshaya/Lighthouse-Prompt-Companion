@@ -18,7 +18,7 @@ import '@ux/select-input/styles';
 import '@ux/icon/checkmark/index.css';
 import '@ux/icon/remove/index.css';
 import '@ux/icon/create-form/index.css';
-import CreateForm from '@ux/icon/create-form';
+import '@ux/collapsible/styles';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
