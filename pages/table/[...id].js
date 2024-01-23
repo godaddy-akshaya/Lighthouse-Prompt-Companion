@@ -27,17 +27,23 @@ import SiblingSet from '@ux/sibling-set';
 import { getNumRows, getTableMetaData, getTables } from '../../lib/api';
 import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
+import Alert from '@ux/alert';
+import Tag from '@ux/tag';
 import '@ux/date-input/styles';
+import { getGuid } from '../../lib/utils';
 
 const PromptBuilder = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
     const [numOfTransactions, setNumOfTransactions] = useState(0);
+    const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
+    const [showUserMessage, setShowUserMessage] = useState(false);
     const [includeEval, setIncludeEval] = useState(false);
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [columns, setColumns] = useState();
+    const [errorMessage, setErrorMessage] = useState('Something went wrong');
     const [startDateValue, setStartDateValue] = useState(['2024-01-01']);
     const [selectedTable, setSelectedTable] = useState();
     const [endDateValue, setEndDateValue] = useState(['2024-01-30']);
@@ -66,7 +72,7 @@ const PromptBuilder = () => {
         setDateValue({ ...dateValue, column_selected_values: [startDateValue, e] });
     }
     function handleNumberOfTransactionChange(e) {
-        setNumOfTransactions(e);
+        setNumOfTransactionsToRun(e);
     }
     function handleIncludeEval(e) {
         setIncludeEval(!includeEval);
@@ -76,19 +82,29 @@ const PromptBuilder = () => {
         setRouteParams({ ...routeParams, table: selectedTable });
     }
     function handleSelectAll(e) {
-        let _columns = [...columns];
-        e.checkbox_columns.forEach(x => x.value = true);
-        let index = _columns.findIndex(x => x.column_name === e.column_name);
-        _columns[index].checkbox_columns = e.checkbox_columns;
-        _columns[index].column_selected_values = e.checkbox_columns.map(x => x.label);
+        let _columns = columns.map(column => {
+            if (column.column_name === e.column_name) {
+                return {
+                    ...column,
+                    checkbox_columns: e.checkbox_columns.map(x => ({ ...x, value: true })),
+                    column_selected_values: e.checkbox_columns.map(x => x.label)
+                };
+            }
+            return column;
+        });
         setColumns(_columns);
     }
     function handleDeselectAll(e) {
-        let _columns = [...columns];
-        e.checkbox_columns.forEach(x => x.value = false);
-        let index = _columns.findIndex(x => x.column_name === e.column_name);
-        _columns[index].checkbox_columns = e.checkbox_columns;
-        _columns[index].column_selected_values = [];
+        let _columns = columns.map(column => {
+            if (column.column_name === e.column_name) {
+                return {
+                    ...column,
+                    checkbox_columns: e.checkbox_columns.map(x => ({ ...x, value: false })),
+                    column_selected_values: []
+                };
+            }
+            return column;
+        });
         setColumns(_columns);
 
     }
@@ -96,7 +112,21 @@ const PromptBuilder = () => {
         setSelectedTable(event);
     }
     function handleFilterChange(e) {
-        console.log(e);
+        let _columns = columns.map(column => {
+            if (column.column_name.toLowerCase() === e.column.toLowerCase()) {
+                return {
+                    ...column,
+                    checkbox_columns: column.checkbox_columns.map(checkbox_column => {
+                        if (checkbox_column.label === e.label) {
+                            return { ...checkbox_column, value: e.value };
+                        }
+                        return checkbox_column;
+                    })
+                };
+            }
+            return column;
+        });
+        setColumns(_columns);
     }
     function handleRunClick(e) {
         e.preventDefault();
@@ -112,13 +142,16 @@ const PromptBuilder = () => {
         let _columns = [...columns];
         _columns.push(dateValue);
         getNumRows(routeParams.table, columns).then(data => {
-            console.log(data);
+            setNumOfTransactions(data || 0);
+            setNumOfTransactionsToRun(data || 0);
             setIsPromptVisible(true);
             setIsLoading(false);
-            // Smooth scrolling to top of page after submit
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, error => {
+            setErrorMessage(error);
+            setIsLoading(false);
+            setShowUserMessage(true);
         });
-
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     useEffect(() => {
         if (routeParams.table == 0) {
@@ -137,6 +170,13 @@ const PromptBuilder = () => {
     }, [routeParams]);
     return (
         <>  <Head title='Prompt Parameters' route='table' />
+            {showUserMessage && <>
+                <Alert
+                    title={errorMessage}
+                    id='critical-message'
+                    emphasis="critical"
+                    actions={<Button design="inline" text="Close" />} />
+            </>}
             {isLoading && <Spinner />}
             {showTableSelect && <>
                 <Block as='stack' orientation='vertical'>
@@ -176,7 +216,9 @@ const PromptBuilder = () => {
                                         <text.h4 as='title' text='Table Columns' />
                                         <div className='lh-filter-container'>
                                             {
-                                                columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
+                                                columns?.map(field =>
+                                                    <FilterCards key={field.column_name} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
+                                                )
                                             }
                                         </div>
                                         <Button text="Fetch Results" type='submit' design='primary' />
@@ -186,40 +228,42 @@ const PromptBuilder = () => {
                         </Block>
                         <Block>
                             {isPromptVisible &&
-                                <>  <form obSubmit={handleRunClick}>
+                                <>  <form onSubmit={handleRunClick}>
                                     <Card id='para-card' stretch="true" title='Parameters'>
                                         <Module>
                                             <text.h4 as='title' text='Parameters' />
-                                            <text.label as='label' text={`Number of records: ${numOfTransactions}`} />
-                                            <SelectInput className='m-t-1' label='Model'>
+                                            <p>
+                                                <Tag emphasis='neutral'>
+                                                    {`Number of Transactions ${numOfTransactions}`}
+                                                </Tag>
+                                            </p>
+                                            <SelectInput id='model' name='model' label='Model'>
                                                 <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                                 <option value='Claude-V2'>Claude-V2</option>
                                             </SelectInput>
-                                            <TextInput id='number-to-run' className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                                            <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
                                             <Menu id='my-menu' className='m-t-1'>
                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
                                                 <MenuList design='primary'>
-                                                    {columns?.map(field => <MenuItem onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
+                                                    {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
                                                 </MenuList>
                                             </Menu>
-                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
-
+                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={5} />
                                             <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                                                 <Lockup orientation='vertical'>
                                                     <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
                                                 </Lockup>
                                                 {includeEval ?
-                                                    <div className="eval" >
-                                                        Evalution Parameters <br />
-                                                        <SelectInput id='model-select' className='m-t-1' label='Model'>
+                                                    <div className="eval">
+                                                        <text.label as='label' text='Evaluation Parameters' />
+                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' label='Model-select'>
                                                             <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                                             <option value='Claude-V2'>Claude-V2</option>
                                                         </SelectInput>
-                                                        <TextInput label='Prompt' name='evalPromp' multiline size={3} />
-                                                    </div>
-                                                    : null}
+                                                        <TextInput label='Prompt' name='evalPromp' multiline size={5} />
+                                                    </div> : null}
                                             </Card>
-                                            <Button text="Run Prompt" type='submit' design='primary' />
+                                            <Button className='m-t-1' text="Run Prompt" type='submit' design='primary' />
                                         </Module>
                                     </Card>
                                 </form>

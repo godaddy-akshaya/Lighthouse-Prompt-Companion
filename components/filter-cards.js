@@ -14,14 +14,12 @@ const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll 
         let model = {
             label: e.target.id,
             value: e.target.checked,
-            column: label
+            column: id
         }
-        console.log(model)
         onChange(model);
     }
     const handleSelectAll = () => {
         onSelectAll(options);
-
     }
     const handleRemoveAll = () => {
         onDeselectAll(options);
@@ -39,12 +37,11 @@ const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll 
                     </div>
                 </Block>
                 <Block className='lh-content'>
-                    <text.label as='caption' text={`${options?.column_selected_values.length} of ${options?.column_values.length}`} />
+                    <text.label as='caption' text={`${options?.checkbox_columns.filter(r => r.value).length} of ${options?.column_values.length}`} />
                     <div className={`columns ${optionSize}`}>
                         {options?.checkbox_columns?.map(item => <div key={item.label} className='column'><Checkbox key={item.label} id={item.label} label={item.label} name={item.label} onClick={handleOnChange} checked={item.value} /></div>) || null}
                     </div>
                 </Block>
-
             </Card>
         </>
     )

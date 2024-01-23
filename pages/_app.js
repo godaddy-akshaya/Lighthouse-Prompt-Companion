@@ -25,6 +25,8 @@ import '@ux/icon/settings/index.css';
 import '@ux/icon/wand/index.css';
 import '@ux/icon/play/index.css';
 import '@ux/icon/help/index.css';
+import '@ux/alert/styles';
+import '@ux/tag/styles';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
