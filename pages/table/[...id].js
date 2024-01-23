@@ -142,6 +142,7 @@ const PromptBuilder = () => {
         let _columns = [...columns];
         _columns.push(dateValue);
         getNumRows(routeParams.table, columns).then(data => {
+            // Convert to number
             setNumOfTransactions(data || 0);
             setNumOfTransactionsToRun(data || 0);
             setIsPromptVisible(true);
@@ -170,13 +171,16 @@ const PromptBuilder = () => {
     }, [routeParams]);
     return (
         <>  <Head title='Prompt Parameters' route='table' />
-            {showUserMessage && <>
-                <Alert
-                    title={errorMessage}
-                    id='critical-message'
-                    emphasis="critical"
-                    actions={<Button design="inline" text="Close" />} />
-            </>}
+            {showUserMessage &&
+                <Block>
+                    <Alert
+                        title={errorMessage}
+                        id='critical-message'
+                        emphasis="critical"
+                        actions={<Button design="inline" text="Close" />} />
+                </Block>
+
+            }
             {isLoading && <Spinner />}
             {showTableSelect && <>
                 <Block as='stack' orientation='vertical'>
