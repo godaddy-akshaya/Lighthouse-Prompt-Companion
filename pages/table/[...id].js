@@ -11,15 +11,8 @@ import Add from '@ux/icon/add';
 import '@ux/text-input/styles';
 import '@ux/card/styles';
 import Button from '@ux/button';
-import '@ux/button/styles';
 import SelectInput from '@ux/select-input';
-import '@ux/select-input/styles';
-import '@ux/icon/settings/index.css';
-import '@ux/icon/wand/index.css';
-import '@ux/icon/play/index.css';
-import '@ux/icon/help/index.css';
 import Checkbox from '@ux/checkbox';
-import Select from '@ux/select';
 import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
@@ -31,7 +24,7 @@ import '@ux/filter/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import '@ux/menu/styles';
 import SiblingSet from '@ux/sibling-set';
-import { getTableMetaData, getTables } from '../../lib/api';
+import { getNumRows, getTableMetaData, getTables } from '../../lib/api';
 import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import '@ux/date-input/styles';
@@ -40,16 +33,17 @@ const PromptBuilder = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
+    const [numOfTransactions, setNumOfTransactions] = useState(0);
     const [includeEval, setIncludeEval] = useState(false);
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [columns, setColumns] = useState();
-    const [startDateValue, setStartDateValue] = useState([]);
+    const [startDateValue, setStartDateValue] = useState(['2024-01-01']);
     const [selectedTable, setSelectedTable] = useState();
-    const [endDateValue, setEndDateValue] = useState([]);
+    const [endDateValue, setEndDateValue] = useState(['2024-01-30']);
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
-        column_selected_values: ['', ''],
+        column_selected_values: [startDateValue, endDateValue],
         column_data_type: 'date',
     });
     const router = useRouter();
@@ -73,10 +67,6 @@ const PromptBuilder = () => {
     }
     function handleNumberOfTransactionChange(e) {
         setNumOfTransactions(e);
-    }
-    function handleClick(e) {
-        e.preventDefault();
-        setIsPromptVisible(true);
     }
     function handleIncludeEval(e) {
         setIncludeEval(!includeEval);
@@ -115,11 +105,22 @@ const PromptBuilder = () => {
             setGuid(g);
         })();
     }
-    function handleParameterChange(e) {
-        console.log(e);
+    function handleTableRowSubmit(e) {
+        e.preventDefault();
+        setIsLoading(true);
+        // Appned data to the columns
+        let _columns = [...columns];
+        _columns.push(dateValue);
+        getNumRows(routeParams.table, columns).then(data => {
+            console.log(data);
+            setIsPromptVisible(true);
+            setIsLoading(false);
+            // Smooth scrolling to top of page after submit
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
     }
     useEffect(() => {
-        console.log(routeParams.table == 0);
         if (routeParams.table == 0) {
             getTables().then(data => {
                 setTables(data.tables);
@@ -164,68 +165,65 @@ const PromptBuilder = () => {
                     </Block>
                     <div className='lh-container lh-between'>
                         <Block>
-                            <Card id='table-params-card' stretch="true" title='Parameters'>
-                                <Module>
-                                    {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                                    <div className='lh-container lh-end'>
-                                        <Button text="Run" size='small' onClick={handleRunClick} design='primary' />
-                                    </div>
-
-
-                                    <div className='lh-filter-container'>
-
-                                        <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                                        <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-
-                                    </div>
-
-                                    <text.h4 as='title' text='Table Columns' />
-                                    <div className='lh-filter-container'>
-                                        {
-                                            columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
-                                        }
-                                    </div>
-                                    <Button text="Fetch Results" onClick={handleClick} design='primary' />
-                                </Module>
-                            </Card>
+                            <form onSubmit={handleTableRowSubmit}>
+                                <Card id='table-params-card' stretch={true} title='Parameters'>
+                                    <Module>
+                                        {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
+                                        <div className='lh-filter-container'>
+                                            <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                                            <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                                        </div>
+                                        <text.h4 as='title' text='Table Columns' />
+                                        <div className='lh-filter-container'>
+                                            {
+                                                columns?.map(field => <FilterCards id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />)
+                                            }
+                                        </div>
+                                        <Button text="Fetch Results" type='submit' design='primary' />
+                                    </Module>
+                                </Card>
+                            </form>
                         </Block>
                         <Block>
                             {isPromptVisible &&
-                                <Card id='para-card' stretch="true" title='Parameters'>
-                                    <Module>
-                                        <text.h4 as='title' text='Parameters' />
-                                        <Block>
+                                <>  <form obSubmit={handleRunClick}>
+                                    <Card id='para-card' stretch="true" title='Parameters'>
+                                        <Module>
+                                            <text.h4 as='title' text='Parameters' />
+                                            <text.label as='label' text={`Number of records: ${numOfTransactions}`} />
                                             <SelectInput className='m-t-1' label='Model'>
                                                 <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                                 <option value='Claude-V2'>Claude-V2</option>
                                             </SelectInput>
-                                            <TextInput className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                                            <TextInput id='number-to-run' className='m-t-1' onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
                                             <Menu id='my-menu' className='m-t-1'>
                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
                                                 <MenuList design='primary'>
                                                     {columns?.map(field => <MenuItem onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
                                                 </MenuList>
                                             </Menu>
-                                            <TextInput label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
-                                        </Block>
-                                        <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                                            <Lockup orientation='vertical'>
-                                                <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
-                                            </Lockup>
-                                            {includeEval ?
-                                                <div className="eval" >
-                                                    Evalution Parameters <br />
-                                                    <SelectInput className='m-t-1' label='Model'>
-                                                        <option value='Claude-instant-v1'>Claude-instant-v1</option>
-                                                        <option value='Claude-V2'>Claude-V2</option>
-                                                    </SelectInput>
-                                                    <TextInput label='Prompt' name='evalPromp' multiline size={3} />
-                                                </div>
-                                                : null}
-                                        </Card> <br />
+                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={3} />
 
-                                    </Module>
-                                </Card>
+                                            <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+                                                <Lockup orientation='vertical'>
+                                                    <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                                                </Lockup>
+                                                {includeEval ?
+                                                    <div className="eval" >
+                                                        Evalution Parameters <br />
+                                                        <SelectInput id='model-select' className='m-t-1' label='Model'>
+                                                            <option value='Claude-instant-v1'>Claude-instant-v1</option>
+                                                            <option value='Claude-V2'>Claude-V2</option>
+                                                        </SelectInput>
+                                                        <TextInput label='Prompt' name='evalPromp' multiline size={3} />
+                                                    </div>
+                                                    : null}
+                                            </Card>
+                                            <Button text="Run Prompt" type='submit' design='primary' />
+                                        </Module>
+                                    </Card>
+                                </form>
+                                </>
                             }
                         </Block>
                     </div>
