@@ -29,3 +29,5 @@ gasket.config.local.js*
 startit.sh
 certs/prompt-ui.c3.int.dev-gdcorp.tools.key
 certs/prompt-ui.c3.int.dev-gdcorp.tools.crt
+.vscode/task.json
+.vscode/launch.json

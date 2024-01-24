@@ -49,7 +49,7 @@ const PromptBuilder = () => {
     const [endDateValue, setEndDateValue] = useState(['2024-01-30']);
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
-        column_selected_values: [startDateValue, endDateValue],
+        column_selected_values: [startDateValue[0], endDateValue[0]],
         column_data_type: 'date',
     });
     const router = useRouter();
@@ -135,18 +135,27 @@ const PromptBuilder = () => {
             setGuid(g);
         })();
     }
+    function handleCloseError(e) {
+        setShowUserMessage(false);
+        setErrorMessage('');
+    }
     function handleTableRowSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-        // Appned data to the columns
-        let _columns = [...columns];
-        _columns.push(dateValue);
-        getNumRows(routeParams.table, columns).then(data => {
-            // Convert to number
-            setNumOfTransactions(data || 0);
-            setNumOfTransactionsToRun(data || 0);
-            setIsPromptVisible(true);
-            setIsLoading(false);
+        getNumRows(routeParams.table, columns, dateValue).then(data => {
+            console.log(data);
+            if (data?.errorMessage) {
+                setNumOfTransactions(0);
+                setNumOfTransactionsToRun(0);
+                setErrorMessage(data.errorMessage);
+                setShowUserMessage(true);
+                setIsLoading(false);
+            } else {
+                setNumOfTransactions(data || 0);
+                setNumOfTransactionsToRun(data || 0);
+                setIsPromptVisible(true);
+                setIsLoading(false);
+            }
         }, error => {
             setErrorMessage(error);
             setIsLoading(false);
@@ -177,7 +186,7 @@ const PromptBuilder = () => {
                         title={errorMessage}
                         id='critical-message'
                         emphasis="critical"
-                        actions={<Button design="inline" text="Close" />} />
+                        actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
                 </Block>
 
             }
