@@ -11,6 +11,7 @@
             "name": "Launch Chrome against localhost",
             "url": "https://local.gasket.dev-gdcorp.tools:8443",
             "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "npm: run local"
             
         }
     ]
