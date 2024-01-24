@@ -11,7 +11,7 @@ jobs:
   build_publish_promote:
     runs-on:
       labels: self-hosted
-      group: therandomd-runner-pool
+      group: 7416-therandomdrunner
 
     steps:
       - name: Checkout Repository
