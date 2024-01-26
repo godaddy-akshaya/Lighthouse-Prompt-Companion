@@ -143,7 +143,6 @@ const PromptBuilder = () => {
         e.preventDefault();
         setIsLoading(true);
         getNumRows(routeParams.table, columns, dateValue).then(data => {
-            console.log(data);
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
                 setNumOfTransactionsToRun(0);
@@ -188,7 +187,6 @@ const PromptBuilder = () => {
                         emphasis="critical"
                         actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
                 </Block>
-
             }
             {isLoading && <Spinner />}
             {showTableSelect && <>
@@ -206,7 +204,6 @@ const PromptBuilder = () => {
                             </SiblingSet>
                         </Block>
                     </Card>
-
                 </Block>
             </>}
             {!isLoading && !showTableSelect && <>

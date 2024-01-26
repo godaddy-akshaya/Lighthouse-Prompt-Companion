@@ -9,6 +9,9 @@ it is recommended to import those directly to `pages/_app.js`
 
 @see: docs/css-imports.md
 */
+.lh-no-padding {
+    padding: 0px !important;
+}
 .lh-filter-container {
     display: flex;
     width: 100%;
@@ -32,7 +35,11 @@ it is recommended to import those directly to `pages/_app.js`
             justify-content: flex-end;            
         }
     }
+    .lh-tag {
+        margin-left: 8px !important;
+    }
     .lh-content {
+        padding-top: 0px !important;
         .columns {   
             overflow-y: auto;
             &.full-height {
