@@ -1,6 +1,6 @@
 # Create base image which can be cached for prolonged periods, pending changes to package-lock.json
 FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.6.1-alpine-3.18
-# USER root
+USER root
 # LABEL type="fd-base"
 
 RUN apk add --no-cache bash openssl
@@ -12,10 +12,14 @@ RUN ulimit -n 65536 && \
     adduser -D  -G app -s /bin/false -u 9999 app
 
 # Ensure the npm auth token is defined, exit early otherwise
-ARG NPM_AUTH_TOKEN
-RUN test -n "$NPM_AUTH_TOKEN"
-ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
+#ARG NPM_AUTH_TOKEN
+#RUN test -n "$NPM_AUTH_TOKEN"
+#ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
+ARG NPM_TOKEN=${NPM_TOKEN}
 
+RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_TOKEN}" > .npmrc
+
+RUN npm i
 RUN mkdir -p /app
 RUN chown app:app /app
 WORKDIR /app
@@ -31,7 +35,7 @@ COPY --chown=app:app .npmrc /app/.npmrc
 # # Install all dependencies as we still need to build the application.
 # # Skip installation of the Cypress binary which we won't use anyway.
 # ENV CYPRESS_INSTALL_BINARY=0
-RUN npm ci --legacy-peer-deps
+RUN npm install
 
 # # Shrink image size by removing install cache
 RUN npm cache clean --force
@@ -73,7 +77,6 @@ COPY --chown=app:app ./public ./public
 # COPY --chown=app:app ./utils ./utils
 COPY --chown=app:app ./redux ./redux
 COPY --chown=app:app ./styles ./styles
-COPY --chown=app:app ./constants.js ./constants.js
 COPY --chown=app:app ./gasket.config.js ./gasket.config.js
 COPY --chown=app:app ./manifest.xml ./manifest.xml
 # COPY --chown=app:app ./tsconfig.json ./tsconfig.json

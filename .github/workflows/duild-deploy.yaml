@@ -1,4 +1,4 @@
-name: My First Katana CI/CD Workflow
+name: Lighthouse Katana CI/CD Pipeline
 
 on:
   push:
