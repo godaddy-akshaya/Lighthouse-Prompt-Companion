@@ -29,9 +29,12 @@ import '@ux/alert/styles';
 import '@ux/tag/styles';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
+import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
-
+const options = {
+    realm: 'jomax'
+};
 export default withPageEnhancers([
-    withLocaleRequired('/locales', { initialProps: true }),
+    withLocaleRequired('/locales', { initialProps: true }), withAuthRequired(options)
 ])(App);

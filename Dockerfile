@@ -4,22 +4,14 @@ USER root
 # LABEL type="fd-base"
 
 RUN apk add --no-cache bash openssl
-
+RUN npm install -g npm@10.4.0
 # create a user that can run the application
 # and define the maximum open files at 65k
 RUN ulimit -n 65536 && \
     addgroup -g 9999 app && \
     adduser -D  -G app -s /bin/false -u 9999 app
 
-# Ensure the npm auth token is defined, exit early otherwise
-#ARG NPM_AUTH_TOKEN
-#RUN test -n "$NPM_AUTH_TOKEN"
-#ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
-ARG NPM_TOKEN=${NPM_TOKEN}
 
-RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_TOKEN}" > .npmrc
-
-RUN npm i
 RUN mkdir -p /app
 RUN chown app:app /app
 WORKDIR /app
@@ -30,22 +22,23 @@ USER app
 # Copy minimal set of files needed to install dependencies to ensure cacheability
 COPY --chown=app:app package.json /app
 COPY --chown=app:app package-lock.json /app
+# Make sure we have the .npmrc file with the token 
 COPY --chown=app:app .npmrc /app/.npmrc
 
+
+
 # # Install all dependencies as we still need to build the application.
-# # Skip installation of the Cypress binary which we won't use anyway.
-# ENV CYPRESS_INSTALL_BINARY=0
-RUN npm install
+RUN npm ci
 
 # # Shrink image size by removing install cache
 RUN npm cache clean --force
 
 # Generate self-signed certificate used by the Gasket (see plugins/deploy-plugin.js)
-RUN openssl genrsa -des3 -out /app/server.origKey -passout pass:server 1024
-RUN openssl req -new -key /app/server.origKey -out /app/server.csr -subj "/C=US/ST=Arizona/L=Mesa/O=Go Daddy/OU=Cloud Platform/CN=*.lighthouse-ui.gdcorp.tools/emailAddress=mswaagman@godaddy.com" -passin pass:server
-RUN openssl rsa -in /app/server.origKey -out /app/server.key -passin pass:server
-RUN openssl x509 -req -days 3650 -in /app/server.csr -signkey /app/server.key -out /app/server.crt
-RUN rm /app/server.origKey
+# RUN openssl genrsa -des3 -out /app/server.origKey -passout pass:server 1024
+# RUN openssl req -new -key /app/server.origKey -out /app/server.csr -subj "/C=US/ST=Arizona/L=Mesa/O=Go Daddy/OU=Cloud Platform/CN=*.lighthouse-ui.gdcorp.tools/emailAddress=mswaagman@godaddy.com" -passin pass:server
+# RUN openssl rsa -in /app/server.origKey -out /app/server.key -passin pass:server
+# RUN openssl x509 -req -days 3650 -in /app/server.csr -signkey /app/server.key -out /app/server.crt
+# RUN rm /app/server.origKey
 
 # # Remove .npmrc file that was added for install steps
 RUN rm /app/.npmrc
@@ -84,7 +77,7 @@ COPY --chown=app:app ./manifest.xml ./manifest.xml
 
 # # Switch to application user and build the application
 USER app:app
-RUN npm run local -- --env=${AWS_ENV}
+RUN npm run local --env=${AWS_ENV}
 
 EXPOSE 8081
 EXPOSE 8443

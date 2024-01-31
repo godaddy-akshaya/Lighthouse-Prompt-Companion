@@ -27,8 +27,7 @@ it is recommended to import those directly to `pages/_app.js`
     .lh-title {
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
-        justify-content: space-between;
-        display: flex;
+        padding-top: 12px !important;
         .lh-controls {
             display: flex;
             flex-direction: row;
@@ -67,7 +66,6 @@ it is recommended to import those directly to `pages/_app.js`
          > * {
             flex: 1;
         }
-
     }
     &.lh-end {
         justify-content: flex-end;

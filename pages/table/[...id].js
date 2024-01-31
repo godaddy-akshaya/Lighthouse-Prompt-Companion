@@ -226,8 +226,8 @@ const PromptBuilder = () => {
                                         <text.h4 as='title' text='Table Columns' />
                                         <div className='lh-filter-container'>
                                             {
-                                                columns?.map(field =>
-                                                    <FilterCards key={field.column_name} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
+                                                columns?.map((field, index) =>
+                                                    <FilterCards key={field.column_name} open={index == 0} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
                                                 )
                                             }
                                         </div>

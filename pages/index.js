@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lockup, Block, Module } from '@ux/layout';
 import { withLocaleRequired } from '@gasket/react-intl';
+import PropTypes from 'prop-types';
 import Head from '../components/head';
 import Button from '@ux/button';
 import SelectInput from '@ux/select-input';
@@ -12,7 +13,7 @@ import SiblingSet from '@ux/sibling-set';
 
 
 
-export const IndexPage = () => {
+export const IndexPage = ({ authDetails }) => {
   const [tables, setTables] = useState();
   const [selectedTable, setSelectedTable] = useState();
 
@@ -67,7 +68,9 @@ export const IndexPage = () => {
     </>
   )
 };
-const options = {
-  realm: 'jomax', ssoRedirectOverride: 'https://sso.dev-gdcorp.tools/?realm=jomax&app=lighthouse.c3.int&path='
+
+IndexPage.propTypes = {
+  authDetails: PropTypes.object
 };
+
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);

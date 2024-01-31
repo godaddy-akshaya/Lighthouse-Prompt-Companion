@@ -1,10 +1,10 @@
 # prompt-ui
 
-Prompt UI 
+Prompt UI
 
 ## Local Setup
 
-To support https with SSO for local development, first update your hosts file 
+To support https with SSO for local development, first update your hosts file
 to include:
 
 ```
@@ -14,7 +14,8 @@ to include:
 Now start up the app.
 
 ```bash
-cd prompt-ui
+
+npm login
 
 npm install
 
@@ -25,4 +26,11 @@ The app should now be accessible over https on port 8443 at:
 
 ```
 https://local.gasket.dev-godaddy.com:8443
+```
+
+## Docker Build
+
+```bash
+
+docker build -t lighthouse-ui --build-arg NPM_TOKEN=[token] --build-arg AWS_ENV=[env].
 ```

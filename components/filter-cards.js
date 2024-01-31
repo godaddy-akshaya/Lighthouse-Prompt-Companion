@@ -12,7 +12,7 @@ import Tag from '@ux/tag';
 import '@ux/tag/styles';
 import '@ux/collapsible/styles';
 
-const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll }) => {
+const filterCards = ({ options, label, id, open, onChange, onSelectAll, onDeselectAll }) => {
     const [optionSize, setOptionSize] = useState(options.column_values.length > 12 ? 'restricted-height' : 'full-height');
     const handleOnChange = (e) => {
         let model = {
@@ -30,15 +30,16 @@ const filterCards = ({ options, label, id, onChange, onSelectAll, onDeselectAll 
     }
     const SelectionCountTitle = () => (
         <>
-            <text.label as='label' text={label} />
-            <Tag emphasis='neutral' design='filled' className='lh-tag' children={`${options?.checkbox_columns.filter(r => r.value).length} of ${options?.column_values.length}`}></Tag>
+            <div className='lh-title'>
+                <text.label as='label' text={label} /><br />
+                <text.label as='caption' text={`${options?.checkbox_columns.filter(r => r.value).length} of ${options?.column_values.length}`} />
+            </div>
         </>
-
     )
     return (
         <>
             <Card className='lh-filter-card' stretch={true} id={id}>
-                <Collapsible className='lh-no-padding' title={<SelectionCountTitle />}>
+                <Collapsible defaultOpen={open ? open : false} className='lh-no-padding' title={<SelectionCountTitle />}>
 
                     <Block className='lh-content'>
                         <div className='lh-controls'>
