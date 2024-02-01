@@ -18,12 +18,13 @@ export const IndexPage = ({ authDetails }) => {
   const [selectedTable, setSelectedTable] = useState();
 
   function handleTableSelect(event) {
+    console.log(event);
     setSelectedTable(event);
   }
 
   useEffect(() => {
     getTables().then(data => {
-      setTables(data.tables);
+      setTables(data);
     });
   }, []);
 
@@ -57,7 +58,7 @@ export const IndexPage = ({ authDetails }) => {
               <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
                 <SelectInput className='select-table' label='' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
                   <option value=''>Select...</option>
-                  {tables?.map(table => <option key={table} value={table}>{table}</option>) || null}
+                  {tables?.map(table => <option key={table.column_name} value={table.column_name}>{table.display_name}</option>) || null}
                 </SelectInput>
                 <Button text='Go' design='primary' as='cta' href={`/table/${encodeURIComponent(selectedTable)}`} />
               </SiblingSet>

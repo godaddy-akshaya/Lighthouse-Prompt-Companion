@@ -17,7 +17,25 @@ import Search from '@ux/search';
 import '@ux/search/styles';
 
 export const ResultsPage = () => {
-    const data = [];
+    //page notes
+    // valid status = Submitted/In Progress/Completed/Cancelled
+    /*
+        cancel link will be enabled only for IP and Submitted
+        View results link will be enabled only for Completed
+
+    */
+    // 
+    const cancelButton = (run_id) => { };
+    const viewResults = (run_id) => { };
+    const status = {
+        Submitted: 'Submitted',
+        InProgress: 'In Progress',
+        Completed: 'Completed',
+        Cancelled: 'Cancelled'
+    }
+    const data = [
+        { run_id: 1234, last_update_time: '6:45 AM', status: 'Submitted', action: 'cancel', view_results: 'View results' },
+    ];
     return (
         <div className='container m-t-3'>
             <Head title='Results' route='results' />
@@ -44,14 +62,11 @@ export const ResultsPage = () => {
                                 sortable={true}>
                                 <thead>
                                     <tr>
-                                        <th column='parentContactID' showIcon>{'Parent Contact ID'}</th>
-                                        <th>{'Prompt Response'}</th>
-                                        <th>{'Customer Type'}</th>
-                                        <th>{'Has Refund'}</th>
-                                        <th>{'Call Date'}</th>
-                                        <th>{'Top Level Topic'}</th>
-                                        <th>{'Evaluation Model'}</th>
-                                        <th>{'Evaluation Response'}</th>
+                                        <th column='parentContactID' showIcon>{'Run ID'}</th>
+                                        <th>{'Last Update Time'}</th>
+                                        <th>{'Status'}</th>
+                                        <th>{'Action'}</th>
+                                        <th>{'View Results'}</th>
                                     </tr>
                                 </thead>
                             </Table>
