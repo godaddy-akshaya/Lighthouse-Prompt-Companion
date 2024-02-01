@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { withLocaleRequired } from '@gasket/react-intl';
 import Head from '../components/head';
 import '@ux/text-input/styles';
+import Card from '@ux/card';
 import Button from '@ux/button';
+import { Block, Lockup, Module } from '@ux/layout';
 import '@ux/button/styles';
-
+import text from '@ux/text';
 import '@ux/select-input/styles';
 import '@ux/icon/settings/index.css';
 import '@ux/icon/wand/index.css';
@@ -14,73 +16,107 @@ import '@ux/checkbox/styles';
 import Table from '@ux/table';
 import '@ux/table/styles';
 import Search from '@ux/search';
+import session from '../lib/session';
+import { getResults, cancelJob } from '../lib/api';
 import '@ux/search/styles';
 
-export const ResultsPage = () => {
+
+export const ResultsPage = ({ authDetails }) => {
+    const [results, setResults] = useState([]);
+    if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     //page notes
     // valid status = Submitted/In Progress/Completed/Cancelled
     /*
         cancel link will be enabled only for IP and Submitted
         View results link will be enabled only for Completed
-
     */
     // 
-    const cancelButton = (run_id) => { };
-    const viewResults = (run_id) => { };
+    const cancelButton = (job) => (
+        <>
+            <Button size='small' design='secondary' text='Cancel' onClick={() => cancel(job)} />
+        </>
+    )
+    const cancel = (job) => {
+        alert(`Cancelling job ${job.run_id}...`);
+        cancelJob(job).then((data) => {
+            console.log(data);
+            if (data.error) return alert(data.error);
+            alert('Job cancelled successfully');
+        });
+    }
+
+    const filterResults = (searchText) => {
+        console.log(searchText)
+        if (searchText === '' || searchText === null) return setResults(results);
+        let newResults = results.filter((item) => {
+            return item.run_id.includes(searchText);
+        });
+        setResults(newResults);
+    }
+
+    useEffect(() => {
+        //get results
+        getResults().then((data) => {
+            console.log(data);
+            setResults(data);
+        });
+    }, []);
+
     const status = {
         Submitted: 'Submitted',
         InProgress: 'In Progress',
         Completed: 'Completed',
         Cancelled: 'Cancelled'
     }
-    const data = [
-        { run_id: 1234, last_update_time: '6:45 AM', status: 'Submitted', action: 'cancel', view_results: 'View results' },
-    ];
+
     return (
-        <div className='container m-t-3'>
+        <>
             <Head title='Results' route='results' />
-            <div className='row'>
-                <div className='card m-t-3 ux-card'>
-                    <div className='card-block'>
-                        <div className='card-title'>
-                            <h1 className='p-t-2'>Results</h1>
-                        </div>
-                        <div class="card-title">
-                            <form role='search' action=''>
-                                <Search
-                                    id='my-search'
-                                    placeholder='Results Id'
-                                />
-                            </form>
-                        </div>
-                        <div className='card-title'><Button design='secondary'>Download</Button></div>
-                        <div className='card-block'>
-                            <Table
-                                className='table table-hover'
-                                data={data}
-                                order='parentContactID'
-                                sortable={true}>
-                                <thead>
-                                    <tr>
-                                        <th column='parentContactID' showIcon>{'Run ID'}</th>
-                                        <th>{'Last Update Time'}</th>
-                                        <th>{'Status'}</th>
-                                        <th>{'Action'}</th>
-                                        <th>{'View Results'}</th>
+            <Block as='stack' orientation='vertical'>
+                <Block orientation='horizontal'>
+                    <Lockup >
+                        <text.h3 text={'Results'} as='heading' />
+                    </Lockup>
+                </Block>
+
+                <Card stretch={true} id='results' title='Results'>
+                    <Module>
+                        <Search
+                            id='my-search'
+                            onChange={(e) => filterResults(e)}
+                            placeholder='Search for Run ID....'
+                        />
+                        <Table
+                            className='table table-hover'
+                            data={results}
+                            sortable={true}>
+                            <thead>
+                                <tr>
+                                    <th column='run_id' showIcon>{'Run ID'}</th>
+                                    <th column='run_date'>{'Run Date'}</th>
+                                    <th column='user_id'>{'User ID'}</th>
+                                    <th column='status'>{'Status'}</th>
+                                    <th column='action'>{'Action'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {results.map((item, index) => (
+                                    <tr key={index}>
+                                        <td column='run_id'>{item.run_id}</td>
+                                        <td column='run_date'>{item.run_date}</td>
+                                        <td column='user_id'>{item.user_id}</td>
+                                        <td column='status'>{item.status}</td>
+                                        <td column='action'>{item.action === 'cancel' ? cancelButton(item) : item.action}</td>
                                     </tr>
-                                </thead>
-                            </Table>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </Module>
 
-                        </div>
-                        <div class="card-block">
+                </Card>
+            </Block>
 
-
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+        </>
     )
 };
 

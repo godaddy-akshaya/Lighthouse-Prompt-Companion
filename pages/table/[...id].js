@@ -24,18 +24,20 @@ import '@ux/filter/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import '@ux/menu/styles';
 import SiblingSet from '@ux/sibling-set';
-import { getTableRowCount, getTableFilters, getTables } from '../../lib/api';
+import { getTableRowCount, getTableFilters, getTables, submitPromptJob } from '../../lib/api';
 import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
 import Tag from '@ux/tag';
+import session from '../../lib/session';
 import '@ux/date-input/styles';
 import { getGuid } from '../../lib/utils';
 
-const PromptBuilder = () => {
+const PromptBuilder = ({ authDetails }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
+    const [guid, setGuid] = useState('');
     const [numOfTransactions, setNumOfTransactions] = useState(0);
     const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
     const [showUserMessage, setShowUserMessage] = useState(false);
@@ -54,8 +56,9 @@ const PromptBuilder = () => {
     });
     const router = useRouter();
     const [routeParams, setRouteParams] = useState({
-        table: decodeURIComponent(router.query?.id?.[0] || 'default')
+        table: decodeURIComponent(router.query?.id?.[0] || '0')
     });
+    if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     function insertAction(e) {
         let text = prompt + ` {${e}}`;
         setPrompt(text);
@@ -133,6 +136,10 @@ const PromptBuilder = () => {
         (async () => {
             const g = await getGuid();
             setGuid(g);
+            setIsLoading(true);
+            submitPromptJob({ guid: g }).then(data => {
+                router.push(`/results`);
+            });
         })();
     }
     function handleCloseError(e) {
@@ -164,7 +171,7 @@ const PromptBuilder = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     useEffect(() => {
-        if (routeParams.table == 'default') {
+        if (routeParams.table === '0') {
             getTables().then(data => {
                 setTables(data);
                 setShowTableSelect(true);
@@ -199,7 +206,7 @@ const PromptBuilder = () => {
                             <SiblingSet style={{ 'width': '650px' }} stretch={true} gap='sm'>
                                 <SelectInput className='select-table' label='' stretch={true} onChange={handleTableSelect} id='tables' name='select'>
                                     <option value=''>Select...</option>
-                                    {tables?.map(table => <option key={table} value={table}>{table}</option>) || null}
+                                    {tables?.map(table => <option key={table.column_name} value={table.column_name}>{table.display_name}</option>) || null}
                                 </SelectInput>
                                 <Button text='Go' design='primary' as='cta' onClick={handleTableRouteChange} />
                             </SiblingSet>

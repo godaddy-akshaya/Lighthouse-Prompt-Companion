@@ -7,11 +7,6 @@ const Head = (props) => {
   useEffect(() => {
     ux.header((err, header) => {
       if (err) return console.error(err); // handle this as you wish
-      header.updateAfterNavHeadingLeft(
-        <a className='test' href='#'>
-          Click me
-        </a>
-      );
 
       header.updateSidebarNav([
         {

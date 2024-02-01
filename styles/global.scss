@@ -54,6 +54,7 @@ it is recommended to import those directly to `pages/_app.js`
 .lh-container {
     display: flex;
     flex-direction: row;
+    
     padding-top: 0px !important;
  
     &.lh-start {

@@ -1,6 +1,6 @@
-# prompt-ui
+# Lighthouse UI
 
-Prompt UI
+GoDaddy Lighthouse is an insights platform powered by large language models. The platform allows users throughout the company to craft, manage and evaluate prompts against any text-based data.
 
 ## Local Setup
 
