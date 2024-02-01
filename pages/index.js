@@ -9,6 +9,7 @@ import text from '@ux/text';
 import Card, { spaceOptions } from '@ux/card';
 import Logo from '../components/logo';
 import { getTables } from '../lib/api';
+import session from '../lib/session';
 import SiblingSet from '@ux/sibling-set';
 
 
@@ -17,8 +18,9 @@ export const IndexPage = ({ authDetails }) => {
   const [tables, setTables] = useState();
   const [selectedTable, setSelectedTable] = useState();
 
+  if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
+
   function handleTableSelect(event) {
-    console.log(event);
     setSelectedTable(event);
   }
 
