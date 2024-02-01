@@ -24,7 +24,7 @@ import '@ux/filter/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import '@ux/menu/styles';
 import SiblingSet from '@ux/sibling-set';
-import { getNumRows, getTableMetaData, getTables } from '../../lib/api';
+import { getTableRowCount, getTableFilters, getTables } from '../../lib/api';
 import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
@@ -112,7 +112,7 @@ const PromptBuilder = () => {
         setSelectedTable(event);
     }
     function handleFilterChange(e) {
-        let _columns = columns.map(column => {
+        let _columns = columns?.map(column => {
             if (column.column_name.toLowerCase() === e.column.toLowerCase()) {
                 return {
                     ...column,
@@ -139,10 +139,11 @@ const PromptBuilder = () => {
         setShowUserMessage(false);
         setErrorMessage('');
     }
+    /*  after posting prompt form -> results page    */
     function handleTableRowSubmit(e) {
         e.preventDefault();
         setIsLoading(true);
-        getNumRows(routeParams.table, columns, dateValue).then(data => {
+        getTableRowCount(routeParams.table, columns, dateValue).then(data => {
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
                 setNumOfTransactionsToRun(0);
@@ -163,14 +164,14 @@ const PromptBuilder = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     useEffect(() => {
-        if (routeParams.table == 0) {
+        if (routeParams.table == 'default') {
             getTables().then(data => {
-                setTables(data.tables);
+                setTables(data);
                 setShowTableSelect(true);
                 setIsLoading(false);
             });
         } else {
-            getTableMetaData(routeParams.table).then(data => {
+            getTableFilters(routeParams.table).then(data => {
                 setColumns(data);
                 setShowTableSelect(false);
                 setIsLoading(false);
@@ -223,7 +224,6 @@ const PromptBuilder = () => {
                                             <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
                                             <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                                         </div>
-                                        <text.h4 as='title' text='Table Columns' />
                                         <div className='lh-filter-container'>
                                             {
                                                 columns?.map((field, index) =>
