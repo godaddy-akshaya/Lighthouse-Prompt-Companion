@@ -18,7 +18,7 @@ module.exports = {
       user: 'jhanes',
       host: 'prompt-ui.c3.int.dev-gdcorp.tools',
       'pre-deploy': 'git pull',
-      ref: 'origin/main',
+      ref: 'origin/dev',
       repo: 'git@github.com:gdcorp-dna/lighthouse-ui.git',
       path: '/var/www/prompt-ui',
       'post-deploy':

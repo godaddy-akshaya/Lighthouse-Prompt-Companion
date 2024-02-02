@@ -68,11 +68,11 @@ const PromptBuilder = ({ authDetails }) => {
     }
     function handleStartDateValue(e) {
         setStartDateValue(e);
-        setDateValue({ ...dateValue, column_selected_values: [e, endDateValue] });
+        setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] });
     }
     function handleEndDateValue(e) {
         setEndDateValue(e);
-        setDateValue({ ...dateValue, column_selected_values: [startDateValue, e] });
+        setDateValue({ ...dateValue, column_selected_values: [startDateValue[0], e[0]] });
     }
     function handleNumberOfTransactionChange(e) {
         setNumOfTransactionsToRun(e);
@@ -138,7 +138,7 @@ const PromptBuilder = ({ authDetails }) => {
             setGuid(g);
             setIsLoading(true);
             submitPromptJob({ guid: g }).then(data => {
-                router.push(`/results`);
+                router.push(`/resultsrun_id=${g}`);
             });
         })();
     }
