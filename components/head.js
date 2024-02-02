@@ -18,14 +18,6 @@ const Head = (props) => {
           active: props?.route === 'home' ? true : false
         },
         {
-          caption: 'Prompt',
-          key: '1',
-          href: '/table/0',
-          eid: 'pep.prompt-ui.nav.prompt.click',
-          icon: 'create-form',
-          active: props?.route === 'table' ? true : false
-        },
-        {
           caption: 'Results',
           key: '2',
           href: '/results',

@@ -27,6 +27,7 @@ export const ResultsPage = ({ authDetails }) => {
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState();
     const [results, setResults] = useState();
+    const [tableLoading, setTableLoading] = useState(true);
     if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     //page notes
     // valid status = Submitted/In Progress/Completed/Cancelled
@@ -36,7 +37,11 @@ export const ResultsPage = ({ authDetails }) => {
     */
     // 
     useEffect(() => {
-        getResults().then((data) => setResults(data))
+        getResults().then((data) => {
+            console.log(data);
+            setResults(data);
+            setTableLoading(false);
+        })
     }, []);
     const actions = (
         <>
@@ -87,24 +92,24 @@ export const ResultsPage = ({ authDetails }) => {
             }
             <Head title='Results' route='results' />
             <Block as='stack' orientation='vertical'>
-                <Block orientation='horizontal'>
-                    <Lockup >
-                        <text.h3 text={'Results'} as='heading' />
-                    </Lockup>
-                </Block>
-                <div className='lh-container lh-between m-b-1'>
+
+                <Lockup >
+                    <text.h3 text={'Results'} as='heading' />
+                </Lockup>
+
+                <div className='lh-container lh-start m-b-1'>
                     <Search
                         id='my-search'
-
+                        style={{ 'width': '25%' }}
                         placeholder='Search for Run ID....'
                     />
-                    <text.label as='caption' text={`# of records: ${results?.length || 0}`} />
+
                 </div>
 
                 <Card stretch={true} id='results' title='Results'>
                     <Module>
-
-                        {results && results.length > 0 &&
+                        {tableLoading && <text.p text='Loading...' />}
+                        {!tableLoading &&
                             <Table
                                 className='table table-hover'
                                 sortable={true}>
@@ -112,6 +117,7 @@ export const ResultsPage = ({ authDetails }) => {
                                     <tr>
                                         <th column='run_id' showIcon>{'Run ID'}</th>
                                         <th column='run_date'>{'Run Date'}</th>
+                                        <th column='last_updated_time'>{'Last Updated Time'}</th>
                                         <th column='user_id'>{'User ID'}</th>
                                         <th column='status'>{'Status'}</th>
                                         <th column='action'>{'Action'}</th>
@@ -123,6 +129,7 @@ export const ResultsPage = ({ authDetails }) => {
                                         <tr key={item.run_id}>
                                             <td column='run_id'>{item.run_id}</td>
                                             <td column='run_date'>{item.run_date}</td>
+                                            <td column='last_updated_time'>{item.last_updated_time}</td>
                                             <td column='user_id'>{item.user_id}</td>
                                             <td column='status'>{item.status}</td>
                                             <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
