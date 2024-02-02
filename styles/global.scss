@@ -89,7 +89,9 @@ it is recommended to import those directly to `pages/_app.js`
 .m-t-1 {
     margin-top: 1rem !important;
 }
-
+.m-b-1 {
+    margin-bottom: 1rem !important;
+}
 body.ux-app.gasket-app {
     background-color: var(--ux-cao06b, white) !important;
 }
