@@ -42,6 +42,9 @@ const PromptBuilder = ({ authDetails }) => {
     const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [includeEval, setIncludeEval] = useState(false);
+    const [promptModel, setPromptModel] = useState('Claude-instant-v1');
+    const [evaluationModel, setEvaluationModel] = useState('Claude-instant-v1');
+    const [evaluationPrompt, setEvaluationPrompt] = useState('');
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [columns, setColumns] = useState();
@@ -73,6 +76,12 @@ const PromptBuilder = ({ authDetails }) => {
     function handleEndDateValue(e) {
         setEndDateValue(e);
         setDateValue({ ...dateValue, column_selected_values: [startDateValue[0], e[0]] });
+    }
+    function handleModelChange(e) {
+        setPromptModel(e);
+    }
+    function handleEvalModelChange(e) {
+        setEvaluationModel(e);
     }
     function handleNumberOfTransactionChange(e) {
         setNumOfTransactionsToRun(e);
@@ -131,16 +140,30 @@ const PromptBuilder = ({ authDetails }) => {
         });
         setColumns(_columns);
     }
-    function handleRunClick(e) {
+    function handleJobSubmit(e) {
         e.preventDefault();
         (async () => {
             const g = await getGuid();
             setGuid(g);
+            let job = {
+                count: numOfTransactionsToRun,
+                run_id: g,
+                prompt: prompt,
+                evaluation: includeEval,
+                model: promptModel,
+                evaluation_model: evaluationModel || '',
+                evaluation_prompt: evaluationPrompt || '',
+            }
             setIsLoading(true);
-            submitPromptJob({ guid: g }).then(data => {
-                router.push(`/resultsrun_id=${g}`);
+            submitPromptJob(routeParams.table, job, columns, dateValue).then(data => {
+                console.log(data);
+                //router.push(`/results&run_id=${g}`);
+                router.push('/results', undefined, { shallow: true });
             });
         })();
+    }
+    function handleModelChange(e) {
+        console.log(e);
     }
     function handleCloseError(e) {
         setShowUserMessage(false);
@@ -245,7 +268,7 @@ const PromptBuilder = ({ authDetails }) => {
                         </Block>
                         <Block>
                             {isPromptVisible &&
-                                <>  <form onSubmit={handleRunClick}>
+                                <>  <form onSubmit={handleJobSubmit}>
                                     <Card id='para-card' stretch="true" title='Parameters'>
                                         <Module>
                                             <text.h4 as='title' text='Parameters' />
@@ -254,7 +277,7 @@ const PromptBuilder = ({ authDetails }) => {
                                                     {`Number of Transactions ${numOfTransactions}`}
                                                 </Tag>
                                             </p>
-                                            <SelectInput id='model' name='model' label='Model'>
+                                            <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
                                                 <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                                 <option value='Claude-V2'>Claude-V2</option>
                                             </SelectInput>
@@ -273,7 +296,7 @@ const PromptBuilder = ({ authDetails }) => {
                                                 {includeEval ?
                                                     <div className="eval">
                                                         <text.label as='label' text='Evaluation Parameters' />
-                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' label='Model-select'>
+                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model-select'>
                                                             <option value='Claude-instant-v1'>Claude-instant-v1</option>
                                                             <option value='Claude-V2'>Claude-V2</option>
                                                         </SelectInput>
