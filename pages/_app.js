@@ -9,6 +9,7 @@ import '@ux/card/styles';
 import '@ux/button/styles';
 import '@ux/icon/home/index.css';
 import '@ux/icon/add/index.css';
+import '@ux/icon/copy/index.css';
 import '@ux/checkbox/styles';
 import '@ux/date-input/styles';
 import '@ux/menu/styles';
