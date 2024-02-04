@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { withLocaleRequired } from '@gasket/react-intl';
-import Head from '../../components/head';
+import Head from '../components/head';
 import '@ux/text-input/styles';
 import Card from '@ux/card';
 import Button from '@ux/button';
@@ -20,11 +20,11 @@ import Modal from '@ux/modal';
 import '@ux/modal/styles';
 import '@ux/table/styles';
 import Search from '@ux/search';
-import session from '../../lib/session';
+import session from '../lib/session';
 import Copy from '@ux/icon/copy';
-import { getResults, cancelJob } from '../../lib/api';
+import { getResults, cancelJob } from '../lib/api';
 import '@ux/search/styles';
-import { copyToClipBoard } from '../../lib/utils';
+import { copyToClipBoard } from '../lib/utils';
 
 
 const copyButton = (text) => {
@@ -33,14 +33,13 @@ const copyButton = (text) => {
 
 export const ResultsPage = ({ authDetails }) => {
     const router = useRouter();
+    // tag for new records created from job submission
+    const { newJob } = router.query;
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState();
     const [results, setResults] = useState();
     const [tableLoading, setTableLoading] = useState(true);
-    const [runId, setRunId] = useState(decodeURIComponent(router.query?.id?.[0] || 'all'));
     if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
-
-
 
     //page notes
     // valid status = Submitted/In Progress/Completed/Cancelled
@@ -50,17 +49,15 @@ export const ResultsPage = ({ authDetails }) => {
     */
     // 
     useEffect(() => {
-        console.log(runId);
         getResults().then((data) => {
-            console.log(data);
             setResults(data);
             setTableLoading(false);
         })
     }, []);
     const actions = (
         <>
-            <Button design='primary' onClick={() => confrimedJobCancel()} text='Yes' />
-            <Button design='secondary' onClick={() => abortCancel(false)} text='No' />
+            <Button design='primary' aria-label='Yes' onClick={() => confrimedJobCancel()} text='Yes' />
+            <Button design='secondary' aria-label='No' onClick={() => abortCancel(false)} text='No' />
         </>
     );
     const CancelButton = (job) => (
@@ -69,7 +66,6 @@ export const ResultsPage = ({ authDetails }) => {
         </>
     )
     const confirmCancelModal = (job) => {
-        console.log('Cancel job', job);
         setModalData(job);
         setShowModal(true);
     }
@@ -81,7 +77,6 @@ export const ResultsPage = ({ authDetails }) => {
         // Check if they are sure they want to cancel the job
         if (modalData) {
             cancelJob(modalData).then((data) => {
-                console.log('Job cancelled', data);
                 setShowModal(false);
                 setModalData();
                 getResults().then((data) => setResults(data))
@@ -90,7 +85,7 @@ export const ResultsPage = ({ authDetails }) => {
     }
 
     const ViewButton = (job) => (
-        <Button size='small' design='secondary' text='View Results' onClick={() => view(job)} />
+        <Button size='small' design='secondary' aria-label='View Results' text='View Results' onClick={() => view(job)} />
     )
 
     const view = (job) => {
@@ -107,19 +102,18 @@ export const ResultsPage = ({ authDetails }) => {
             <Head title='Results' route='results' />
             <Block as='stack' orientation='vertical'>
 
-                <Lockup >
-                    <text.h3 text={'Results'} as='heading' />
-                </Lockup>
 
-                <div className='lh-container lh-start m-b-1'>
+
+                <div className='lh-container lh-between m-b-1'>
+                    <Lockup >
+                        <text.h3 text={'Results'} as='heading' />
+                    </Lockup>
                     <Search
                         id='my-search'
                         style={{ 'width': '25%' }}
                         placeholder='Search for Run ID....'
                     />
-
                 </div>
-
                 <Card stretch={true} id='results' title='Results'>
                     <Module>
                         {tableLoading && <text.p text='Loading...' />}
@@ -142,8 +136,8 @@ export const ResultsPage = ({ authDetails }) => {
                                     {results?.map((item, index) => (
                                         <tr key={item.run_id}>
                                             <td column='run_id'> {item.run_id}
-                                                <Button size='small' aria-labelby='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.run_id)} icon={<Copy />} />
-                                                {runId == item.run_id && <>
+                                                <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.run_id)} icon={<Copy />} />
+                                                {newJob == item.run_id && <>
                                                     <Tag type='success' design='filled'>New </Tag>
                                                 </>}</td>
                                             <td column='run_date'>{item.run_date}</td>

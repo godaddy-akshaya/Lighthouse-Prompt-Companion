@@ -20,7 +20,7 @@ const Head = (props) => {
         {
           caption: 'Results',
           key: '2',
-          href: '/results/all',
+          href: '/results',
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
           active: props?.route === 'results' ? true : false

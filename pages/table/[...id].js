@@ -156,9 +156,7 @@ const PromptBuilder = ({ authDetails }) => {
             }
             setIsLoading(true);
             submitPromptJob(routeParams.table, job, columns, dateValue).then(data => {
-                console.log(data);
-                //router.push(`/results&run_id=${g}`);
-                router.push(`/results/${g}`, undefined, { shallow: true });
+                router.push(`/results?newJob=${g}`, undefined, { shallow: true });
             });
         })();
     }
