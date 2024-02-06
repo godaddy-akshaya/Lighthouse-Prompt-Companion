@@ -133,6 +133,7 @@ export const ResultsPage = ({ authDetails }) => {
                                 </thead>
 
                                 <tbody>
+                                    {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
                                     {results?.map((item, index) => (
                                         <tr key={item.run_id}>
                                             <td column='run_id'> {item.run_id}
@@ -146,7 +147,7 @@ export const ResultsPage = ({ authDetails }) => {
                                             <td column='status'>{item.status}</td>
                                             <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
                                         </tr>
-                                    ))}
+                                    )) || null}
                                 </tbody>
                             </Table>
                         }
