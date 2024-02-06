@@ -288,10 +288,10 @@ const PromptBuilder = ({ authDetails }) => {
                                                 <option value='claude-v2'>claude-v2</option>
                                             </SelectInput>
                                             <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                                            <Menu id='my-menu' className='m-t-1'>
+                                            <Menu id='my-menu' size='small' className='m-t-1'>
                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
 
-                                                <MenuList design='primary'>
+                                                <MenuList className='lh-menu' design='primary'>
                                                     <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
                                                     {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
                                                 </MenuList>
@@ -309,9 +309,9 @@ const PromptBuilder = ({ authDetails }) => {
                                                             <option value='claude-v2'>claude-v2</option>
                                                         </SelectInput>
 
-                                                        <Menu id='my-menu' className='m-t-1'>
+                                                        <Menu id='my-menu-for-eval' className='m-t-1'>
                                                             <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                                                            <MenuList design='primary'>
+                                                            <MenuList className='lh-menu' design='primary'>
                                                                 <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
                                                                 {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
                                                             </MenuList>

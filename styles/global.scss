@@ -99,7 +99,9 @@ it is recommended to import those directly to `pages/_app.js`
 .grey-card {
     background-color: var(--ux-1vw9arb, #D4DBE0) !important;
 }
-
+.lh-menu {
+    max-height: 250px !important;
+}
 .m-t-1 {
     margin-top: 1rem !important;
 }
