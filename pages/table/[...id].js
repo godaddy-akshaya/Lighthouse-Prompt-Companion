@@ -44,8 +44,8 @@ const PromptBuilder = ({ authDetails }) => {
     const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [includeEval, setIncludeEval] = useState(false);
-    const [promptModel, setPromptModel] = useState('Claude-instant-v1');
-    const [evaluationModel, setEvaluationModel] = useState('Claude-instant-v1');
+    const [promptModel, setPromptModel] = useState('claude-instant-v1');
+    const [evaluationModel, setEvaluationModel] = useState('claude-instant-v1');
     const [evaluationPrompt, setEvaluationPrompt] = useState('');
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
