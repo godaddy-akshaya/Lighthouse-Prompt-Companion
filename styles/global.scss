@@ -114,7 +114,10 @@ body.ux-app.gasket-app {
 body.ux-app.gasket-app .ux-app__content {
     background-color: var(--ux-cao06b, white) !important;
 }
-
+.text-center {
+    text-align: center !important;
+    align-items: center !important;
+}
 
 .select-table {
     min-width: 350px !important;

@@ -32,6 +32,7 @@ import Tag from '@ux/tag';
 import session from '../../lib/session';
 import '@ux/date-input/styles';
 import { getGuid } from '../../lib/utils';
+import MessageOverlay from '@ux/message-overlay';
 
 const PromptBuilder = ({ authDetails }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +40,7 @@ const PromptBuilder = ({ authDetails }) => {
     const [prompt, setPrompt] = useState('');
     const [guid, setGuid] = useState('');
     const [numOfTransactions, setNumOfTransactions] = useState(0);
+    const [showMessage, setShowMessage] = useState(false);
     const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [includeEval, setIncludeEval] = useState(false);
@@ -178,19 +180,20 @@ const PromptBuilder = ({ authDetails }) => {
     /*  after posting prompt form -> results page    */
     function handleTableRowSubmit(e) {
         e.preventDefault();
-        setIsLoading(true);
+        setShowMessage(true);
+        //  setIsLoading(true);
         getTableRowCount(routeParams.table, columns, dateValue).then(data => {
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
                 setNumOfTransactionsToRun(0);
                 setErrorMessage(data.errorMessage);
                 setShowUserMessage(true);
-                setIsLoading(false);
+                setShowMessage(false);
             } else {
                 setNumOfTransactions(data || 0);
                 setNumOfTransactionsToRun(data || 0);
                 setIsPromptVisible(true);
-                setIsLoading(false);
+                setShowMessage(false);
             }
         }, error => {
             setErrorMessage(error);
@@ -225,8 +228,14 @@ const PromptBuilder = ({ authDetails }) => {
                         actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
                 </Block>
             }
-            {isLoading && <Spinner />}
+
+            {isLoading &&
+                <div className='text-center'>
+                    <Spinner />
+                </div>
+            }
             {showTableSelect && <>
+
                 <Block as='stack' orientation='vertical'>
                     <Card id='table-select-card' className='grey-card'>
                         <Block orientation='horizontal' >
@@ -252,22 +261,33 @@ const PromptBuilder = ({ authDetails }) => {
                     </Block>
                     <div className='lh-container lh-between'>
                         <Block>
+                            {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                <Block as='stack' className='text-center' orientation='vertical'>
+                                    <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                    <br />
+                                    <Spinner />
+                                </Block>
+                            </MessageOverlay>}
                             <form onSubmit={handleTableRowSubmit}>
                                 <Card id='table-params-card' stretch={true} title='Parameters'>
                                     <Module>
+
                                         {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                                        <div className='lh-filter-container'>
-                                            <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                                            <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                                        </div>
+                                        <Lockup>
+                                            <div className='lh-filter-container'>
+                                                <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                                                <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                                            </div>
+                                        </Lockup>
                                         <div className='lh-filter-container'>
                                             {
                                                 columns?.map((field, index) =>
-                                                    <FilterCards key={field.column_name} open={index == 0} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
+                                                    <FilterCards key={field.column_name} open={false} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
                                                 )
                                             }
                                         </div>
                                         <Button text="Fetch Results" aria-label='Submit Results' type='submit' design='primary' />
+
                                     </Module>
                                 </Card>
                             </form>
