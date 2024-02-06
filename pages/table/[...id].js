@@ -63,11 +63,19 @@ const PromptBuilder = ({ authDetails }) => {
     });
     if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     function insertAction(e) {
-        let text = prompt + ` {${e}}`;
+        let text = prompt + ` [${e}]`;
         setPrompt(text);
+    }
+    function insertActionEval(e) {
+        console.log(e);
+        let text = evaluationPrompt + ` [${e}]`;
+        setEvaluationPrompt(text);
     }
     function handlePrompt(e) {
         setPrompt(e);
+    }
+    function handleEvalPrompt(e) {
+        setEvaluationPrompt(e);
     }
     function handleStartDateValue(e) {
         setStartDateValue(e);
@@ -259,7 +267,7 @@ const PromptBuilder = ({ authDetails }) => {
                                                 )
                                             }
                                         </div>
-                                        <Button text="Fetch Results" type='submit' design='primary' />
+                                        <Button text="Fetch Results" aria-label='Submit Results' type='submit' design='primary' />
                                     </Module>
                                 </Card>
                             </form>
@@ -276,32 +284,43 @@ const PromptBuilder = ({ authDetails }) => {
                                                 </Tag>
                                             </p>
                                             <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
-                                                <option value='Claude-instant-v1'>Claude-instant-v1</option>
-                                                <option value='Claude-V2'>Claude-V2</option>
+                                                <option value='claude-instant-v1'>claude-instant-v1</option>
+                                                <option value='claude-v2'>claude-v2</option>
                                             </SelectInput>
                                             <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
                                             <Menu id='my-menu' className='m-t-1'>
                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
+
                                                 <MenuList design='primary'>
+                                                    <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
                                                     {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
                                                 </MenuList>
                                             </Menu>
-                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={5} />
+                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
                                             <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                                                 <Lockup orientation='vertical'>
                                                     <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
                                                 </Lockup>
                                                 {includeEval ?
-                                                    <div className="eval">
+                                                    <div className="eval m-t-1">
                                                         <text.label as='label' text='Evaluation Parameters' />
-                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model-select'>
-                                                            <option value='Claude-instant-v1'>Claude-instant-v1</option>
-                                                            <option value='Claude-V2'>Claude-V2</option>
+                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model'>
+                                                            <option value='claude-instant-v1'>claude-instant-v1</option>
+                                                            <option value='claude-v2'>claude-v2</option>
                                                         </SelectInput>
-                                                        <TextInput label='Prompt' name='evalPromp' multiline size={5} />
+
+                                                        <Menu id='my-menu' className='m-t-1'>
+                                                            <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                                                            <MenuList design='primary'>
+                                                                <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
+                                                                {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
+                                                            </MenuList>
+                                                        </Menu>
+
+                                                        <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} value={evaluationPrompt} multiline size={7} />
                                                     </div> : null}
                                             </Card>
-                                            <Button className='m-t-1' text="Run Prompt" type='submit' design='primary' />
+                                            <Button className='m-t-1' text="Run Prompt" type='submit' aria-label='submit-run' design='primary' />
                                         </Module>
                                     </Card>
                                 </form>
