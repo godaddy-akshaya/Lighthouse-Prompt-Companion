@@ -127,6 +127,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                         <th column='run_date'>{'Run Date'}</th>
                                         <th column='last_updated_time'>{'Last Updated Time'}</th>
                                         <th column='user_id'>{'User ID'}</th>
+                                        {/* <th column='query'>Query</th> */}
                                         <th column='status'>{'Status'}</th>
                                         <th column='action'>{'Action'}</th>
                                     </tr>
@@ -144,6 +145,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                             <td column='run_date'>{item.run_date}</td>
                                             <td column='last_updated_time'>{item.last_updated_time}</td>
                                             <td column='user_id'>{item.user_id}</td>
+                                            {/* <td column='query'>{item.query}    <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.query)} icon={<Copy />} /></td> */}
                                             <td column='status'>{item.status}</td>
                                             <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
                                         </tr>

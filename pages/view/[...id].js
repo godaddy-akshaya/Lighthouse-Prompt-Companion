@@ -65,6 +65,8 @@ const ViewPage = ({ authDetails }) => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
             console.log(data);
+            // remove the title column
+            data.shift();
             setData(data);
             setTableLoading(false);
         })
