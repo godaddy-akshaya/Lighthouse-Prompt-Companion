@@ -17,11 +17,14 @@ import SiblingSet from '@ux/sibling-set';
 export const IndexPage = ({ authDetails }) => {
   const [tables, setTables] = useState();
   const [selectedTable, setSelectedTable] = useState();
+  const [tableDisplayName, setTableDisplayName] = useState();
 
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
 
   function handleTableSelect(event) {
     setSelectedTable(event);
+    let display_name = tables.find(table => table.column_name === event).display_name;
+    setTableDisplayName(display_name.toString());
   }
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export const IndexPage = ({ authDetails }) => {
                   <option value=''>Select...</option>
                   {tables?.map(table => <option key={table.column_name} value={table.column_name}>{table.display_name}</option>) || null}
                 </SelectInput>
-                <Button text='Go' design='primary' as='cta' href={`/table/${encodeURIComponent(selectedTable)}`} />
+                <Button text='Go' design='primary' as='cta' href={`/table/${encodeURI(selectedTable)}?display_name=${encodeURI(tableDisplayName)}`} />
               </SiblingSet>
             </Block>
           </Card>

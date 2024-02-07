@@ -54,6 +54,7 @@ const PromptBuilder = ({ authDetails }) => {
     const [startDateValue, setStartDateValue] = useState(['2024-01-01']);
     const [selectedTable, setSelectedTable] = useState();
     const [endDateValue, setEndDateValue] = useState(['2024-01-30']);
+    const [promptErrorMessage, setPromptErrorMessage] = useState('');
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
         column_selected_values: [startDateValue[0], endDateValue[0]],
@@ -61,7 +62,8 @@ const PromptBuilder = ({ authDetails }) => {
     });
     const router = useRouter();
     const [routeParams, setRouteParams] = useState({
-        table: decodeURIComponent(router.query?.id?.[0] || '0')
+        table: decodeURIComponent(router.query?.id?.[0] || '0'),
+        display_name: decodeURI(router.query?.display_name) || decodeURIComponent(router.query?.id?.[0] || '0')
     });
     if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     function insertAction(e) {
@@ -152,6 +154,7 @@ const PromptBuilder = ({ authDetails }) => {
     }
     function handleJobSubmit(e) {
         e.preventDefault();
+        if (checkForInputs()) return;
         (async () => {
             const g = await getGuid();
             setGuid(g);
@@ -201,6 +204,19 @@ const PromptBuilder = ({ authDetails }) => {
             setShowUserMessage(true);
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function checkForInputs() {
+        let passed = true;
+        // need to make sure [transcript] is in the prompt
+        if (prompt.indexOf('[transcript]') === -1) {
+            setPromptErrorMessage('Prompt must contain [transcript]');
+            passed = false;
+        }
+        if (includeEval && evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[summary]') === -1) {
+            setPromptErrorMessage('Evaluation Prompt must contain [transcript] and [summary]');
+            passed = false;
+        }
+        return passed;
     }
     useEffect(() => {
         if (routeParams.table === '0') {
@@ -256,27 +272,20 @@ const PromptBuilder = ({ authDetails }) => {
                 <Block as='stack' orientation='vertical'>
                     <Block orientation='horizontal'>
                         <Lockup >
-                            <text.h3 text={routeParams.table || 'missing'} as='heading' />
+                            <text.h3 text={routeParams.display_name || 'missing'} as='heading' />
                         </Lockup>
                     </Block>
                     <div className='lh-container lh-between'>
                         <Block>
-                            {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                                <Block as='stack' className='text-center' orientation='vertical'>
-                                    <text.label as='label' text='Getting number of transcripts based on your selections' />
-                                    <br />
-                                    <Spinner />
-                                </Block>
-                            </MessageOverlay>}
+
                             <form onSubmit={handleTableRowSubmit}>
                                 <Card id='table-params-card' stretch={true} title='Parameters'>
                                     <Module>
-
                                         {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
                                         <Lockup>
                                             <div className='lh-filter-container'>
-                                                <DateInput id='start' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                                                <DateInput id='end' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                                                <DateInput id='start' name='start-date' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                                                <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                                             </div>
                                         </Lockup>
                                         <div className='lh-filter-container'>
@@ -293,57 +302,67 @@ const PromptBuilder = ({ authDetails }) => {
                             </form>
                         </Block>
                         <Block>
+                            {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                <Block as='stack' className='text-center' orientation='vertical'>
+                                    <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                    <br />
+                                    <Spinner />
+                                </Block>
+                            </MessageOverlay>}
                             {isPromptVisible &&
-                                <>  <form onSubmit={handleJobSubmit}>
-                                    <Card id='para-card' stretch="true" title='Parameters'>
-                                        <Module>
-                                            <text.h4 as='title' text='Parameters' />
-                                            <p>
-                                                <Tag emphasis='neutral'>
-                                                    {`Number of Transactions ${numOfTransactions}`}
-                                                </Tag>
-                                            </p>
-                                            <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
-                                                <option value='claude-instant-v1'>claude-instant-v1</option>
-                                                <option value='claude-v2'>claude-v2</option>
-                                            </SelectInput>
-                                            <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                                            <Menu id='my-menu' size='small' className='m-t-1'>
-                                                <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                                <>
+                                    <form onSubmit={handleJobSubmit}>
+                                        <Card id='para-card' stretch="true" title='Parameters'>
+                                            <Module>
+                                                <text.h4 as='title' text='Parameters' />
+                                                <p>
+                                                    <Tag emphasis='neutral'>
+                                                        {`Number of Transactions ${numOfTransactions}`}
+                                                    </Tag>
+                                                </p>
+                                                <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
+                                                    <option value='claude-instant-v1'>claude-instant-v1</option>
+                                                    <option value='claude-v2'>claude-v2</option>
+                                                </SelectInput>
+                                                <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                                                <Menu id='my-menu' size='small' className='m-t-1'>
+                                                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
 
-                                                <MenuList className='lh-menu' design='primary'>
-                                                    <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-                                                    {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
-                                                </MenuList>
-                                            </Menu>
-                                            <TextInput id='prompt-test' label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
-                                            <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                                                <Lockup orientation='vertical'>
-                                                    <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
-                                                </Lockup>
-                                                {includeEval ?
-                                                    <div className="eval m-t-1">
-                                                        <text.label as='label' text='Evaluation Parameters' />
-                                                        <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model'>
-                                                            <option value='claude-instant-v1'>claude-instant-v1</option>
-                                                            <option value='claude-v2'>claude-v2</option>
-                                                        </SelectInput>
+                                                    <MenuList className='lh-menu' design='primary'>
+                                                        <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
+                                                        <MenuItem key='summary' aria-label='summary' onSelect={insertAction}>summary</MenuItem>
+                                                        {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
+                                                    </MenuList>
+                                                </Menu>
+                                                <TextInput aria-required required={true} id='prompt-test' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is required to be in prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
+                                                <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+                                                    <Lockup orientation='vertical'>
+                                                        <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                                                    </Lockup>
+                                                    {includeEval ?
+                                                        <div className="eval m-t-1">
+                                                            <text.label as='label' text='Evaluation Parameters' />
+                                                            <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model'>
+                                                                <option value='claude-instant-v1'>claude-instant-v1</option>
+                                                                <option value='claude-v2'>claude-v2</option>
+                                                            </SelectInput>
 
-                                                        <Menu id='my-menu-for-eval' className='m-t-1'>
-                                                            <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                                                            <MenuList className='lh-menu' design='primary'>
-                                                                <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
-                                                                {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
-                                                            </MenuList>
-                                                        </Menu>
+                                                            <Menu id='my-menu-for-eval' className='m-t-1'>
+                                                                <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                                                                <MenuList className='lh-menu' design='primary'>
+                                                                    <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
+                                                                    <MenuItem key='summary' aria-label='summary' onSelect={insertAction}>summary</MenuItem>
+                                                                    {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
+                                                                </MenuList>
+                                                            </Menu>
 
-                                                        <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} value={evaluationPrompt} multiline size={7} />
-                                                    </div> : null}
-                                            </Card>
-                                            <Button className='m-t-1' text="Run Prompt" type='submit' aria-label='submit-run' design='primary' />
-                                        </Module>
-                                    </Card>
-                                </form>
+                                                            <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} helpMessage='transcript and summary are required' value={evaluationPrompt} multiline size={7} />
+                                                        </div> : null}
+                                                </Card>
+                                                <Button className='m-t-1' text="Run Prompt" type='submit' aria-label='submit-run' design='primary' />
+                                            </Module>
+                                        </Card>
+                                    </form>
                                 </>
                             }
                         </Block>
