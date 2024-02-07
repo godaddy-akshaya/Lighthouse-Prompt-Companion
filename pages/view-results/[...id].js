@@ -37,7 +37,7 @@ const ViewPage = ({ authDetails }) => {
         console.log(routeParams.run_id);
         getResultsByRunId(routeParams.run_id).then(data => {
             console.log(data);
-            setData(data);
+
         })
 
     }, []);

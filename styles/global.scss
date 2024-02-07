@@ -56,7 +56,9 @@ it is recommended to import those directly to `pages/_app.js`
     flex-direction: row;
     
     padding-top: 0px !important;
- 
+    &.lh-center {
+        justify-content: center;
+    }
     &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;

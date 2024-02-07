@@ -324,7 +324,7 @@ const PromptBuilder = ({ authDetails }) => {
                             {isPromptVisible &&
                                 <>
                                     <form onSubmit={handleJobSubmit}>
-                                        <Card id='para-card' stretch="true" title='Parameters'>
+                                        <Card id='para-card' stretch={true} title='Parameters'>
                                             <Module>
                                                 <text.h4 as='title' text='Parameters' />
                                                 <p>
