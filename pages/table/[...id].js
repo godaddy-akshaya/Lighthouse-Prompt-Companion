@@ -151,6 +151,7 @@ const PromptBuilder = ({ authDetails }) => {
             if (column.column_name.toLowerCase() === e.column.toLowerCase()) {
                 return {
                     ...column,
+                    has_been_modified: true,
                     checkbox_columns: column.checkbox_columns.map(checkbox_column => {
                         if (checkbox_column.label === e.label) {
                             return { ...checkbox_column, value: e.value };

@@ -107,11 +107,12 @@ export const RunStatusPage = ({ authDetails }) => {
                     <Lockup >
                         <text.h3 text={'Run Status'} as='heading' />
                     </Lockup>
-                    <Search
+                    <Lockup></Lockup>
+                    {/* <Search
                         id='my-search'
                         style={{ 'width': '25%' }}
                         placeholder='Search for Run ID....'
-                    />
+                    /> */}
                 </div>
                 <Card stretch={true} id='results' title='Results'>
                     <Module>
