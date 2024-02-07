@@ -28,6 +28,7 @@ import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
 import Tag from '@ux/tag';
+import session from '../../lib/session';
 const columnList = [
     "conversation_summary",
     "prompt_template_text",
