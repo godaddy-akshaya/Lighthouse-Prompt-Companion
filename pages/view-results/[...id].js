@@ -35,19 +35,19 @@ const ViewPage = ({ authDetails }) => {
 
     useEffect(() => {
         console.log(routeParams.run_id);
-
-        getResultsByRunId(routeParams.run_id)
-            .then(data => setData(data))
-            .then(() => setTableLoading(false));
+        getResultsByRunId(routeParams.run_id).then(data => {
+            console.log(data);
+            setData(data);
+        })
 
     }, []);
 
     return (
         <>
-            <Head title='GoDaddy Lighthouse - View Summary' route='status' />
+            <Head title='GoDaddy Lighthouse - View Results' route='status' />
             <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                 <Module>
-                    <Table className='table table-hover'>
+                    <Table data={data} className='table table-hover'>
                         <thead>
                             <tr>
                                 {columnList.map((column) => column.replaceAll('_', ' ')).map((column, index) => (

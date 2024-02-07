@@ -108,6 +108,9 @@ it is recommended to import those directly to `pages/_app.js`
 .m-b-1 {
     margin-bottom: 1rem !important;
 }
+.lh-date-on-top {
+    z-index: 1;
+}
 body.ux-app.gasket-app {
     background-color: var(--ux-cao06b, white) !important;
 }

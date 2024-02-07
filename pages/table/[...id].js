@@ -288,17 +288,19 @@ const PromptBuilder = ({ authDetails }) => {
                     </Block>
                     <div className='lh-container lh-between'>
                         <Block>
-
                             <form onSubmit={handleTableRowSubmit}>
                                 <Card id='table-params-card' stretch={true} title='Parameters'>
                                     <Module>
                                         {columns?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                                        <Lockup>
-                                            <div className='lh-filter-container'>
+
+                                        <div className='lh-filter-container'>
+                                            <div className='lh-container lh-between'>
                                                 <DateInput id='start' name='start-date' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
                                                 <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                                             </div>
-                                        </Lockup>
+                                        </div>
+
+
                                         <div className='lh-filter-container'>
                                             {
                                                 columns?.map((field, index) =>
