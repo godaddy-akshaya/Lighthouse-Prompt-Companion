@@ -1,32 +1,45 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import session from '../../lib/session'
+import Head from '../../components/head'
 import Table from '@ux/table'
 import Card from '@ux/card'
 import Module from '@ux/layout'
 import Button from '@ux/button'
 import Tag from '@ux/tag'
+import text from '@ux/text'
 
 
-const columnList = [
-    "conversation_summary",
-    "prompt_template_text",
-    "interaction_id",
-    "routing_report_region_2",
-    "customer_type_name",
-    "handled_repeat_contact_platform",
-    "css_score",
-    "nps_score",
-    "run_id"
-]
 
-export default function ViewResults({ authDetails }) {
+const ViewPage = ({ authDetails }) => {
+    if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
+    const [tableLoading, setTableLoading] = useState(true);
     const router = useRouter();
-    const { id } = router.query;
-    const [data, setData] = useState([]);
+    const [data, setData] = useState();
+    const [routeParams, setRouteParams] = useState({
+        run_id: decodeURIComponent(router.query?.id?.[0] || '0')
+    });
+    const columnList = [
+        "conversation_summary",
+        "prompt_template_text",
+        "interaction_id",
+        "routing_report_region_2",
+        "customer_type_name",
+        "handled_repeat_contact_platform",
+        "css_score",
+        "nps_score",
+        "run_id"
+    ];
     return (
-        <div>
+        <>
+            <Head title='GoDaddy Lighthouse - View Summary' route='status' />
             <Card stretch={true} id='results' title='Results'>
+                <Module>
+                    {tableLoading && <text.p text='Loading...' />}
+                </Module>
+            </Card>
+            {/* <Card stretch={true} id='results' title='Results'>
                 <Module>
                     {tableLoading && <text.p text='Loading...' />}
                     {!tableLoading &&
@@ -35,17 +48,14 @@ export default function ViewResults({ authDetails }) {
                             sortable={true}>
                             <thead>
                                 <tr>
-                                    <th column='run_id' showIcon>{'Run ID'}</th>
-                                    <th column='run_date'>{'Run Date'}</th>
-                                    <th column='last_updated_time'>{'Last Updated Time'}</th>
-                                    <th column='user_id'>{'User ID'}</th>
-                                    <th column='status'>{'Status'}</th>
-                                    <th column='action'>{'Action'}</th>
+                                    {columnList.map((column, index) => (
+                                        <th column={column} showIcon>{column}</th>
+                                    ))}
                                 </tr>
                             </thead>
 
                             <tbody>
-                                {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
+                                {/* {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
                                 {results?.map((item, index) => (
                                     <tr key={item.run_id}>
                                         <td column='run_id'> {item.run_id}
@@ -57,12 +67,14 @@ export default function ViewResults({ authDetails }) {
                                         <td column='status'>{item.status}</td>
                                         <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
                                     </tr>
-                                )) || null}
+                                )) || null} 
                             </tbody>
                         </Table>
                     }
                 </Module>
-            </Card>
-        </div>
+            </Card> */}
+        </>
     )
 }
+
+export default ViewPage;

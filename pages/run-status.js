@@ -22,7 +22,7 @@ import '@ux/table/styles';
 import Search from '@ux/search';
 import session from '../lib/session';
 import Copy from '@ux/icon/copy';
-import { getResults, cancelJob } from '../lib/api';
+import { getStatus, cancelJob } from '../lib/api';
 import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
 
@@ -31,7 +31,7 @@ const copyButton = (text) => {
     copyToClipBoard(text);
 }
 
-export const ResultsPage = ({ authDetails }) => {
+export const RunStatusPage = ({ authDetails }) => {
     const router = useRouter();
     // tag for new records created from job submission
     const { newJob } = router.query;
@@ -49,7 +49,7 @@ export const ResultsPage = ({ authDetails }) => {
     */
     // 
     useEffect(() => {
-        getResults().then((data) => {
+        getStatus().then((data) => {
             setResults(data);
             setTableLoading(false);
         })
@@ -79,7 +79,7 @@ export const ResultsPage = ({ authDetails }) => {
             cancelJob(modalData).then((data) => {
                 setShowModal(false);
                 setModalData();
-                getResults().then((data) => setResults(data))
+                getStatus().then((data) => setResults(data))
             });
         }
     }
@@ -89,9 +89,8 @@ export const ResultsPage = ({ authDetails }) => {
     )
 
     const view = (job) => {
-        alert('I don\'t know how to view the results yet');
+        router.push(`/view/${job.run_id}`);
     }
-
     return (
         <>
             {showModal && <Modal id='cancel-confirm' actions={actions} title='Cancel Confirmation'>
@@ -99,14 +98,14 @@ export const ResultsPage = ({ authDetails }) => {
                 <text.label as='label' text={`Run ID: ${modalData?.run_id}`} />
             </Modal>
             }
-            <Head title='Results' route='results' />
+            <Head title='Run Status' route='status' />
             <Block as='stack' orientation='vertical'>
 
 
 
                 <div className='lh-container lh-between m-b-1'>
                     <Lockup >
-                        <text.h3 text={'Results'} as='heading' />
+                        <text.h3 text={'Run Status'} as='heading' />
                     </Lockup>
                     <Search
                         id='my-search'
@@ -158,4 +157,4 @@ export const ResultsPage = ({ authDetails }) => {
     )
 };
 
-export default withLocaleRequired('/locales', { initialProps: true })(ResultsPage);
+export default withLocaleRequired('/locales', { initialProps: true })(RunStatusPage);

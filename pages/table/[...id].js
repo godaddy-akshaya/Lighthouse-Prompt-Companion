@@ -16,7 +16,6 @@ import Checkbox from '@ux/checkbox';
 import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
-import FieldFrame from '@ux/field-frame';
 import '@ux/field-frame/styles';
 import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
@@ -29,7 +28,17 @@ import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
 import Tag from '@ux/tag';
-import session from '../../lib/session';
+const columnList = [
+    "conversation_summary",
+    "prompt_template_text",
+    "interaction_id",
+    "routing_report_region_2",
+    "customer_type_name",
+    "handled_repeat_contact_platform",
+    "css_score",
+    "nps_score",
+    "run_id"
+]
 import '@ux/date-input/styles';
 import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
@@ -55,6 +64,7 @@ const PromptBuilder = ({ authDetails }) => {
     const [selectedTable, setSelectedTable] = useState();
     const [endDateValue, setEndDateValue] = useState(['2024-01-30']);
     const [promptErrorMessage, setPromptErrorMessage] = useState('');
+    const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
         column_selected_values: [startDateValue[0], endDateValue[0]],
@@ -70,8 +80,8 @@ const PromptBuilder = ({ authDetails }) => {
         let text = prompt + ` [${e}]`;
         setPrompt(text);
     }
+
     function insertActionEval(e) {
-        console.log(e);
         let text = evaluationPrompt + ` [${e}]`;
         setEvaluationPrompt(text);
     }
@@ -154,7 +164,7 @@ const PromptBuilder = ({ authDetails }) => {
     }
     function handleJobSubmit(e) {
         e.preventDefault();
-        if (checkForInputs()) return;
+        if (!checkForInputs()) return;
         (async () => {
             const g = await getGuid();
             setGuid(g);
@@ -169,7 +179,7 @@ const PromptBuilder = ({ authDetails }) => {
             }
             setIsLoading(true);
             submitPromptJob(routeParams.table, job, columns, dateValue).then(data => {
-                router.push(`/results?newJob=${g}`, undefined, { shallow: true });
+                router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
             });
         })();
     }
@@ -212,8 +222,8 @@ const PromptBuilder = ({ authDetails }) => {
             setPromptErrorMessage('Prompt must contain [transcript]');
             passed = false;
         }
-        if (includeEval && evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[summary]') === -1) {
-            setPromptErrorMessage('Evaluation Prompt must contain [transcript] and [summary]');
+        if (includeEval && evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[llm_response]') === -1) {
+            setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
             passed = false;
         }
         return passed;
@@ -296,7 +306,6 @@ const PromptBuilder = ({ authDetails }) => {
                                             }
                                         </div>
                                         <Button text="Fetch Results" aria-label='Submit Results' type='submit' design='primary' />
-
                                     </Module>
                                 </Card>
                             </form>
@@ -330,11 +339,11 @@ const PromptBuilder = ({ authDetails }) => {
 
                                                     <MenuList className='lh-menu' design='primary'>
                                                         <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-                                                        <MenuItem key='summary' aria-label='summary' onSelect={insertAction}>summary</MenuItem>
-                                                        {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null}
+
+                                                        {/* {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null} */}
                                                     </MenuList>
                                                 </Menu>
-                                                <TextInput aria-required required={true} id='prompt-test' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is required to be in prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
+                                                <TextInput aria-required required={true} id='prompt-test' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert' onChange={handlePrompt} value={prompt} multiline size={10} />
                                                 <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                                                     <Lockup orientation='vertical'>
                                                         <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
@@ -346,17 +355,18 @@ const PromptBuilder = ({ authDetails }) => {
                                                                 <option value='claude-instant-v1'>claude-instant-v1</option>
                                                                 <option value='claude-v2'>claude-v2</option>
                                                             </SelectInput>
-
                                                             <Menu id='my-menu-for-eval' className='m-t-1'>
                                                                 <MenuButton icon={<Add />} text='Insert' design='secondary' />
                                                                 <MenuList className='lh-menu' design='primary'>
                                                                     <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
-                                                                    <MenuItem key='summary' aria-label='summary' onSelect={insertAction}>summary</MenuItem>
+                                                                    <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertActionEval}>llm_response</MenuItem>
+                                                                    {/* Need to exclude this list for now until more options available in back end 
                                                                     {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
+                                                             */}
                                                                 </MenuList>
                                                             </Menu>
 
-                                                            <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} helpMessage='transcript and summary are required' value={evaluationPrompt} multiline size={7} />
+                                                            <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} errorMessage={evalPromptErrorMessage} helpMessage='[transcript] and [llm_response] are required prompt inserts' value={evaluationPrompt} multiline size={7} />
                                                         </div> : null}
                                                 </Card>
                                                 <Button className='m-t-1' text="Run Prompt" type='submit' aria-label='submit-run' design='primary' />

@@ -18,12 +18,12 @@ const Head = (props) => {
           active: props?.route === 'home' ? true : false
         },
         {
-          caption: 'Results',
+          caption: 'Run Status',
           key: '2',
-          href: '/results',
+          href: '/run-status',
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
-          active: props?.route === 'results' ? true : false
+          active: props?.route === 'status' ? true : false
         }
       ]);
     });
