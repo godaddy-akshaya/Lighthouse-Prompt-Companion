@@ -78,7 +78,7 @@ const ViewPage = ({ authDetails }) => {
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
             <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                 <Module>
-                    <Table className='table table-hover'>
+                    <Table className='table table-hover' order={columns.map(col => col.column_name)}>
                         <thead>
                             <tr>
                                 {columns.map((column, index) => (

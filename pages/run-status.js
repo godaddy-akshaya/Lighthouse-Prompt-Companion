@@ -27,7 +27,9 @@ import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
 import Tooltip from '@ux/tooltip';
 
-
+const tooltipContent = (
+    <h1>h</h1>
+)
 
 const copyButton = (text) => {
     copyToClipBoard(text);
@@ -139,7 +141,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                     {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
                                     {results?.map((item, index) => (
                                         <tr key={item.run_id}>
-                                            <td column='run_id'>... {item.run_id.slice(-10)}
+                                            <td column='run_id'>... {item.run_id.slice(-12)}
                                                 <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.run_id)} icon={<Copy />} />
                                                 {newJob == item.run_id && <>
                                                     <Tag type='success' design='filled'>New </Tag>
@@ -147,7 +149,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                             <td column='run_date'>{item.run_date}</td>
                                             <td column='last_updated_time'>{item.last_updated_time}</td>
                                             <td column='user_id'>{item.user_id}</td>
-                                            <td column='query'> <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.query)} icon={<Copy />} /></td>
+                                            <td column='query'> <Button size='small' on aria-label='Copy Query' id={`c${index}`} display='inline' onClick={() => copyButton(item.query)} icon={<Copy />} /></td>
                                             <td column='status'>{item.status}</td>
                                             <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
                                         </tr>
