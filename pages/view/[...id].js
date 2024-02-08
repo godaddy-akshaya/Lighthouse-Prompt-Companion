@@ -64,10 +64,7 @@ const ViewPage = ({ authDetails }) => {
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
-            console.log(data);
-            // remove the title column
-            data.shift();
-            setData(data);
+            setData(data?.shift() || []);
             setTableLoading(false);
         })
 
