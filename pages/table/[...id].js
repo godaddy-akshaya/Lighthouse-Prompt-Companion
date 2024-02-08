@@ -335,7 +335,6 @@ const PromptBuilder = ({ authDetails }) => {
                                         <Spinner />
                                     </Block>
                                 </MessageOverlay>}
-
                                 <>
                                     <form onSubmit={handleJobSubmit}>
                                         <Module>
