@@ -25,6 +25,8 @@ import Copy from '@ux/icon/copy';
 import { getStatus, cancelJob } from '../lib/api';
 import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
+import Tooltip from '@ux/tooltip';
+
 
 
 const copyButton = (text) => {
@@ -127,7 +129,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                         <th column='run_date'>{'Run Date'}</th>
                                         <th column='last_updated_time'>{'Last Updated Time'}</th>
                                         <th column='user_id'>{'User ID'}</th>
-                                        {/* <th column='query'>Query</th> */}
+                                        <th column='query'>Query</th>
                                         <th column='status'>{'Status'}</th>
                                         <th column='action'>{'Action'}</th>
                                     </tr>
@@ -137,7 +139,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                     {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
                                     {results?.map((item, index) => (
                                         <tr key={item.run_id}>
-                                            <td column='run_id'> {item.run_id}
+                                            <td column='run_id'>... {item.run_id.slice(-10)}
                                                 <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.run_id)} icon={<Copy />} />
                                                 {newJob == item.run_id && <>
                                                     <Tag type='success' design='filled'>New </Tag>
@@ -145,7 +147,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                             <td column='run_date'>{item.run_date}</td>
                                             <td column='last_updated_time'>{item.last_updated_time}</td>
                                             <td column='user_id'>{item.user_id}</td>
-                                            {/* <td column='query'>{item.query}    <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.query)} icon={<Copy />} /></td> */}
+                                            <td column='query'> <Button size='small' aria-label='Copy Run ID' id={`c${index}`} display='inline' onClick={() => copyButton(item.query)} icon={<Copy />} /></td>
                                             <td column='status'>{item.status}</td>
                                             <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
                                         </tr>

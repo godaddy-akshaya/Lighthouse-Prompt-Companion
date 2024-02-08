@@ -29,6 +29,7 @@ import '@ux/icon/help/index.css';
 import '@ux/alert/styles';
 import '@ux/tag/styles';
 import '@ux/message-overlay/styles';
+import '@ux/tooltip/styles';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
 import { withAuthRequired } from '@godaddy/gasket-auth';
