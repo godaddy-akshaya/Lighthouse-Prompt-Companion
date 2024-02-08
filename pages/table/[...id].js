@@ -45,7 +45,7 @@ import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
 
 const PromptBuilder = ({ authDetails }) => {
-    const LIMIT_OF_TRANSACTIONS = 10;
+    const LIMIT_OF_TRANSACTIONS = 400;
     const [isLoading, setIsLoading] = useState(true);
     const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
