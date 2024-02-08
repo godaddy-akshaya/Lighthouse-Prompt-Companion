@@ -45,11 +45,14 @@ import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
 
 const PromptBuilder = ({ authDetails }) => {
+    const LIMIT_OF_TRANSACTIONS = 10;
     const [isLoading, setIsLoading] = useState(true);
     const [tables, setTables] = useState();
     const [prompt, setPrompt] = useState('');
     const [guid, setGuid] = useState('');
     const [numOfTransactions, setNumOfTransactions] = useState(0);
+    const [numberToRunHelpMessage, setNumberToRunHelpMessage] = useState();
+    const [numOfErrorMessage, setNumOfErrorMessage] = useState();
     const [showMessage, setShowMessage] = useState(false);
     const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(0);
     const [showUserMessage, setShowUserMessage] = useState(false);
@@ -59,6 +62,7 @@ const PromptBuilder = ({ authDetails }) => {
     const [evaluationPrompt, setEvaluationPrompt] = useState('');
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
+    const [isPromptFormVisible, setIsPromptFormVisible] = useState(false);
     const [columns, setColumns] = useState();
     const [errorMessage, setErrorMessage] = useState('Something went wrong');
     const [startDateValue, setStartDateValue] = useState(['2024-01-01']);
@@ -195,8 +199,10 @@ const PromptBuilder = ({ authDetails }) => {
     /*  after posting prompt form -> results page    */
     function handleTableRowSubmit(e) {
         e.preventDefault();
+        setIsPromptVisible(true);
+        setIsPromptFormVisible(false);
         setShowMessage(true);
-        //  setIsLoading(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         getTableRowCount(routeParams.table, columns, dateValue).then(data => {
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
@@ -206,8 +212,9 @@ const PromptBuilder = ({ authDetails }) => {
                 setShowMessage(false);
             } else {
                 setNumOfTransactions(data || 0);
-                setNumOfTransactionsToRun(data || 0);
-                setIsPromptVisible(true);
+                setNumOfTransactionsToRun(data > LIMIT_OF_TRANSACTIONS ? LIMIT_OF_TRANSACTIONS : data);
+                setNumberToRunHelpMessage(`Max number of transactions is ${LIMIT_OF_TRANSACTIONS}`);
+                setIsPromptFormVisible(true);
                 setShowMessage(false);
             }
         }, error => {
@@ -215,7 +222,7 @@ const PromptBuilder = ({ authDetails }) => {
             setIsLoading(false);
             setShowUserMessage(true);
         });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
     }
     function checkForInputs() {
         let passed = true;
@@ -224,8 +231,15 @@ const PromptBuilder = ({ authDetails }) => {
             setPromptErrorMessage('Prompt must contain [transcript]');
             passed = false;
         }
-        if (includeEval && evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[llm_response]') === -1) {
-            setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
+        if (includeEval) {
+            if (evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[llm_response]') === -1) {
+                setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
+                passed = false;
+            }
+        }
+        // Check if they try to increase the number of transactions to run by more the limit
+        if (numOfTransactionsToRun > LIMIT_OF_TRANSACTIONS) {
+            setNumOfErrorMessage(`Number of transactions to run cannot exceed ${LIMIT_OF_TRANSACTIONS}`);
             passed = false;
         }
         return passed;
@@ -300,8 +314,6 @@ const PromptBuilder = ({ authDetails }) => {
                                                 <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                                             </div>
                                         </div>
-
-
                                         <div className='lh-filter-container'>
                                             {
                                                 columns?.map((field, index) =>
@@ -315,19 +327,20 @@ const PromptBuilder = ({ authDetails }) => {
                             </form>
                         </Block>
                         <Block>
-                            {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                                <Block as='stack' className='text-center' orientation='vertical'>
-                                    <text.label as='label' text='Getting number of transcripts based on your selections' />
-                                    <br />
-                                    <Spinner />
-                                </Block>
-                            </MessageOverlay>}
-                            {isPromptVisible &&
+                            {isPromptVisible && <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                    <Block as='stack' className='text-center' orientation='vertical'>
+                                        <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                        <br />
+                                        <Spinner />
+                                    </Block>
+                                </MessageOverlay>}
+
                                 <>
                                     <form onSubmit={handleJobSubmit}>
-                                        <Card id='para-card' stretch={true} title='Parameters'>
-                                            <Module>
-                                                <text.h4 as='title' text='Parameters' />
+                                        <Module>
+                                            <text.h4 as='title' text='Parameters' />
+                                            {isPromptFormVisible && <>
                                                 <p>
                                                     <Tag emphasis='neutral'>
                                                         {`Number of Transactions ${numOfTransactions}`}
@@ -337,14 +350,12 @@ const PromptBuilder = ({ authDetails }) => {
                                                     <option value='claude-instant-v1'>claude-instant-v1</option>
                                                     <option value='claude-v2'>claude-v2</option>
                                                 </SelectInput>
-                                                <TextInput id='number-to-run' className='m-t-1' value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                                                <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
                                                 <Menu id='my-menu' size='small' className='m-t-1'>
                                                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
 
                                                     <MenuList className='lh-menu' design='primary'>
                                                         <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-
-                                                        {/* {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertAction}>{field.column_name}</MenuItem>) || null} */}
                                                     </MenuList>
                                                 </Menu>
                                                 <TextInput aria-required required={true} id='prompt-test' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert' onChange={handlePrompt} value={prompt} multiline size={10} />
@@ -364,9 +375,6 @@ const PromptBuilder = ({ authDetails }) => {
                                                                 <MenuList className='lh-menu' design='primary'>
                                                                     <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
                                                                     <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertActionEval}>llm_response</MenuItem>
-                                                                    {/* Need to exclude this list for now until more options available in back end 
-                                                                    {columns?.map(field => <MenuItem key={field.column_name} onSelect={insertActionEval}>{field.column_name}</MenuItem>) || null}
-                                                             */}
                                                                 </MenuList>
                                                             </Menu>
 
@@ -374,11 +382,13 @@ const PromptBuilder = ({ authDetails }) => {
                                                         </div> : null}
                                                 </Card>
                                                 <Button className='m-t-1' text="Run Prompt" type='submit' aria-label='submit-run' design='primary' />
-                                            </Module>
-                                        </Card>
+                                            </>}
+
+                                        </Module>
+
                                     </form>
                                 </>
-                            }
+                            </Card>}
                         </Block>
                     </div>
                 </Block>

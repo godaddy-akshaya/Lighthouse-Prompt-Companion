@@ -22,6 +22,9 @@ it is recommended to import those directly to `pages/_app.js`
     flex: 1;
     flex-grow: 1;
 }
+.lh-prompt-form-card {
+    min-height: 300px;
+}
 .lh-filter-card {
     margin-bottom: 16px !important;
     .lh-title {
