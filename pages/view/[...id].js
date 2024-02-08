@@ -64,7 +64,10 @@ const ViewPage = ({ authDetails }) => {
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
-            setData(data?.shift() || []);
+            if (data?.length > 0) {
+                data?.shift();
+            }
+            setData(data);
             setTableLoading(false);
         })
 
@@ -85,13 +88,14 @@ const ViewPage = ({ authDetails }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {!tableLoading && data?.map((item, dataIndex) => (
-                                <tr key={`c-${dataIndex}`}>
-                                    {columns.map((column, index) => (
-                                        <td key={index} column={column.column_name}>{item.Data[index]?.VarCharValue}</td>
-                                    ))}
-                                </tr>
-                            ))}
+                            {data && <>
+                                {!tableLoading && data?.map((item, dataIndex) => (
+                                    <tr key={`c-${dataIndex}`}>
+                                        {columns.map((column, index) => (
+                                            <td key={index} column={column.column_name}>{item.Data[index]?.VarCharValue}</td>
+                                        ))}
+                                    </tr>
+                                ))} </>}
                         </tbody>
                     </Table>
                     <div className='lh-container lh-center'>
