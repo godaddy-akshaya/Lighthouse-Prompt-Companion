@@ -19,7 +19,7 @@ COPY package-lock.json /app
 ARG NPM_AUTH_TOKEN
 RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
 RUN test -n "${NPM_AUTH_TOKEN}"
-ENV NPM_AUTH=$NPM_AUTH_TOKEN
+ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
 
 
