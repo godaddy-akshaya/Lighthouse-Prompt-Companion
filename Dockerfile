@@ -31,7 +31,6 @@ COPY --chown=worker ./.eslintrc.js ./.eslintrc.js
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
 COPY --chown=worker ./components ./components
 COPY --chown=worker ./lib ./lib
-COPY --chown=worker ./middleware ./middleware
 COPY --chown=worker ./pages ./pages
 COPY --chown=worker ./public ./public
 COPY --chown=worker ./redux ./redux
