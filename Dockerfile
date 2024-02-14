@@ -17,9 +17,8 @@ COPY package-lock.json /app
 
 # Need to login to NPM 
 ARG NPM_AUTH_TOKEN
-RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
-RUN test -n "${NPM_AUTH_TOKEN}"
 ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
+RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
 RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
 
 
@@ -31,6 +30,7 @@ COPY --chown=worker ./.eslintrc.js ./.eslintrc.js
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
 COPY --chown=worker ./components ./components
 COPY --chown=worker ./lib ./lib
+COPY --chown=worker ./middleware ./middleware
 COPY --chown=worker ./pages ./pages
 COPY --chown=worker ./public ./public
 COPY --chown=worker ./redux ./redux
@@ -43,4 +43,8 @@ ENV NODE_ENV=development
 
 CMD ["gasket", "start", "--env", "development"]
 EXPOSE 8080
+
+
+
+
 
