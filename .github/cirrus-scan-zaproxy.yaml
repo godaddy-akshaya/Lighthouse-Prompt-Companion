@@ -5,7 +5,7 @@ on:
   # Run after the 'Tests' workflow completes on the repo's default branch. Change this to suit your the CI workflows adopted by your team.
   workflow_run:
     workflows:
-      - Tests
+      - build-deploy-dev
     branches:
       - $default-branch
     types:
@@ -13,13 +13,15 @@ on:
   push:
     paths:
       # Run when the workflow file itself is updated
-      - '.github/workflows/cirrus-scan-github-actions.yml'
+      - '.github/workflows/cirrus-scan-zaproxy.yaml'
   workflow_dispatch:
-    - $default-branch
 
 jobs:
   cirrus-scan-dev:
-    runs-on: ubuntu-latest
+    runs-on:
+      labels: self-hosted
+      group: 7416-therandomdrunner
+
     # Config env vars as necessary for the job.
     env:
       AWS_REGION: us-west-2
@@ -33,12 +35,12 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e97d7fbc8e0e5af69631c13daa0f4b5a8d88165b # v1.5.5
         with:
-          aws-access-key-id: ${{ secrets.AWS_DEV_PRIVATE_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_DEV_PRIVATE_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: <GD-AWS-...-Deploy>
+          role-to-assume: arn:aws:iam::232497835605:role/GD-AWS-USA-CCO-therandomd-Dev-Private-Deploy
           role-duration-seconds: 7200 # 2 hours
-          role-session-name: <role-session-name>
+          role-session-name: GD-AWS-USA-CCO-therandomd-Dev-Private-Deploy
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@b9c809dc38d74cd0fde3c13cc4fe4ac72ebecdae # 2.2.2
@@ -59,7 +61,7 @@ jobs:
           -e AWS_DEFAULT_REGION \
           -e TASK_LIST='["vulnscan","zaproxy"]' \
           -e GITHUB_URL=${GITHUB_SERVER_URL} \
-          -e GITHUB_AUTH=${{ secrets.GH_REPO_PAT_TOKEN }} \
+          -e GITHUB_AUTH=${{ secrets.PAT_TOKEN }} \
           -e GITHUB_REPO=${GITHUB_REPOSITORY} \
           -e GITHUB_COMMIT=${GITHUB_SHA} \
           ${{ secrets.AUDIT_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/cirrus-scan-cicd

@@ -1,12 +1,11 @@
-name: Lighthouse Katana CI/CD Pipeline
+name: Lighthouse UI Build-Deploy
 
 on:
-  # push:
-  #   branches: [dev]
-  # pull_request:
-  #   branches: [dev]
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
   workflow_dispatch:
-
 jobs:
   build_publish_promote:
     runs-on:
@@ -16,7 +15,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
       - id: katana-auth
         name: Authenticate with Katana
         uses: gdcorp-actions/katana-auth@v1
@@ -30,10 +28,11 @@ jobs:
       - name: Golden Container Registry Login
         run: |
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.6.1-alpine-3.18 -u AWS --password-stdin
-
+        env:
+          NPM_AUTH_TOKEN: /Katana/Secrets/therandomd/scorecard-ui/_katana/NPM_AUTH_TOKEN
       - name: Build Container
         run: |
-          docker build -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
+          docker build -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} .
 
       - id: katana-publish
         name: Publish Katana Artifact
@@ -46,7 +45,7 @@ jobs:
           artifact_kind: ecs
           artifact_options_json: |
             {
-              "ports": [8080]
+              "ports": [8080,8443]
             }
       - name: Promote to dev-private Environment
         uses: gdcorp-actions/katana-promote-artifact@v1

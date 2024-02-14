@@ -39,11 +39,11 @@ const filterCards = ({ options, label, id, open, onChange, onSelectAll, onDesele
     return (
         <>
             <Card className='lh-filter-card' stretch={true} id={id}>
-                <Collapsible defaultOpen={open ? open : false} id={id} className='lh-no-padding' title={<SelectionCountTitle />}>
+                <Collapsible defaultOpen={open ? open : false} id={id} aria-label='collaspible-container' className='lh-no-padding' title={<SelectionCountTitle />}>
 
                     <Block className='lh-content'>
                         <div className='lh-controls'>
-                            <SiblingSet gap='sm'>
+                            <SiblingSet gap='sm' aria-label='sib-set-actions'>
                                 <Button design='inline' onClick={handleSelectAll} size='small' aria-label='Select All' icon={<Checkmark />} />
                                 <Button design='inline' onClick={handleRemoveAll} size='small' aria-label='Remove All' icon={<Remove />} />
                             </SiblingSet>

@@ -22,6 +22,17 @@ it is recommended to import those directly to `pages/_app.js`
     flex: 1;
     flex-grow: 1;
 }
+.lh-prompt-form-card {
+    min-height: 300px;
+}
+table.lh-table-view-results td:first-child,
+table.lh-table-view-results td:nth-child(2) {
+  min-width: 325px;
+}
+table.lh-table-view-results th:first-child,
+table.lh-table-view-results th:nth-child(2) {
+  min-width: 325px;
+}
 .lh-filter-card {
     margin-bottom: 16px !important;
     .lh-title {
@@ -56,7 +67,9 @@ it is recommended to import those directly to `pages/_app.js`
     flex-direction: row;
     
     padding-top: 0px !important;
- 
+    &.lh-center {
+        justify-content: center;
+    }
     &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;
@@ -66,6 +79,20 @@ it is recommended to import those directly to `pages/_app.js`
          // Add this to make all children equal width
          > * {
             flex: 1;
+        }
+    }
+    &.lh-start-and-end {
+        justify-content: space-between;
+        margin-right: 16px;
+        > * {
+            flex: 0.35;
+        }
+    }
+    &.lh-start {
+        justify-content: flex-start;
+        margin-right: 16px;
+        > * {
+            flex: 0.35;
         }
     }
     &.lh-end {
@@ -85,12 +112,17 @@ it is recommended to import those directly to `pages/_app.js`
 .grey-card {
     background-color: var(--ux-1vw9arb, #D4DBE0) !important;
 }
-
+.lh-menu {
+    max-height: 250px !important;
+}
 .m-t-1 {
     margin-top: 1rem !important;
 }
 .m-b-1 {
     margin-bottom: 1rem !important;
+}
+.lh-date-on-top {
+    z-index: 1;
 }
 body.ux-app.gasket-app {
     background-color: var(--ux-cao06b, white) !important;
@@ -98,7 +130,10 @@ body.ux-app.gasket-app {
 body.ux-app.gasket-app .ux-app__content {
     background-color: var(--ux-cao06b, white) !important;
 }
-
+.text-center {
+    text-align: center !important;
+    align-items: center !important;
+}
 
 .select-table {
     min-width: 350px !important;

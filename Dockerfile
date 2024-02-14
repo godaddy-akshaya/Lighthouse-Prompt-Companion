@@ -1,85 +1,47 @@
-# Create base image which can be cached for prolonged periods, pending changes to package-lock.json
-FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.6.1-alpine-3.18
-USER root
-# LABEL type="fd-base"
+# Golden container - only the best
+FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
 
-RUN apk add --no-cache bash openssl
-RUN npm install -g npm@10.4.0
-# create a user that can run the application
-# and define the maximum open files at 65k
-RUN ulimit -n 65536 && \
-    addgroup -g 9999 app && \
-    adduser -D  -G app -s /bin/false -u 9999 app
-
-
-RUN mkdir -p /app
-RUN chown app:app /app
+#FROM node:20-alpine3.18
+# Configure all the permission 
 WORKDIR /app
+USER root
+RUN npm install --global @gasket/cli
+# RUN adduser -D worker
 
-# Swich to application user
-USER app
+RUN chown -R worker /app
+USER worker
 
 # Copy minimal set of files needed to install dependencies to ensure cacheability
-COPY --chown=app:app package.json /app
-COPY --chown=app:app package-lock.json /app
-# Make sure we have the .npmrc file with the token 
-COPY --chown=app:app .npmrc /app/.npmrc
+COPY package.json /app
+COPY package-lock.json /app
+
+# Need to login to NPM 
+ARG NPM_AUTH_TOKEN
+RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
+RUN test -n "${NPM_AUTH_TOKEN}"
+ENV NPM_AUTH=$NPM_AUTH_TOKEN
+RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
 
 
-
-# # Install all dependencies as we still need to build the application.
+RUN echo "Starting up the installation"
 RUN npm ci
 
-# # Shrink image size by removing install cache
-RUN npm cache clean --force
-
-# Generate self-signed certificate used by the Gasket (see plugins/deploy-plugin.js)
-# RUN openssl genrsa -des3 -out /app/server.origKey -passout pass:server 1024
-# RUN openssl req -new -key /app/server.origKey -out /app/server.csr -subj "/C=US/ST=Arizona/L=Mesa/O=Go Daddy/OU=Cloud Platform/CN=*.lighthouse-ui.gdcorp.tools/emailAddress=mswaagman@godaddy.com" -passin pass:server
-# RUN openssl rsa -in /app/server.origKey -out /app/server.key -passin pass:server
-# RUN openssl x509 -req -days 3650 -in /app/server.csr -signkey /app/server.key -out /app/server.crt
-# RUN rm /app/server.origKey
-
-# # Remove .npmrc file that was added for install steps
-RUN rm /app/.npmrc
-
-ENV HOME=/app
-
-# Next.js defaults to production build, use `AWS_ENV` to specify runtime environment per https://github.com/vercel/next.js/discussions/25764
-ARG AWS_ENV=development
-ENV AWS_ENV=${AWS_ENV}
-
-# create a user that can run the application
-# and define the maximum open files at 65k
-# RUN ulimit -n 65536 && \
-#     addgroup -g 9999 app && \
-#     adduser -D  -G app -s /bin/false -u 9999 app
-
-WORKDIR /app
-
-# # Set file ownership to app as user:group
-RUN chown app:app /app
-
 # Copy application files + core package
-COPY --chown=app:app ./components ./components
-COPY --chown=app:app ./lib ./lib
-# COPY --chown=app:app ./providers ./providers
-COPY --chown=app:app ./pages ./pages
-COPY --chown=app:app ./public ./public
-# COPY --chown=app:app ./plugins ./plugins
-# COPY --chown=app:app ./utils ./utils
-COPY --chown=app:app ./redux ./redux
-COPY --chown=app:app ./styles ./styles
-COPY --chown=app:app ./gasket.config.js ./gasket.config.js
-COPY --chown=app:app ./manifest.xml ./manifest.xml
-# COPY --chown=app:app ./tsconfig.json ./tsconfig.json
-# COPY --chown=app:app ./bin/server ./bin/server
+COPY --chown=worker ./.eslintrc.js ./.eslintrc.js
+COPY --chown=worker ./.stylelintrc /app/.stylelintrc
+COPY --chown=worker ./components ./components
+COPY --chown=worker ./lib ./lib
+COPY --chown=worker ./middleware ./middleware
+COPY --chown=worker ./pages ./pages
+COPY --chown=worker ./public ./public
+COPY --chown=worker ./redux ./redux
+COPY --chown=worker ./styles ./styles
+COPY --chown=worker ./gasket.config.js ./gasket.config.js
+COPY --chown=worker ./manifest.xml ./manifest.xml
 
-# # Switch to application user and build the application
-USER app:app
-RUN npm run local --env=${AWS_ENV}
+RUN gasket build --env development
+ENV NODE_ENV=development
 
-EXPOSE 8081
-EXPOSE 8443
+CMD ["gasket", "start", "--env", "development"]
+EXPOSE 8080
 
-# ENV NEXT_TELEMETRY_DISABLED 1
