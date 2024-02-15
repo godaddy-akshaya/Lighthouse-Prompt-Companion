@@ -4,7 +4,7 @@
   "description": "Lighthouse UI ",
   "scripts": {
     "build": "gasket build",
-    "start": "gasket start",
+    "start": "gasket start --env development",
     "local": "gasket local",
     "analyze": "gasket analyze",
     "upload-coverage": "upload-coverage ",

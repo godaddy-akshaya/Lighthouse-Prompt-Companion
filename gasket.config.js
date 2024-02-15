@@ -25,8 +25,12 @@ module.exports = {
       https: 443,
     },
     development: {
-      hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
-      https: 443,
+      hostname: 'localhost',
+      http: 8080,
+      https: 8443,
+      api: {
+        url: 'https://lighthouse.c3.int.dev-gdcorp.tools/scorecard-mgmt',
+      },
     },
     production: {
       https: {
