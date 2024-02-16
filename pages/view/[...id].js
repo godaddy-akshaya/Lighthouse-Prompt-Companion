@@ -34,19 +34,19 @@ const ViewPage = ({ authDetails }) => {
     // }];
 
     const columns = [{
-        column_name: 'llm_response',
+        column_name: 'conversaiont_summary',
         column_dislay_name: 'LLM Response',
     }, {
         column_name: 'prompt_template_text',
         column_dislay_name: 'Prompt Template Text'
     },
     {
-        column_name: 'evaluation_response',
-        column_dislay_name: 'Evaluation response'
+        column_name: 'evaluation_summary',
+        column_dislay_name: 'Evaluation Summary'
     },
     {
-        column_name: 'evaluation_prompt',
-        column_dislay_name: 'Evaluation Prompt'
+        column_name: 'evaluation_prompt_text',
+        column_dislay_name: 'Evaluation Prompt Text'
     },
     {
         column_name: 'interaction_id',
@@ -58,10 +58,7 @@ const ViewPage = ({ authDetails }) => {
         column_name: 'customer_type_name',
         column_dislay_name: 'Customer Type Name'
     },
-    {
-        column_name: 'interaction_durationy',
-        column_dislay_name: 'Interaction Duration'
-    },
+
     {
         column_name: 'handled_repeat_contact_platform',
         column_dislay_name: 'Handled Repeat Contact Platform'
@@ -71,13 +68,19 @@ const ViewPage = ({ authDetails }) => {
     }, {
         column_name: 'nps_score',
         column_dislay_name: 'NPS Score'
-    }, {
+    },
+    {
+        column_name: 'interaction_durationy',
+        column_dislay_name: 'Interaction Duration'
+    },
+    {
         column_name: 'run_id',
         column_dislay_name: 'Run ID'
     }];
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
+            console.log(data);
             if (data?.length > 1) {
                 data?.shift();
             }
@@ -90,38 +93,38 @@ const ViewPage = ({ authDetails }) => {
         <>
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
             <text.h3 text='View Results' as='heading' />
+
             <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                <Module>
-                    <Table className='table table-hover lh-table-view-results' order={columns.map(col => col.column_name)}>
-                        <thead>
-                            <tr>
-                                {columns.map((column, index) => (
-                                    <th key={index} column={column.column_name}>{column.column_dislay_name}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data && <>
-                                {!tableLoading && data?.map((item, dataIndex) => (
-                                    <tr key={`c-${dataIndex}`}>
-                                        {columns.map((column, index) => (
-                                            <td key={index} column={column.column_name}>{item.Data[index]?.VarCharValue}</td>
-                                        ))}
-                                    </tr>
-                                ))} </>}
-                        </tbody>
-                    </Table>
-                    <div className='lh-container lh-center'>
-                        <div className='text-center'>
-                            {data?.length === 0 && <text.p text='No records found' />}
-                            {data?.length > 0 && <div>{data.length}</div>}
-                            {tableLoading && <>
-                                <Spinner />
-                                <text.p text='Please be patient while we retrieve your results.' />
-                            </>}
-                        </div>
+                <Table className='table table-hover lh-table-full-view-with-scroll' order={columns.map(col => col.column_name)}>
+                    <thead>
+                        <tr>
+                            {columns.map((column, index) => (
+                                <th key={index} column={column.column_name}>{column.column_dislay_name}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data && <>
+                            {!tableLoading && data?.map((item, dataIndex) => (
+                                <tr key={`c-${dataIndex}`}>
+                                    {columns.map((column, index) => (
+                                        <td key={index} column={column.column_name}>{item.Data[index]?.VarCharValue || '-'}</td>
+                                    ))}
+                                </tr>
+                            ))} </>}
+                    </tbody>
+                </Table>
+                <div className='lh-container lh-center'>
+                    <div className='text-center'>
+                        {data?.length === 0 && <text.p text='No records found' />}
+                        {data?.length > 0 && <div>{data.length}</div>}
+                        {tableLoading && <>
+                            <Spinner />
+                            <text.p text='Please be patient while we retrieve your results.' />
+                        </>}
                     </div>
-                </Module>
+                </div>
+
             </Card>
             {/* <Card stretch={true} id='results' title='Results'>
                 <Module>

@@ -25,14 +25,26 @@ it is recommended to import those directly to `pages/_app.js`
 .lh-prompt-form-card {
     min-height: 300px;
 }
-table.lh-table-view-results td:first-child,
-table.lh-table-view-results td:nth-child(2) {
-  min-width: 325px;
+
+
+.lh-table-full-view-with-scroll { 
+    tbody thead {
+        display: block !important;
+        max-height: 100vh !important; /* Adjust this value to fit your needs */
+        overflow-y: auto !important; /* Enable vertical scrolling */
+        overflow-x: auto !important;/* Enable horizontal scrolling */
+      }
+    // thead, tbody tr {
+    //     display: table  !important;
+    //   }
+    // td:first-child, td:nth-child(2) {
+    //    min-width: 325px !important;
+    // }
+    // th:first-child, th:nth-child(2) {
+    //    min-width: 325px !important;
+    // }
 }
-table.lh-table-view-results th:first-child,
-table.lh-table-view-results th:nth-child(2) {
-  min-width: 325px;
-}
+
 .lh-filter-card {
     margin-bottom: 16px !important;
     .lh-title {
