@@ -94,9 +94,9 @@ const ViewPage = ({ authDetails }) => {
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
             <text.h3 text='View Results' as='heading' />
 
-            <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+            <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                 <Table className='table table-hover lh-table-full-view-with-scroll' order={columns.map(col => col.column_name)}>
-                    <thead>
+                    <thead style={{ 'table-layout': 'fixed' }}>
                         <tr>
                             {columns.map((column, index) => (
                                 <th key={index} column={column.column_name}>{column.column_dislay_name}</th>

@@ -25,10 +25,20 @@ it is recommended to import those directly to `pages/_app.js`
 .lh-prompt-form-card {
     min-height: 300px;
 }
-
-
+.lh-view-card {
+    max-width: 100% !important;
+    height: 80vh !important;
+    overflow: auto !important;
+}
 .lh-table-full-view-with-scroll { 
-    tbody thead {
+    thead { 
+        display: block !important; 
+        position: sticky !important; 
+        top: 0 !important; 
+        z-index: 1 !important; 
+        background-color: white !important; 
+    }
+    tbody {
         display: block !important;
         max-height: 100vh !important; /* Adjust this value to fit your needs */
         overflow-y: auto !important; /* Enable vertical scrolling */
