@@ -15,6 +15,7 @@ USER worker
 COPY package.json /app
 COPY package-lock.json /app
 
+
 # Need to login to NPM 
 ARG NPM_AUTH_TOKEN
 ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
@@ -26,16 +27,18 @@ RUN echo "Starting up the installation"
 RUN npm i
 
 # Copy application files + core package
-COPY --chown=worker ./.eslintrc.js ./.eslintrc.js
+COPY --chown=worker ./.eslintrc.js /app.eslintrc.js
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
-COPY --chown=worker ./components ./components
-COPY --chown=worker ./lib ./lib
-COPY --chown=worker ./pages ./pages
-COPY --chown=worker ./public ./public
-COPY --chown=worker ./redux ./redux
-COPY --chown=worker ./styles ./styles
-COPY --chown=worker ./gasket.config.js ./gasket.config.js
-COPY --chown=worker ./manifest.xml ./manifest.xml
+COPY --chown=worker ./components /app/components
+COPY --chown=worker ./lib /app/lib
+COPY --chown=worker ./pages /app/pages
+COPY --chown=worker ./public /app/public
+COPY --chown=worker ./redux /app/redux
+COPY --chown=worker ./styles /app/styles
+COPY --chown=worker ./gasket.config.js /app/gasket.config.js
+COPY --chown=worker ./manifest.xml /app/manifest.xml
+
+RUN ls -l
 
 RUN gasket build --env development
 ENV NODE_ENV=development
