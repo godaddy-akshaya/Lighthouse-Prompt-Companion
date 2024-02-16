@@ -1,10 +1,13 @@
 # Golden container - only the best
 FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
 
+ARG NPM_AUTH_TOKEN
+
+USER root
 #FROM node:20-alpine3.18
 # Configure all the permission 
 WORKDIR /app
-USER root
+
 RUN npm install --global @gasket/cli
 # RUN adduser -D worker
 
@@ -15,16 +18,16 @@ USER worker
 COPY package.json /app
 COPY package-lock.json /app
 
+RUN cat .npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > .npmrc
 
 # Need to login to NPM 
-ARG NPM_AUTH_TOKEN
-ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
-RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
-RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
+#ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
+#RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
+#RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
 
 
 RUN echo "Starting up the installation"
-RUN npm i
+RUN npm ci
 
 # Copy application files + core package
 COPY --chown=worker ./.eslintrc.js /app.eslintrc.js
