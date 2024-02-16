@@ -30,7 +30,7 @@ RUN echo "Starting up the installation"
 RUN npm ci
 
 # Copy application files + core package
-COPY --chown=worker ./.eslintrc.js /app.eslintrc.js
+COPY --chown=worker ./.eslintrc /app/.eslintrc
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
 COPY --chown=worker ./components /app/components
 COPY --chown=worker ./lib /app/lib
