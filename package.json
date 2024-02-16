@@ -1,10 +1,10 @@
 {
   "name": "lighthouse-ui",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Lighthouse UI ",
   "scripts": {
     "build": "gasket build",
-    "start": "gasket start",
+    "start": "gasket start --env development",
     "local": "gasket local",
     "analyze": "gasket analyze",
     "upload-coverage": "upload-coverage ",

@@ -1,0 +1,4 @@
+//artifactory.secureserver.net/artifactory/api/npm/node-virt/:_authToken={{NPM_AUTH_TOKEN}}
+//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_authToken={{NPM_AUTH_TOKEN}}
+registry=https://gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/
+always-auth=true

@@ -39,7 +39,16 @@ const ViewPage = ({ authDetails }) => {
     }, {
         column_name: 'prompt_template_text',
         column_dislay_name: 'Prompt Template Text'
-    }, {
+    },
+    {
+        column_name: 'evaluation_response',
+        column_dislay_name: 'Evaluation response'
+    },
+    {
+        column_name: 'evaluation_prompt',
+        column_dislay_name: 'Evaluation Prompt'
+    },
+    {
         column_name: 'interaction_id',
         column_dislay_name: 'Interaction ID'
     }, {
@@ -48,7 +57,12 @@ const ViewPage = ({ authDetails }) => {
     }, {
         column_name: 'customer_type_name',
         column_dislay_name: 'Customer Type Name'
-    }, {
+    },
+    {
+        column_name: 'conversation_summary',
+        column_dislay_name: 'Conversation Summary'
+    },
+    {
         column_name: 'handled_repeat_contact_platform',
         column_dislay_name: 'Handled Repeat Contact Platform'
     }, {
@@ -64,13 +78,12 @@ const ViewPage = ({ authDetails }) => {
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
-            if (data?.length > 0) {
+            if (data?.length > 1) {
                 data?.shift();
             }
             setData(data);
             setTableLoading(false);
         })
-
     }, []);
 
     return (
