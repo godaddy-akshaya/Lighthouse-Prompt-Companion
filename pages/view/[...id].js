@@ -59,8 +59,8 @@ const ViewPage = ({ authDetails }) => {
         column_dislay_name: 'Customer Type Name'
     },
     {
-        column_name: 'conversation_summary',
-        column_dislay_name: 'Conversation Summary'
+        column_name: 'interaction_durationy',
+        column_dislay_name: 'Interaction Duration'
     },
     {
         column_name: 'handled_repeat_contact_platform',
