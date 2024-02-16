@@ -31,28 +31,23 @@ it is recommended to import those directly to `pages/_app.js`
     overflow: auto !important;
 }
 .lh-table-full-view-with-scroll { 
-    thead { 
-        display: block !important; 
-        position: sticky !important; 
-        top: 0 !important; 
-        z-index: 1 !important; 
-        background-color: white !important; 
-    }
-    tbody {
+    // thead { 
+    //     display: block !important; 
+    //     position: sticky !important; 
+    //     top: 0 !important; 
+    //     background-color: white !important; 
+    //     table-layout: auto !important;
+    // }
+    tbody thead {
         display: block !important;
         max-height: 100vh !important; /* Adjust this value to fit your needs */
         overflow-y: auto !important; /* Enable vertical scrolling */
         overflow-x: auto !important;/* Enable horizontal scrolling */
       }
-    // thead, tbody tr {
-    //     display: table  !important;
-    //   }
-    // td:first-child, td:nth-child(2) {
-    //    min-width: 325px !important;
-    // }
-    // th:first-child, th:nth-child(2) {
-    //    min-width: 325px !important;
-    // }
+    thead {
+        position: sticky !important;
+        top: 0 !important;
+    }
 }
 
 .lh-filter-card {

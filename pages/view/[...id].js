@@ -9,7 +9,7 @@ import Card from '@ux/card';
 import Spinner from '@ux/spinner';
 import { Module } from '@ux/layout';
 import text from '@ux/text';
-
+import DownloadButton from '../../components/download-button';
 
 
 const ViewPage = ({ authDetails }) => {
@@ -21,20 +21,9 @@ const ViewPage = ({ authDetails }) => {
         run_id: decodeURIComponent(router.query?.id?.[0] || '0')
     });
 
-    // const model = [{
-    //     llm_response: 'value here',
-    //     prompt_template_text: 'something here',
-    //     interaction_id: 'dafa',
-    //     routing_report_region_2: 'value here',
-    //     customer_type_name: 'value here',
-    //     handled_repeat_contact_platform: 'value here',
-    //     css_score: 'value here',
-    //     nps_score: 'value here',
-    //     run_id: 'value here',
-    // }];
 
     const columns = [{
-        column_name: 'conversaiont_summary',
+        column_name: 'conversation_summary',
         column_dislay_name: 'LLM Response',
     }, {
         column_name: 'prompt_template_text',
@@ -70,7 +59,7 @@ const ViewPage = ({ authDetails }) => {
         column_dislay_name: 'NPS Score'
     },
     {
-        column_name: 'interaction_durationy',
+        column_name: 'interaction_duration',
         column_dislay_name: 'Interaction Duration'
     },
     {
@@ -80,11 +69,21 @@ const ViewPage = ({ authDetails }) => {
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
-            console.log(data);
-            if (data?.length > 1) {
-                data?.shift();
-            }
-            setData(data);
+            let headers = data?.shift();
+            headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
+
+            let dataSet = data.map((value, index) => {
+                let obj = {};
+                headers?.forEach((header, index) => {
+                    obj[header] = value?.Data[index]?.VarCharValue;
+                });
+                return obj;
+            });
+            console.log(dataSet);
+            // if (data?.length > 1) {
+            //     data?.shift();
+            // }
+            setData(dataSet);
             setTableLoading(false);
         })
     }, []);
@@ -92,11 +91,20 @@ const ViewPage = ({ authDetails }) => {
     return (
         <>
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
-            <text.h3 text='View Results' as='heading' />
 
+            <div className='lh-container'>
+                <div>
+                    <text.h3 text='View Results' as='heading' />
+                    <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
+                </div>
+                <div>
+                    <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} />
+                </div>
+
+            </div>
             <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                 <Table className='table table-hover lh-table-full-view-with-scroll' order={columns.map(col => col.column_name)}>
-                    <thead style={{ 'table-layout': 'fixed' }}>
+                    <thead>
                         <tr>
                             {columns.map((column, index) => (
                                 <th key={index} column={column.column_name}>{column.column_dislay_name}</th>
@@ -108,7 +116,7 @@ const ViewPage = ({ authDetails }) => {
                             {!tableLoading && data?.map((item, dataIndex) => (
                                 <tr key={`c-${dataIndex}`}>
                                     {columns.map((column, index) => (
-                                        <td key={index} column={column.column_name}>{item.Data[index]?.VarCharValue || '-'}</td>
+                                        <td key={index} column={column.column_name}>{item[column.column_name]}</td>
                                     ))}
                                 </tr>
                             ))} </>}
