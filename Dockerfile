@@ -4,7 +4,10 @@ FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
 ARG NPM_AUTH_TOKEN
 
 USER root
-#FROM node:20-alpine3.18
+
+RUN npm install -g npm@10.4.0
+RUN apk add bash
+
 # Configure all the permission 
 WORKDIR /app
 
@@ -19,9 +22,8 @@ COPY --chown=worker package.json /app
 COPY --chown=worker package-lock.json /app
 COPY --chown=worker .npmrc.template /app
 
-RUN cat .npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > /app/.npmrc
+RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > /app/.npmrc
 RUN cat /app/.npmrc
-RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"
 # Need to login to NPM 
 #ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 #RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
@@ -30,10 +32,11 @@ RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"
 RUN ls -l
 
 RUN echo "Starting up the installation"
-RUN npm ci
+RUN npm install --force
 
 # Copy application files + core package
 COPY --chown=worker ./.eslintrc.js /app/.eslintrc.js
+COPY --chown=worker ./.babelrc /app/.babelrc
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
 COPY --chown=worker ./components /app/components
 COPY --chown=worker ./lib /app/lib
