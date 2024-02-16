@@ -47,7 +47,6 @@ COPY --chown=worker ./styles /app/styles
 COPY --chown=worker ./gasket.config.js /app/gasket.config.js
 COPY --chown=worker ./manifest.xml /app/manifest.xml
 
-RUN ls -l
 
 RUN gasket build --env development
 ENV NODE_ENV=development
