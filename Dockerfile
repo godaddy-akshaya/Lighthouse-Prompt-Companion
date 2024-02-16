@@ -15,16 +15,19 @@ RUN chown -R worker /app
 USER worker
 
 # Copy minimal set of files needed to install dependencies to ensure cacheability
-COPY package.json /app
-COPY package-lock.json /app
+COPY --chown=worker package.json /app
+COPY --chown=worker package-lock.json /app
+COPY --chown=worker .npmrc.template /app
 
-RUN cat .npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > .npmrc
-
+RUN cat .npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > /app/.npmrc
+RUN cat /app/.npmrc
+RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"
 # Need to login to NPM 
 #ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
 #RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
 #RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
 
+RUN ls -l
 
 RUN echo "Starting up the installation"
 RUN npm ci
