@@ -10,9 +10,9 @@ const PRODUCTION = 'production';
 
 const API = '/api/v1';
 const HOSTNAMES = new Map([
-    [DEV_PRIVATE, '.lighthouse.dev-gdcorp.tools'],
-    [DEVELOPMENT, 'platform.frontdoor.dev-gdcorp.tools'],
-    [PRODUCTION, 'platform.frontdoor.int.gdcorp.tools']
+    [DEV_PRIVATE, 'lighthouse.c3.int.dev-gdcorp.tools'],
+    [DEVELOPMENT, 'lighthouse.c3.int.dev-gdcorp.tools'],
+    [PRODUCTION, 'lighthouse.c3.int.gdcorp.tools']
 ]);
 
 /**
