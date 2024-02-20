@@ -1,11 +1,12 @@
 import React from 'react';
 import Button from '@ux/button';
+import { convertToCSV } from '../lib/utils';
 
 
 function downloadJSONAsCSV(data, filename) {
+
     let csv = '';
     const keys = Object.keys(data[0]);
-    console.log(keys);
     csv += keys.join(',') + '\n';
 
     data.forEach(row => {
@@ -15,8 +16,10 @@ function downloadJSONAsCSV(data, filename) {
         });
         csv += '\n';
     });
-
-    const blob = new Blob([data], { type: 'text/csv' });
+    const csv1 = convertToCSV(data, Object.keys(data[0]));
+    console.log(csv);
+    console.log(csv1);
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement('a');

@@ -79,10 +79,6 @@ const ViewPage = ({ authDetails }) => {
                 });
                 return obj;
             });
-            console.log(dataSet);
-            // if (data?.length > 1) {
-            //     data?.shift();
-            // }
             setData(dataSet);
             setTableLoading(false);
         })
@@ -92,7 +88,7 @@ const ViewPage = ({ authDetails }) => {
         <>
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
 
-            <div className='lh-container'>
+            <div className='lh-container lh-between'>
                 <div>
                     <text.h3 text='View Results' as='heading' />
                     <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
@@ -134,40 +130,6 @@ const ViewPage = ({ authDetails }) => {
                 </div>
 
             </Card>
-            {/* <Card stretch={true} id='results' title='Results'>
-                <Module>
-                    {tableLoading && <text.p text='Loading...' />}
-                    {!tableLoading &&
-                        <Table
-                            className='table table-hover'
-                            sortable={true}>
-                            <thead>
-                                <tr>
-                                    {columnList.map((column, index) => (
-                                        <th column={column} showIcon>{column}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {/* {results?.length == 0 && <tr><td colSpan='6'>No records found</td></tr>}
-                                {results?.map((item, index) => (
-                                    <tr key={item.run_id}>
-                                        <td column='run_id'> {item.run_id}
-
-                                        </td>
-                                        <td column='run_date'>{item.run_date}</td>
-                                        <td column='last_updated_time'>{item.last_updated_time}</td>
-                                        <td column='user_id'>{item.user_id}</td>
-                                        <td column='status'>{item.status}</td>
-                                        <td column='action'>{item.action === 'cancel' ? CancelButton(item) : item.action == 'view' ? ViewButton(item) : null}</td>
-                                    </tr>
-                                )) || null} 
-                            </tbody>
-                        </Table>
-                    }
-                </Module>
-            </Card> */}
         </>
     )
 };
