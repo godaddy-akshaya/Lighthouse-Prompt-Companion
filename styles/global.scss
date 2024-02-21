@@ -98,6 +98,9 @@ it is recommended to import those directly to `pages/_app.js`
             flex: 1;
         }
     }
+    &.lh-b {
+        justify-content: space-between;
+    }
     &.lh-start-and-end {
         justify-content: space-between;
         margin-right: 16px;
@@ -157,4 +160,7 @@ body.ux-app.gasket-app .ux-app__content {
 }
 .field-container {
     margin-bottom: 16px !important;
+}
+.summary-prompt-modal {
+    width: 700px !important;
 }

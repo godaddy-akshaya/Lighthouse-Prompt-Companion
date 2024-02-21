@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '@ux/button';
 import { convertToCSV } from '../lib/utils';
-
+import Download from '@ux/icon/download';
 
 function downloadJSONAsCSV(data, filename) {
 
@@ -32,6 +32,6 @@ function downloadJSONAsCSV(data, filename) {
 
 export default function DownloadButton({ data, filename }) {
     return (
-        <Button design='secondary' onClick={() => downloadJSONAsCSV(data, filename)} text='Download' />
+        <Button onClick={() => downloadJSONAsCSV(data, filename)} text='Download' icon={<Download />} />
     )
 };

@@ -7,7 +7,6 @@ module.exports = {
       '@godaddy/webapp'
     ],
     add: [
-      '@gasket/mocha',
       '@gasket/fetch',
       '@gasket/plugin-config'
     ]
@@ -39,7 +38,6 @@ module.exports = {
         cert: ['*.c3.int.dev-gdcorp.tools.crt']
       },
       hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
-
       plugins: {
         remove: []
       }

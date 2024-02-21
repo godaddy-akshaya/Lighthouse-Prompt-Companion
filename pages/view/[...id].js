@@ -7,8 +7,13 @@ import { getResultsByRunId } from '../../lib/api';
 import Table from '@ux/table';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
-import { Module } from '@ux/layout';
+import { Module, Block } from '@ux/layout';
 import text from '@ux/text';
+import Alert from '@ux/alert';
+import SiblingSet from '@ux/sibling-set';
+import SummaryPrompt from '../../components/summary-prompt';
+import { submitSummaryPromptJob } from '../../lib/api';
+import Button from '@ux/button';
 import DownloadButton from '../../components/download-button';
 
 
@@ -17,6 +22,10 @@ const ViewPage = ({ authDetails }) => {
     const [tableLoading, setTableLoading] = useState(true);
     const router = useRouter();
     const [data, setData] = useState();
+    const [isSummaryPromptOpen, setIsSummaryPromptOpen] = useState(false);
+    const [showUserMessage, setShowUserMessage] = useState(false);
+    const [userMessage, setUserMessage] = useState('');
+    const [userMessageType, setUserMessageType] = useState('info');
     const [routeParams, setRouteParams] = useState({
         run_id: decodeURIComponent(router.query?.id?.[0] || '0')
     });
@@ -66,6 +75,27 @@ const ViewPage = ({ authDetails }) => {
         column_name: 'run_id',
         column_dislay_name: 'Run ID'
     }];
+    const handleCancelSummaryPrompt = () => {
+        setIsSummaryPromptOpen(false);
+    }
+    const handleSubmitSummaryPrompt = (formData) => {
+        submitSummaryPromptJob(formData).then((data) => {
+            setIsSummaryPromptOpen(false);
+            if (data?.error) {
+                setUserMessage(data.error);
+                setUserMessageType('error');
+                setShowUserMessage(true);
+                return;
+            } else {
+                setUserMessage('Summary Prompt Job Submitted Successfully');
+                setUserMessageType('success');
+                setShowUserMessage(true);
+            }
+        });
+    };
+    const handleCloseError = () => {
+        setShowUserMessage(false);
+    }
     useEffect(() => {
         setTableLoading(true);
         getResultsByRunId(routeParams.run_id).then((data) => {
@@ -87,16 +117,28 @@ const ViewPage = ({ authDetails }) => {
     return (
         <>
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
-
-            <div className='lh-container lh-between'>
+            {showUserMessage &&
+                <Block>
+                    <Alert
+                        title={userMessage}
+                        id='critical-message'
+                        emphasis={userMessageType === 'error' ? 'critical' : 'success'}
+                        actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
+                </Block>
+            }
+            <text.h3 text='View Results' as='heading' />
+            <div className='lh-container lh-b'>
                 <div>
-                    <text.h3 text='View Results' as='heading' />
                     <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
                 </div>
                 <div>
-                    <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} />
+                    {!tableLoading > 0 &&
+                        <SiblingSet gap={'sm'}>
+                            <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
+                            {/* <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} /> */}
+                        </SiblingSet>
+                    }
                 </div>
-
             </div>
             <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                 <Table className='table table-hover lh-table-full-view-with-scroll' order={columns.map(col => col.column_name)}>
