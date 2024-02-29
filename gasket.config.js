@@ -1,7 +1,6 @@
 const path = require('path');
 
 module.exports = {
-  http: 8080,
   plugins: {
     presets: [
       '@godaddy/webapp'
@@ -16,12 +15,17 @@ module.exports = {
   },
   environments: {
     local: {
-      hostname: 'local.gasket.dev-gdcorp.tools',
+      hostname: 'local.gasket.dev-godaddy.com',
+      http: 8080,
+      https: {
+        port: 8443,
+        // root: path.join(__dirname, 'certs'),
+        // key: 'local.c3.int.dev-gdcorp.tools.key',
+        // cert: 'local.c3.int.dev-gdcorp.tools.crt'
+      },
       endpoints: {
         api: 'https://gheg0jyux8.execute-api.us-west-2.amazonaws.com/dev'
       },
-      http: 80,
-      https: 443,
     },
     development: {
       hostname: 'localhost',

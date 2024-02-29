@@ -11,8 +11,6 @@ import { Module, Block } from '@ux/layout';
 import text from '@ux/text';
 import Alert from '@ux/alert';
 import SiblingSet from '@ux/sibling-set';
-import SummaryPrompt from '../../components/summary-prompt';
-import { submitSummaryPromptJob } from '../../lib/api';
 import Button from '@ux/button';
 import DownloadButton from '../../components/download-button';
 import { getSummaryResultsByRunId } from '../../lib/api';
