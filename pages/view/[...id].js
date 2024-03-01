@@ -15,6 +15,7 @@ import SummaryPrompt from '../../components/summary-prompt';
 import { submitSummaryPromptJob } from '../../lib/api';
 import Button from '@ux/button';
 import DownloadButton from '../../components/download-button';
+import { BannerMessage } from '../../components/banner-message';
 
 
 const ViewPage = ({ authDetails }) => {
@@ -118,13 +119,7 @@ const ViewPage = ({ authDetails }) => {
         <>
             <Head title='GoDaddy Lighthouse - View Summary' route='status' />
             {showUserMessage &&
-                <Block>
-                    <Alert
-                        title={userMessage}
-                        id='critical-message'
-                        emphasis={userMessageType === 'error' ? 'critical' : 'success'}
-                        actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
-                </Block>
+                <BannerMessage showMessage={showUserMessage} message={userMessage} userMessageType={userMessageType} handleCloseError={handleCloseError} />
             }
             <text.h3 text='View Results' as='heading' />
             <div className='lh-container lh-b'>
@@ -135,7 +130,7 @@ const ViewPage = ({ authDetails }) => {
                     {!tableLoading > 0 &&
                         <SiblingSet gap={'sm'}>
                             <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
-                            <Button href={`/summary/${routeParams.run_id}`} text='Go to Summary' as='external' />
+                            <Button href={`/summary/${routeParams.run_id}`} text='Summary Responses' as='external' />
 
                             {/* <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} /> */}
                         </SiblingSet>

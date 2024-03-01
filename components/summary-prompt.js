@@ -52,7 +52,6 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
             setNumOfErrorMessage('Number of transactions must be less than or equal to the total number of transactions');
         }
         setNumToRun(e);
-
     }
     const handleCancel = () => {
         eventCancel();
@@ -65,7 +64,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
         </>
     );
     const modal = (
-        <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => setShow(false)} actions={actions}>
+        <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
             <Block >
                 <SelectInput defaultValue={model} onChange={(e) => { setModel(e) }} id='model' name='model' label='Model'>
                     <option value='claude-instant-v1'>claude-instant-v1</option>
