@@ -132,7 +132,7 @@ const ViewPage = ({ authDetails }) => {
                             <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
                             <Button href={`/summary/${routeParams.run_id}`} text='Summary Responses' as='external' />
 
-                            {/* <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} /> */}
+                            <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} />
                         </SiblingSet>
                     }
                 </div>

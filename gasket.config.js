@@ -19,9 +19,6 @@ module.exports = {
       http: 8080,
       https: {
         port: 8443,
-        // root: path.join(__dirname, 'certs'),
-        // key: 'local.c3.int.dev-gdcorp.tools.key',
-        // cert: 'local.c3.int.dev-gdcorp.tools.crt'
       },
       endpoints: {
         api: 'https://gheg0jyux8.execute-api.us-west-2.amazonaws.com/dev'

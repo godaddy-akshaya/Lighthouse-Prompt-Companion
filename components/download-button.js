@@ -5,20 +5,8 @@ import Download from '@ux/icon/download';
 
 function downloadJSONAsCSV(data, filename) {
 
-    let csv = '';
     const keys = Object.keys(data[0]);
-    csv += keys.join(',') + '\n';
-
-    data.forEach(row => {
-        keys.forEach((key, i) => {
-            if (i > 0) csv += ',';
-            csv += row[key];
-        });
-        csv += '\n';
-    });
-    const csv1 = convertToCSV(data, Object.keys(data[0]));
-    console.log(csv);
-    console.log(csv1);
+    const csv = convertToCSV(data, keys);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
 

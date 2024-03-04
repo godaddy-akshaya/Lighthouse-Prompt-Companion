@@ -25,16 +25,11 @@ const REGION = 'us-west-2';
  * However our CICD account has no deployments/services and will resolve to development.
  * @type {Map<string, string>}
  */
-const FDC_EXECUTION_IAM_ROLES = new Map([
-    [DEV_PRIVATE, 'arn:aws:iam::372581112254:role/frontdoorpro-custom-fd-platform'],
-    [DEVELOPMENT, 'arn:aws:iam::663162811906:role/frontdoorpro-custom-fd-platform'],
-    [PRODUCTION, 'arn:aws:iam::195266620747:role/frontdoorpro-custom-fd-platform']
-]);
+
 
 module.exports = {
     API,
     HOSTNAMES,
     REGION,
-    FDC_EXECUTION_IAM_ROLES,
     ENVS: { LOCAL, DEV_PRIVATE, DEVELOPMENT, PRODUCTION }
 };
