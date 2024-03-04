@@ -33,20 +33,22 @@ const SummaryPage = ({ authDetails }) => {
         if (routerParams) {
             getSummaryResultsByRunId(routerParams.run_id)
                 .then((data) => {
+                    console.log(data)
                     let _headers = data?.shift();
                     _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
+                    let newHeaders = ['run_id', ..._headers];
                     let newData = data.map((value, index) => {
                         let obj = {};
-                        _headers?.forEach((header, index) => {
-                            obj[header] = value?.Data[index]?.VarCharValue;
+                        newHeaders?.forEach((header, index) => {
+                            obj[header] = value?.Data[index]?.VarCharValue || '';
                         });
                         return obj;
                     });
-                    console.log('newData', newData, _headers);
                     setTableData({ headers: _headers, data: newData });
                 })
                 .then(() => setTableLoading(false)).catch((error) => {
-                    setUserMessage(error.message);
+                    console.log(error);
+                    setUserMessage(error.toString());
                     setUserMessageType('error');
                     setShowUserMessage(true);
                 });
@@ -63,13 +65,11 @@ const SummaryPage = ({ authDetails }) => {
                     <text.h3 text='View Summary' as='heading' />
                 </div>
                 <div>
-
                     <SiblingSet gap={'sm'}>
-                        <Button href={`/view/${routerParams.run_id}`} as='external' text='Got Back to Results' />
+                        <Button href={`/view/${routerParams.run_id}`} as='external' text='Go Back to Results' />
 
                         {/* <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} /> */}
                     </SiblingSet>
-
                 </div>
             </div>
             <Card id='view-summary-card' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
