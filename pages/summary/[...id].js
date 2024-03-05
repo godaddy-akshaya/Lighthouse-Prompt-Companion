@@ -33,18 +33,19 @@ const SummaryPage = ({ authDetails }) => {
         if (routerParams) {
             getSummaryResultsByRunId(routerParams.run_id)
                 .then((data) => {
-                    console.log(data)
-                    let _headers = data?.shift();
-                    _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
-                    let newHeaders = ['run_id', ..._headers];
-                    let newData = data.map((value, index) => {
-                        let obj = {};
-                        newHeaders?.forEach((header, index) => {
-                            obj[header] = value?.Data[index]?.VarCharValue || '';
+                    if (data?.length > 0) {
+                        let _headers = data?.shift();
+                        _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
+                        let newHeaders = ['run_id', ..._headers];
+                        let newData = data.map((value, index) => {
+                            let obj = {};
+                            newHeaders?.forEach((header, index) => {
+                                obj[header] = value?.Data[index]?.VarCharValue || '';
+                            });
+                            return obj;
                         });
-                        return obj;
-                    });
-                    setTableData({ headers: _headers, data: newData });
+                        setTableData({ headers: _headers, data: newData });
+                    }
                 })
                 .then(() => setTableLoading(false)).catch((error) => {
                     console.log(error);
