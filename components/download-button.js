@@ -4,8 +4,7 @@ import { convertToCSV } from '../lib/utils';
 import Download from '@ux/icon/download';
 
 function downloadJSONAsCSV(data, filename) {
-
-    const keys = Object.keys(data[0]);
+    const keys = Object.keys(data[0]).map(key => key);
     const csv = convertToCSV(data, keys);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);

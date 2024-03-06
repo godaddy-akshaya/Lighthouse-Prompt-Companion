@@ -94,6 +94,12 @@ const ViewPage = ({ authDetails }) => {
             }
         });
     };
+    function convertToTitleCase(text) {
+        return text
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
     const handleCloseError = () => {
         setShowUserMessage(false);
     }
@@ -102,7 +108,6 @@ const ViewPage = ({ authDetails }) => {
         getResultsByRunId(routeParams.run_id).then((data) => {
             let headers = data?.shift();
             headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
-            console.log(headers);
             let dataSet = data.map((value, index) => {
                 let obj = {};
                 headers?.forEach((header, index) => {
@@ -143,7 +148,7 @@ const ViewPage = ({ authDetails }) => {
                     <thead>
                         <tr>
                             {data.headers.map((column, index) => (
-                                <th key={index} column={column}>{column}</th>
+                                <th key={index} column={column}>{convertToTitleCase(column)}</th>
                             ))}
                         </tr>
                     </thead>
