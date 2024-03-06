@@ -22,7 +22,7 @@ const ViewPage = ({ authDetails }) => {
     if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
     const [tableLoading, setTableLoading] = useState(true);
     const router = useRouter();
-    const [data, setData] = useState();
+    const [data, setData] = useState({ headers: [], dataSet: [] });
     const [isSummaryPromptOpen, setIsSummaryPromptOpen] = useState(false);
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [userMessage, setUserMessage] = useState('');
@@ -102,7 +102,7 @@ const ViewPage = ({ authDetails }) => {
         getResultsByRunId(routeParams.run_id).then((data) => {
             let headers = data?.shift();
             headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
-
+            console.log(headers);
             let dataSet = data.map((value, index) => {
                 let obj = {};
                 headers?.forEach((header, index) => {
@@ -110,7 +110,7 @@ const ViewPage = ({ authDetails }) => {
                 });
                 return obj;
             });
-            setData(dataSet);
+            setData({ headers, dataSet });
             setTableLoading(false);
         })
     }, []);
@@ -132,26 +132,27 @@ const ViewPage = ({ authDetails }) => {
                             <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
                             <Button href={`/summary/${routeParams.run_id}`} text='Summary Responses' as='external' />
 
-                            <DownloadButton data={data} filename={`run_id_${routeParams.run_id}.csv`} />
+                            <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
                         </SiblingSet>
                     }
                 </div>
             </div>
             <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                <Table className='table table-hover lh-table-full-view-with-scroll' order={columns.map(col => col.column_name)}>
+
+                <Table className='table table-hover lh-table-full-view-with-scroll' order={data?.headers.map(col => col)}>
                     <thead>
                         <tr>
-                            {columns.map((column, index) => (
-                                <th key={index} column={column.column_name}>{column.column_dislay_name}</th>
+                            {data.headers.map((column, index) => (
+                                <th key={index} column={column}>{column}</th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {data && <>
-                            {!tableLoading && data?.map((item, dataIndex) => (
+                        {data?.dataSet && <>
+                            {!tableLoading && data.dataSet?.map((item, dataIndex) => (
                                 <tr key={`c-${dataIndex}`}>
-                                    {columns.map((column, index) => (
-                                        <td key={index} column={column.column_name}>{item[column.column_name]}</td>
+                                    {data.headers.map((column, index) => (
+                                        <td key={index} column={column}>{item[column]}</td>
                                     ))}
                                 </tr>
                             ))} </>}
@@ -159,8 +160,8 @@ const ViewPage = ({ authDetails }) => {
                 </Table>
                 <div className='lh-container lh-center'>
                     <div className='text-center'>
-                        {data?.length === 0 && <text.p text='No records found' />}
-                        {data?.length > 0 && <div>{data.length}</div>}
+                        {data?.dataSet?.length === 0 && <text.p text='No records found' />}
+                        {data?.dataSet?.length > 0 && <div>{data.length}</div>}
                         {tableLoading && <>
                             <Spinner />
                             <text.p text='Please be patient while we retrieve your results.' />
