@@ -27,55 +27,9 @@ const ViewPage = ({ authDetails }) => {
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [userMessage, setUserMessage] = useState('');
     const [userMessageType, setUserMessageType] = useState('info');
-    const [routeParams, setRouteParams] = useState({
-        run_id: decodeURIComponent(router.query?.id?.[0] || '0')
-    });
+    const [routeParams, setRouteParams] = useState({ run_id: '0' });
 
 
-    const columns = [{
-        column_name: 'conversation_summary',
-        column_dislay_name: 'LLM Response',
-    }, {
-        column_name: 'prompt_template_text',
-        column_dislay_name: 'Prompt Template Text'
-    },
-    {
-        column_name: 'evaluation_summary',
-        column_dislay_name: 'Evaluation Summary'
-    },
-    {
-        column_name: 'evaluation_prompt_text',
-        column_dislay_name: 'Evaluation Prompt Text'
-    },
-    {
-        column_name: 'interaction_id',
-        column_dislay_name: 'Interaction ID'
-    }, {
-        column_name: 'routing_report_region_2',
-        column_dislay_name: 'Routing Report Region 2'
-    }, {
-        column_name: 'customer_type_name',
-        column_dislay_name: 'Customer Type Name'
-    },
-
-    {
-        column_name: 'handled_repeat_contact_platform',
-        column_dislay_name: 'Handled Repeat Contact Platform'
-    }, {
-        column_name: 'css_score',
-        column_dislay_name: 'CSS Score'
-    }, {
-        column_name: 'nps_score',
-        column_dislay_name: 'NPS Score'
-    },
-    {
-        column_name: 'interaction_duration',
-        column_dislay_name: 'Interaction Duration'
-    },
-    {
-        column_name: 'run_id',
-        column_dislay_name: 'Run ID'
-    }];
     const handleCancelSummaryPrompt = () => {
         setIsSummaryPromptOpen(false);
     }
@@ -104,21 +58,25 @@ const ViewPage = ({ authDetails }) => {
         setShowUserMessage(false);
     }
     useEffect(() => {
-        setTableLoading(true);
-        getResultsByRunId(routeParams.run_id).then((data) => {
-            let headers = data?.shift();
-            headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
-            let dataSet = data.map((value, index) => {
-                let obj = {};
-                headers?.forEach((header, index) => {
-                    obj[header] = value?.Data[index]?.VarCharValue;
+        if (router.isReady) {
+            setRouteParams({ run_id: decodeURIComponent(router.query?.id?.[0] || '0') });
+            setTableLoading(true);
+            getResultsByRunId(routeParams.run_id).then((data) => {
+                let headers = data?.shift();
+                headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
+                let dataSet = data.map((value, index) => {
+                    let obj = {};
+                    headers?.forEach((header, index) => {
+                        obj[header] = value?.Data[index]?.VarCharValue;
+                    });
+                    return obj;
                 });
-                return obj;
-            });
-            setData({ headers, dataSet });
-            setTableLoading(false);
-        })
-    }, []);
+                setData({ headers, dataSet });
+                setTableLoading(false);
+            })
+        }
+
+    }, [router.isReady, router.query]);
 
     return (
         <>
@@ -165,7 +123,7 @@ const ViewPage = ({ authDetails }) => {
                 </Table>
                 <div className='lh-container lh-center'>
                     <div className='text-center'>
-                        {data?.dataSet?.length === 0 && <text.p text='No records found' />}
+                        {data?.dataSet?.length === 0 && !tableLoading && <text.p text='No records found' />}
                         {data?.dataSet?.length > 0 && <div>{data.length}</div>}
                         {tableLoading && <>
                             <Spinner />

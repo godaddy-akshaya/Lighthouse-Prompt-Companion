@@ -17,6 +17,14 @@ import { getSummaryResultsByRunId } from '../../lib/api';
 import { BannerMessage } from '../../components/banner-message';
 
 
+// {
+//     "statusCode": 200,
+//     "body": "[{\"Data\": [{\"VarCharValue\": \"run_id\"},
+// {\"VarCharValue\": \"prompt_template_text\"}, {\"VarCharValue\": \"summarizer_summary\"}]}, 
+//{\"Data\": [{\"VarCharValue\": \"'97bb2d50-3f92-4ba5-8584-ed075296a625'\"}, 
+//{\"VarCharValue\": \"'Below are all the summaries between call center guide and customer at GoDaddy.com. Each summary is seperated by three pipe lines |||.Give me a three sentence summary of all the summaries. [llm_responses]'\"}, {\"VarCharValue\": \"'Completed'\"}]}]"
+// }
+
 const SummaryPage = ({ authDetails }) => {
     const router = useRouter();
     const [routerParams, setRouterParams] = useState({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
