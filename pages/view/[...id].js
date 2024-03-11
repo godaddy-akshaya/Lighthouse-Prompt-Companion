@@ -59,10 +59,10 @@ const ViewPage = ({ authDetails }) => {
     }
     useEffect(() => {
         if (router.isReady) {
-            console.log(router);
+            console.log(router.query?.id[0] || '0');
             setRouteParams({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
             setTableLoading(true);
-            getResultsByRunId(routeParams.run_id).then((data) => {
+            getResultsByRunId(router.query?.id[0] || 0).then((data) => {
                 let headers = data?.shift();
                 headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
                 let dataSet = data.map((value, index) => {
