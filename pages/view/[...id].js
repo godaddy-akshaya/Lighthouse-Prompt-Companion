@@ -59,7 +59,8 @@ const ViewPage = ({ authDetails }) => {
     }
     useEffect(() => {
         if (router.isReady) {
-            setRouteParams({ run_id: decodeURIComponent(router.query?.id?.[0] || '0') });
+            console.log(router);
+            setRouteParams({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
             setTableLoading(true);
             getResultsByRunId(routeParams.run_id).then((data) => {
                 let headers = data?.shift();
