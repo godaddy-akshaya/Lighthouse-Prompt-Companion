@@ -23,7 +23,7 @@ import '@ux/filter/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import '@ux/menu/styles';
 import SiblingSet from '@ux/sibling-set';
-import { getTableRowCount, getTableFilters, getTables, submitPromptJob } from '../../lib/api';
+import { submitRowCountRequest, getTableFilters, getTables, submitPromptJob } from '../../lib/api';
 import FilterCards from '../../components/filter-cards';
 import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
@@ -203,7 +203,7 @@ const PromptBuilder = ({ authDetails }) => {
         setIsPromptFormVisible(false);
         setShowMessage(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        getTableRowCount(routeParams.table, columns, dateValue).then(data => {
+        submitRowCountRequest(routeParams.table, columns, dateValue).then(data => {
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
                 setNumOfTransactionsToRun(0);
