@@ -32,9 +32,9 @@ const SummaryPage = ({ authDetails }) => {
         getSummaryResultsByRunId(routerParams.run_id)
             .then((data) => {
                 if (data?.length > 0) {
-                    let _headers = data?.shift();
-                    _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
-                    let newHeaders = ['run_id', ..._headers];
+
+                    let _headers = [...data?.shift().Data?.map((header) => header?.VarCharValue)];
+                    let newHeaders = [..._headers];
                     let newData = data.map((value, index) => {
                         let obj = {};
                         newHeaders?.forEach((header, index) => {
