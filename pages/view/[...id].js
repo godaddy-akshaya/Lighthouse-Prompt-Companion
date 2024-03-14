@@ -81,11 +81,11 @@ const ViewPage = ({ authDetails }) => {
 
     return (
         <>
-            <Head title='GoDaddy Lighthouse - View Summary' route='status' />
+            <Head title='GoDaddy Lighthouse - Results' route='status' />
             {showUserMessage &&
                 <BannerMessage showMessage={showUserMessage} message={userMessage} userMessageType={userMessageType} handleCloseError={handleCloseError} />
             }
-            <text.h3 text='View Results' as='heading' />
+            <text.h3 text='Results' as='heading' />
             <div className='lh-container lh-b'>
                 <div>
                     <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
@@ -94,7 +94,7 @@ const ViewPage = ({ authDetails }) => {
                     {!tableLoading > 0 &&
                         <SiblingSet gap={'sm'}>
                             <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
-                            <Button href={`/summary/${routeParams.run_id}`} text='Summary Responses' as='external' />
+                            <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
 
                             <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
                         </SiblingSet>

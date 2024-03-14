@@ -3,27 +3,15 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import session from '../../lib/session';
 import Head from '../../components/head';
-import { getResultsByRunId } from '../../lib/api';
 import Table from '@ux/table';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
-import { Module, Block } from '@ux/layout';
 import text from '@ux/text';
-import Alert from '@ux/alert';
 import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
-import DownloadButton from '../../components/download-button';
 import { getSummaryResultsByRunId } from '../../lib/api';
 import { BannerMessage } from '../../components/banner-message';
-
-
-// {
-//     "statusCode": 200,
-//     "body": "[{\"Data\": [{\"VarCharValue\": \"run_id\"},
-// {\"VarCharValue\": \"prompt_template_text\"}, {\"VarCharValue\": \"summarizer_summary\"}]}, 
-//{\"Data\": [{\"VarCharValue\": \"'97bb2d50-3f92-4ba5-8584-ed075296a625'\"}, 
-//{\"VarCharValue\": \"'Below are all the summaries between call center guide and customer at GoDaddy.com. Each summary is seperated by three pipe lines |||.Give me a three sentence summary of all the summaries. [llm_responses]'\"}, {\"VarCharValue\": \"'Completed'\"}]}]"
-// }
+import { toTitleCase } from '../../lib/utils';
 
 const SummaryPage = ({ authDetails }) => {
     const router = useRouter();
@@ -31,47 +19,48 @@ const SummaryPage = ({ authDetails }) => {
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [tableLoading, setTableLoading] = useState(true);
     const [userMessage, setUserMessage] = useState('');
-    const [headers, setHeaders] = useState([]);
     const [userMessageType, setUserMessageType] = useState('info');
     const handleCloseError = () => setShowUserMessage(false);
 
     const [tableData, setTableData] = useState({ headers: [], data: [] });
 
     useEffect(() => {
-        if (routerParams) {
-            getSummaryResultsByRunId(routerParams.run_id)
-                .then((data) => {
-                    if (data?.length > 0) {
-                        let _headers = data?.shift();
-                        _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
-                        let newHeaders = ['run_id', ..._headers];
-                        let newData = data.map((value, index) => {
-                            let obj = {};
-                            newHeaders?.forEach((header, index) => {
-                                obj[header] = value?.Data[index]?.VarCharValue || '';
-                            });
-                            return obj;
+        if (!routerParams) return;
+
+        setTableLoading(true);
+
+        getSummaryResultsByRunId(routerParams.run_id)
+            .then((data) => {
+                if (data?.length > 0) {
+                    let _headers = data?.shift();
+                    _headers = [..._headers?.Data?.map((header) => header?.VarCharValue)];
+                    let newHeaders = ['run_id', ..._headers];
+                    let newData = data.map((value, index) => {
+                        let obj = {};
+                        newHeaders?.forEach((header, index) => {
+                            obj[header] = value?.Data[index]?.VarCharValue || '';
                         });
-                        setTableData({ headers: _headers, data: newData });
-                    }
-                })
-                .then(() => setTableLoading(false)).catch((error) => {
-                    console.log(error);
-                    setUserMessage(error.toString());
-                    setUserMessageType('error');
-                    setShowUserMessage(true);
-                });
-        }
+                        return obj;
+                    });
+                    setTableData({ headers: _headers, data: newData });
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+                setUserMessage(error.toString());
+                setUserMessageType('error');
+                setShowUserMessage(true);
+            }).finally(() => setTableLoading(false));
 
     }, [routerParams]);
 
     return (
         <>
-            <Head title='GoDaddy Lighthouse - View Summary' route='status' />
+            <Head title='GoDaddy Lighthouse - Summaries' route='status' />
             <BannerMessage showMessage={showUserMessage} message={userMessage} userMessageType={userMessageType} handleCloseError={handleCloseError} />
             <div className='lh-container lh-b'>
                 <div>
-                    <text.h3 text='View Summary' as='heading' />
+                    <text.h3 text='Summaries' as='heading' />
                 </div>
                 <div>
                     <SiblingSet gap={'sm'}>
@@ -91,12 +80,12 @@ const SummaryPage = ({ authDetails }) => {
                     {tableData.headers && <thead>
                         <tr>
                             {tableData.headers.map((column, index) => (
-                                <th key={index} column={column}>{column}</th>
+                                <th key={index} column={column}>{toTitleCase(column)}</th>
                             ))}
                         </tr>
                     </thead>
                     }
-                    {/* {tableData.data &&
+                    {tableData.data &&
                         <tbody>
                             {tableData.data && <>
                                 {!tableLoading && tableData?.data.map((item, dataIndex) => (
@@ -107,7 +96,7 @@ const SummaryPage = ({ authDetails }) => {
                                     </tr>
                                 ))} </>}
                         </tbody>
-                    } */}
+                    }
                 </Table>
 
                 {
