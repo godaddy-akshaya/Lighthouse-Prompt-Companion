@@ -39,7 +39,8 @@ import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
 const options = {
-    realm: 'jomax'
+    realm: 'jomax',
+    groups: ['lighthouse-ui-group'],
 };
 export default withPageEnhancers([
     withLocaleRequired('/locales', { initialProps: true }), withAuthRequired(options)
