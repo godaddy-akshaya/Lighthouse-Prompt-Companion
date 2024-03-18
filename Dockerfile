@@ -5,7 +5,6 @@ ARG NPM_AUTH_TOKEN
 
 USER root
 
-RUN npm install -g npm@10.4.0
 RUN apk add bash
 
 # Configure all the permission 
