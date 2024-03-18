@@ -29,20 +29,10 @@ import DateInput from '@ux/date-input';
 import Alert from '@ux/alert';
 import Tag from '@ux/tag';
 import session from '../../lib/session';
-const columnList = [
-    "conversation_summary",
-    "prompt_template_text",
-    "interaction_id",
-    "routing_report_region_2",
-    "customer_type_name",
-    "handled_repeat_contact_platform",
-    "css_score",
-    "nps_score",
-    "run_id"
-]
 import '@ux/date-input/styles';
 import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
+
 
 const PromptBuilder = ({ authDetails }) => {
     const LIMIT_OF_TRANSACTIONS = 400;
