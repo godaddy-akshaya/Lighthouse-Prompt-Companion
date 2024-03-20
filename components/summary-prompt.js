@@ -6,7 +6,8 @@ import { Block } from '@ux/layout';
 import { getGuid } from '../lib/utils';
 import TextInput from '@ux/text-input';
 import SelectInput from '@ux/select-input';
-import e from 'cors';
+import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
+import Add from '@ux/icon/add';
 
 export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, eventOpen, eventCancel }) {
     const [prompt, setPrompt] = useState('');
@@ -17,7 +18,6 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
 
     const handlePrompt = (e) => {
         setPrompt(e);
-
     }
     function checkForm() {
         // check prompt and count
@@ -28,6 +28,10 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
             return false;
         }
         return true;
+    }
+    function insertAction(e) {
+        let text = prompt + ` [${e}]`;
+        setPrompt(text);
     }
     async function handleSaveEvent() {
         if (!checkForm()) {
@@ -71,7 +75,13 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
                     <option value='claude-v2'>claude-v2</option>
                 </SelectInput>
                 <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun} defaultValue={count} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                <TextInput aria-required required={true} id='prompt-test' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
+                <Menu id='my-menu-for-summary' className='m-t-1'>
+                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                    <MenuList className='lh-menu' design='primary'>
+                        <MenuItem key='concatenation_of_responses' onSelect={insertAction}>concatenation_of_responses</MenuItem>
+                    </MenuList>
+                </Menu>
+                <TextInput aria-required required={true} id='summary-prompt-input' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
             </Block>
         </Modal>
     );

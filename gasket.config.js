@@ -1,4 +1,5 @@
 const path = require('path');
+const env = require('./config/.env');
 
 module.exports = {
   plugins: {

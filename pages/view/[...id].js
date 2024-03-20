@@ -93,7 +93,7 @@ const ViewPage = ({ authDetails }) => {
                 <div>
                     {!tableLoading > 0 &&
                         <SiblingSet gap={'sm'}>
-                            <SummaryPrompt runId={routeParams.run_id} count={data?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
+                            <SummaryPrompt runId={routeParams.run_id} count={data?.dataSet?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
                             <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
 
                             <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
@@ -102,7 +102,6 @@ const ViewPage = ({ authDetails }) => {
                 </div>
             </div>
             <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-
                 <Table className='table table-hover lh-table-full-view-with-scroll' order={data?.headers.map(col => col)}>
                     <thead>
                         <tr>
