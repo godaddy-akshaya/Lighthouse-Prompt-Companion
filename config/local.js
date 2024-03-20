@@ -1,16 +1,6 @@
-{
-  "env": "development",
-  "region": "us-west-2",
-  "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
-  "sso": {
-    "root": "https://sso.dev-gdcorp.tools",
-    "cookie": {
-      "domain": ".dev-gdcorp.tools",
-      "path": "/",
-      "secure": true,
-      "httpOnly": true
-    }
-  },
+module.exports = {
+  "env": "local",
+  "root": "https://local.gasket.dev-godaddy.com:8443",
   "api": {
     "table_listing": {
       "method": "GET",

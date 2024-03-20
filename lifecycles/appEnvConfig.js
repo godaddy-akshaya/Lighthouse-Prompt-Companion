@@ -1,11 +1,12 @@
 const logPrefix = 'lifecycle:appEnvConfig';
 
 module.exports = async function (gasket, config) {
-    console.log('config environment', config.env);
+    const { logger } = gasket;
     if (config.env === 'local') {
+        logger.debug(`${logPrefix}: Using local environment configuration`);
         return config;
     }
-    const { logger } = gasket;
+
     logger.debug(`${logPrefix}: Using environment configuration for NODE_ENV=${process.env.NODE_ENV}`);
 
     return config;

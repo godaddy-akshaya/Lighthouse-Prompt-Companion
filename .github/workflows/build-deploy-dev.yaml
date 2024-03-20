@@ -10,7 +10,7 @@ jobs:
   build_publish_promote:
     runs-on:
       labels: self-hosted
-      group: 7416-therandomdrunner
+      group: 6429-hadoopmigratione
 
     steps:
       - name: Checkout Repository

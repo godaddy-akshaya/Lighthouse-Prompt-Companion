@@ -34,7 +34,7 @@ import PromptForm from '../../components/prompt-form';
 const PromptBuilder = ({ authDetails }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [showMessage, setShowMessage] = useState(false);
-    const [numOfTransactions, setNumOfTransactions] = useState(0);
+    const [numOfTransactions, setNumOfTransactions] = useState();
     const [showUserMessage, setShowUserMessage] = useState(false);
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
@@ -155,6 +155,13 @@ const PromptBuilder = ({ authDetails }) => {
                                                 <Spinner />
                                             </Block>
                                         </MessageOverlay>}
+                                        {numOfTransactions == 0 && <>
+                                            <Block>
+                                                <text.h4 as='title' text='No Transactions Found' />
+                                                <text.p text='No transactions found based on your selections' />
+                                            </Block>
+                                        </>
+                                        }
                                         {numOfTransactions > 0 &&
                                             <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
                                         }

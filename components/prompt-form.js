@@ -26,6 +26,7 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
     const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
 
     function insertAction(e) {
+        console.log(e, prompt);
         let text = prompt + ` [${e}]`;
         setPrompt(text);
     }
@@ -87,7 +88,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
         <>
             <Module>
                 <text.h4 as='title' text='Parameters' />
-
                 <p>
                     <Tag emphasis='neutral'>
                         {`Number of Transactions ${numOfTransactions}`}
@@ -102,14 +102,13 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                     onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
                 <Menu id='my-menu' size='small' className='m-t-1'>
                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
-
                     <MenuList className='lh-menu' design='primary'>
                         <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
                     </MenuList>
                 </Menu>
                 <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
                     label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert'
-                    onChange={handlePrompt} defaultValue={prompt} multiline size={10} />
+                    onChange={handlePrompt} value={prompt} multiline size={10} />
                 <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                     <Lockup orientation='vertical'>
                         <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
@@ -133,8 +132,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                         </div> : null}
                 </Card>
                 <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
-
-
             </Module>
         </>
 

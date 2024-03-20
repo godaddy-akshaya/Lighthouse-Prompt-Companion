@@ -7,5 +7,4 @@ const options = {
         env
     }
 };
-
 module.exports = mergeConfigFiles(options);

@@ -1,1 +1,1 @@
-module.exports = process.env.CONFIG_NAME || process.env.NODE_ENV || 'local';
+module.exports = process.env.GASKET_ENV || process.env.NODE_ENV || 'local';

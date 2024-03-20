@@ -1,4 +1,4 @@
-{
+module.exports = {
   "env": "production",
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.gdcorp.tools",
