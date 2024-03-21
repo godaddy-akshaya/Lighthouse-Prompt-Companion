@@ -1,4 +1,4 @@
-name: Lighthouse UI Build-Deploy
+name: Lighthouse Build and Publish - therandomd
 
 on:
   push:
@@ -51,5 +51,5 @@ jobs:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: therandomd
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: dev
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}

@@ -1,4 +1,4 @@
-name: Lighthouse UI Build-Deploy
+name: Lighthouse Build and Publish - ckpetlbatch
 
 on:
   workflow_dispatch:
