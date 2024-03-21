@@ -33,7 +33,7 @@ jobs:
         uses: gdcorp-actions/katana-publish-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: ${{ steps.katana-app.outputs.namespace }}
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
           image_name: ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }}
           artifact_kind: ecs
@@ -45,7 +45,7 @@ jobs:
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: ${{ steps.katana-app.outputs.namespace }}
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
           environment: dev-private
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}

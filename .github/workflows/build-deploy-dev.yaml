@@ -28,8 +28,6 @@ jobs:
       - name: Golden Container Registry Login
         run: |
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.6.1-alpine-3.18 -u AWS --password-stdin
-        env:
-          NPM_AUTH_TOKEN: /Katana/Secrets/therandomd/lighthouse-ui/_katana/NPM_AUTH_TOKEN
       - name: Build Container
         run: |
           docker build -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} .
