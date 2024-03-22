@@ -25,14 +25,31 @@ it is recommended to import those directly to `pages/_app.js`
 .lh-prompt-form-card {
     min-height: 300px;
 }
-table.lh-table-view-results td:first-child,
-table.lh-table-view-results td:nth-child(2) {
-  min-width: 325px;
+.lh-view-card {
+    max-width: 100% !important;
+    height: 80vh !important;
+    overflow: auto !important;
 }
-table.lh-table-view-results th:first-child,
-table.lh-table-view-results th:nth-child(2) {
-  min-width: 325px;
+.lh-table-full-view-with-scroll { 
+    // thead { 
+    //     display: block !important; 
+    //     position: sticky !important; 
+    //     top: 0 !important; 
+    //     background-color: white !important; 
+    //     table-layout: auto !important;
+    // }
+    tbody thead {
+        display: block !important;
+        max-height: 100vh !important; /* Adjust this value to fit your needs */
+        overflow-y: auto !important; /* Enable vertical scrolling */
+        overflow-x: auto !important;/* Enable horizontal scrolling */
+      }
+    thead {
+        position: sticky !important;
+        top: 0 !important;
+    }
 }
+
 .lh-filter-card {
     margin-bottom: 16px !important;
     .lh-title {
@@ -80,6 +97,9 @@ table.lh-table-view-results th:nth-child(2) {
          > * {
             flex: 1;
         }
+    }
+    &.lh-b {
+        justify-content: space-between;
     }
     &.lh-start-and-end {
         justify-content: space-between;
@@ -140,4 +160,7 @@ body.ux-app.gasket-app .ux-app__content {
 }
 .field-container {
     margin-bottom: 16px !important;
+}
+.summary-prompt-modal {
+    width: 700px !important;
 }

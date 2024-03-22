@@ -29,7 +29,6 @@
     "@godaddy/gasket-header-nav": "^2.10.0",
     "@godaddy/gasket-next": "^2.26.3",
     "@godaddy/gasket-preset-webapp": "^2.27.0",
-    "@rigor/upload-coverage": "^1.0.0",
     "@size-limit/preset-big-lib": "^7.0.5",
     "@ux/alert": "^2301.4.1",
     "@ux/button": "^2301.2.1",

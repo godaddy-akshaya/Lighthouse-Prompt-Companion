@@ -5,7 +5,6 @@ ARG NPM_AUTH_TOKEN
 
 USER root
 
-RUN npm install -g npm@10.4.0
 RUN apk add bash
 
 # Configure all the permission 
@@ -40,6 +39,8 @@ COPY --chown=worker ./.babelrc /app/.babelrc
 COPY --chown=worker ./.stylelintrc /app/.stylelintrc
 COPY --chown=worker ./components /app/components
 COPY --chown=worker ./lib /app/lib
+COPY --chown=worker ./lifecycles /app/lifecycles
+COPY --chown=worker ./config /app/config
 COPY --chown=worker ./pages /app/pages
 COPY --chown=worker ./public /app/public
 COPY --chown=worker ./redux /app/redux

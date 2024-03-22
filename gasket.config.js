@@ -1,13 +1,26 @@
-const path = require('path');
+const isCI = process.env.CI === 'true';
+const env = require('./config/.env');
 
+const localHttpsConfig = {
+  hostname: 'local.c3.int.dev-gdcorp.tools',
+  http: false,
+  https: {
+    root: 'certs',
+    key: 'local.c3.int.dev-gdcorp.tools.key',
+    cert: [
+      'local.c3.int.dev-gdcorp.tools.crt'
+    ]
+  }
+};
 module.exports = {
+  env,
   http: 8080,
+  hostname: 'localhost',
   plugins: {
     presets: [
       '@godaddy/webapp'
     ],
     add: [
-      '@gasket/mocha',
       '@gasket/fetch',
       '@gasket/plugin-config'
     ]
@@ -17,33 +30,11 @@ module.exports = {
   },
   environments: {
     local: {
-      hostname: 'local.gasket.dev-gdcorp.tools',
-      endpoints: {
-        api: 'https://gheg0jyux8.execute-api.us-west-2.amazonaws.com/dev'
-      },
-      http: 80,
-      https: 443,
+      ...localHttpsConfig,
     },
-    development: {
-      hostname: 'localhost',
-      http: 8080,
-      https: 8443,
-      api: {
-        url: 'https://lighthouse.c3.int.dev-gdcorp.tools/scorecard-mgmt',
-      },
-    },
-    production: {
-      https: {
-        root: path.join(__dirname, 'certs'),
-        key: '*.c3.int.dev-gdcorp.tools.key',
-        cert: ['*.c3.int.dev-gdcorp.tools.crt']
-      },
-      hostname: 'lighthouse.c3.int.dev-gdcorp.tools',
-
-      plugins: {
-        remove: []
-      }
-    }
+    development: isCI
+      ? localHttpsConfig
+      : {}
   },
   presentationCentral: {
     params: {

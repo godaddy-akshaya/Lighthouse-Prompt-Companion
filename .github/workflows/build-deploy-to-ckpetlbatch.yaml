@@ -1,14 +1,12 @@
-name: Lighthouse Build and Publish - therandomd
+name: Lighthouse Build and Publish - ckpetlbatch
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 jobs:
   build_publish_promote:
     runs-on:
       labels: self-hosted
-      group: 7416-therandomdrunner
+      group: 6429-hadoopmigratione
 
     steps:
       - name: Checkout Repository
@@ -35,7 +33,7 @@ jobs:
         uses: gdcorp-actions/katana-publish-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: therandomd
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
           image_name: ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }}
           artifact_kind: ecs
@@ -47,7 +45,7 @@ jobs:
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: therandomd
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev
+          environment: dev-private
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}

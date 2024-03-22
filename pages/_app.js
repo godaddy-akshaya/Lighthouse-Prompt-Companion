@@ -28,6 +28,9 @@ import '@ux/icon/play/index.css';
 import '@ux/icon/help/index.css';
 import '@ux/alert/styles';
 import '@ux/tag/styles';
+import '@ux/modal/styles';
+import '@ux/icon/download/index.css';
+import '@ux/icon/create-form/index.css';
 import '@ux/message-overlay/styles';
 import '@ux/tooltip/styles';
 import { withLocaleRequired } from '@gasket/react-intl';
@@ -36,7 +39,8 @@ import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
 const options = {
-    realm: 'jomax'
+    realm: 'jomax',
+    groups: ['lighthouse-ui-group'],
 };
 export default withPageEnhancers([
     withLocaleRequired('/locales', { initialProps: true }), withAuthRequired(options)
