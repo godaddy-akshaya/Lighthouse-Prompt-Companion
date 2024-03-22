@@ -1,7 +1,5 @@
 const isCI = process.env.CI === 'true';
-const path = require('path');
 const env = require('./config/.env');
-
 
 const localHttpsConfig = {
   hostname: 'local.c3.int.dev-gdcorp.tools',
@@ -33,12 +31,6 @@ module.exports = {
   environments: {
     local: {
       ...localHttpsConfig,
-      // devCerts: {
-      //   path: '.certs',
-      //   commonNames: [
-      //     'lighthouse.dev-gdcorp.tools'
-      //   ]
-      // }
     },
     development: isCI
       ? localHttpsConfig

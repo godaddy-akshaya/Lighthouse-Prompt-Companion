@@ -1,10 +1,6 @@
 name: Lighthouse Build and Publish - ckpetlbatch
 
 on:
-  push:
-    branches: [dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 jobs:
   build_publish_promote:
