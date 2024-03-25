@@ -41,11 +41,11 @@ jobs:
             {
               "ports": [8080,8443]
             }
-      - name: Promote to dev-private Environment
+      - name: Promote to stage Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: stage
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
