@@ -41,7 +41,8 @@ jobs:
           artifact_kind: ecs
           artifact_options_json: |
             {
-              "ports": [8080,8443]
+              "ports": [8080,8443],
+              "healthCheck": "/healthcheck"
             }
       - name: Promote to dev-private Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
