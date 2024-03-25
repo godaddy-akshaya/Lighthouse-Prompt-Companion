@@ -49,5 +49,5 @@ jobs:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: therandomd
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev
+          environment: dev-private
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
