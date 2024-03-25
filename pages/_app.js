@@ -28,6 +28,7 @@ import '@ux/icon/play/index.css';
 import '@ux/icon/help/index.css';
 import '@ux/alert/styles';
 import '@ux/tag/styles';
+import '@ux/flyout/styles';
 import '@ux/modal/styles';
 import '@ux/menu/styles';
 import '@ux/icon/download/index.css';
