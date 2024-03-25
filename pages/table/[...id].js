@@ -20,7 +20,7 @@ import '@ux/field-frame/styles';
 import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
-import '@ux/menu/styles';
+
 import TableSelect from '../../components/table-select';
 import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/api';
 import Alert from '@ux/alert';

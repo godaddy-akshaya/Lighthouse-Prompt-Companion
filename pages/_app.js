@@ -29,6 +29,7 @@ import '@ux/icon/help/index.css';
 import '@ux/alert/styles';
 import '@ux/tag/styles';
 import '@ux/modal/styles';
+import '@ux/menu/styles';
 import '@ux/icon/download/index.css';
 import '@ux/icon/create-form/index.css';
 import '@ux/message-overlay/styles';
