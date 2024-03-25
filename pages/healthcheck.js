@@ -1,5 +1,7 @@
 import React from 'react';
 
-export default HealthCheck = () => {
+const HealthCheck = ({ props }) => {
     return ({ status: 200 });
 };
+
+export default HealthCheck;
