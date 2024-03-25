@@ -85,15 +85,6 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
 
                 <Button text='Insert' icon={<Add />} design='secondary' value='concatenation_of_responses' onClick={insertAction} />
 
-                <Menu id='my-menu-for-summary' className='m-t-1' >
-                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                    <MenuList>
-                        <MenuItem onSelect={insertAction}>concatenation_of_responses</MenuItem>
-                    </MenuList>
-                </Menu>
-
-
-
                 <TextInput aria-required required={true} id='summary-prompt-input' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
             </Block>
         </Modal>
