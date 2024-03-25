@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import Button from '@ux/button';
 import CreateForm from '@ux/icon/create-form';
 import Modal from '@ux/modal';
-import { Block } from '@ux/layout';
+import { Block, Lockup } from '@ux/layout';
 import { getGuid } from '../lib/utils';
 import TextInput from '@ux/text-input';
 import SelectInput from '@ux/select-input';
+import '@ux/menu/styles';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import Add from '@ux/icon/add';
 
@@ -16,12 +17,16 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     const [model, setModel] = useState('claude-instant-v1');
     const [numToRun, setNumToRun] = useState(count);
 
-    const handlePrompt = (e) => {
+    function handlePrompt(e) {
         setPrompt(e);
     }
     function checkForm() {
         // check prompt and count
         if (prompt == '') setPromptErrorMessage('Prompt is required');
+        if (prompt.indexOf('[concatenation_of_responses]') === -1) {
+            setPromptErrorMessage('Prompt must contain [concatenation_of_responses]');
+            passed = false;
+        }
         if (numToRun < 0) setNumOfErrorMessage('Number of transactions must be a positive number');
         if (numToRun > count) setNumOfErrorMessage('Number of transactions must be less than or equal to the total number of transactions');
         if (prompt === '' || numToRun < 0 || numToRun > count) {
@@ -29,6 +34,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
         }
         return true;
     }
+
     function insertAction(e) {
         let text = prompt + ` [${e}]`;
         setPrompt(text);
@@ -69,18 +75,24 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     );
     const modal = (
         <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
-            <Block >
+            <Block>
+
                 <SelectInput defaultValue={model} onChange={(e) => { setModel(e) }} id='model' name='model' label='Model'>
                     <option value='claude-instant-v1'>claude-instant-v1</option>
                     <option value='claude-v2'>claude-v2</option>
                 </SelectInput>
-                <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun} defaultValue={count} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                <Menu id='my-menu-for-summary' className='m-t-1'>
-                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                    <MenuList className='lh-menu' design='primary'>
-                        <MenuItem key='concatenation_of_responses' onSelect={insertAction}>concatenation_of_responses</MenuItem>
-                    </MenuList>
-                </Menu>
+                <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun.toString()} defaultValue={count?.toString()} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+
+                <Lockup>
+                    <Menu id='my-menu-for-summary' className='m-t-1' >
+                        <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                        <MenuList>
+                            <MenuItem onSelect={insertAction}>concatenation_of_responses</MenuItem>
+                        </MenuList>
+                    </Menu>
+                </Lockup>
+
+
                 <TextInput aria-required required={true} id='summary-prompt-input' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
             </Block>
         </Modal>
