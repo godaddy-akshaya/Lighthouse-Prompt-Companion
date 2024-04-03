@@ -46,7 +46,7 @@ const PromptBuilder = ({ authDetails }) => {
         evaluation_model: '',
         evaluation_prompt: '',
         filterOptions: [],
-        dateValue: {},
+        extras: []
     });
     const [errorMessage, setErrorMessage] = useState('Something went wrong');
 
@@ -71,7 +71,7 @@ const PromptBuilder = ({ authDetails }) => {
                 evaluation_prompt: formValues.evaluationPrompt || '',
             }
 
-            submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.dateValue).then(data => {
+            submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(data => {
                 router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
             });
         })();
@@ -82,12 +82,12 @@ const PromptBuilder = ({ authDetails }) => {
         setErrorMessage('');
     }
     /*  after posting prompt form -> results page    */
-    const handleTableRowSubmit = ({ filterOptions, dateValue }) => {
-        setJobModel({ ...jobModel, filterOptions, dateValue });
+    const handleTableRowSubmit = (filterOptions, extras) => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setJobModel({ ...jobModel, filterOptions, extras });
         setIsPromptVisible(true);
         setShowMessage(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        submitRowCountRequest(routeParams.table, filterOptions, dateValue).then(data => {
+        submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
             if (data?.errorMessage) {
                 setNumOfTransactions(0);
                 setErrorMessage(data.errorMessage);
