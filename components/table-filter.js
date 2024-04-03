@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useState } from 'react';
+import { debounce } from 'lodash';
 import FilterCards from './filter-cards';
 import Card from '@ux/card';
 import { Module } from '@ux/layout';
@@ -7,10 +8,6 @@ import DateInput from '@ux/date-input';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
-
-const LexcalSearchTextBox = ({ onChange }) => {
-
-}
 
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
@@ -32,8 +29,11 @@ const TableFilter = ({ filters, onSubmit }) => {
         const extras = [lexicalSearchModel, dateValue];
         onSubmit(filterOptions, extras);
     }
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch(value), 100), [],);
+
+
     function handleLexicalSearch(e) {
-        setLexicalSearch(e);
+        debounceHandleLexicalSearch(e);
     }
     function handleSelectAll(e) {
         let _filters = [...filterOptions.map(filter => {
@@ -99,7 +99,7 @@ const TableFilter = ({ filters, onSubmit }) => {
                     </div>
                 </div>
                 <div className='lh-filter-container'>
-                    <TextInput id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} value={lexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                    <TextInput id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                 </div>
                 <div className='lh-filter-container'>
                     {
