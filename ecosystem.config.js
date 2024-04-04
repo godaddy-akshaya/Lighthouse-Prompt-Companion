@@ -1,21 +1,23 @@
 module.exports = {
     apps: [
         {
-            name: 'Lighthouse',
+            name: 'dev-lighthouse',
             instances: 1,
             autorestart: false, // Automatically restart on crashes
-            watch: false, // Re
+            watch: false, // Restart on file changes
+            script: 'gasket start --env development',
+            env: {
+                NODE_ENV: 'development',
+                PORT: 8080,
+            }
+        },
+        {
+            name: 'prod-lighthouse',
+            script: 'gasket start --env production',
             env: {
                 NODE_ENV: 'production',
                 PORT: 8080,
-            },
-            env_development: {
-                NODE_ENV: 'development',
-                PORT: 8080,
-            },
-            env_test: {
-                NODE_ENV: 'test',
-                PORT: 8080,
+
             },
             error_file: './err.log',
             out_file: './out.log',
@@ -33,7 +35,7 @@ module.exports = {
             ref: 'origin/master',
             repo: 'git@github.com:repo.git',
             path: '/var/www/development',
-            'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production',
+            'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production --only prod-lighthouse',
         }
     }
 };
