@@ -22,7 +22,8 @@ module.exports = {
     ],
     add: [
       '@gasket/fetch',
-      '@gasket/plugin-config'
+      '@gasket/plugin-config',
+      '@godaddy/gasket-plugin-auth'
     ]
   },
   helmet: {
