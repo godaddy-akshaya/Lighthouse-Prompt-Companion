@@ -16,10 +16,6 @@ module.exports = {
       "method": "GET",
       "url": "https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "view_status": {
-      "method": "GET",
-      "url": "https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy"
-    },
     "table_filters": {
       "method": "GET",
       "url": "https://xk89vym7gd.execute-api.us-west-2.amazonaws.com/gddeploy",
@@ -30,6 +26,10 @@ module.exports = {
     "table_data_row_count": {
       "method": "POST",
       "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
+    "view_status": {
+      "method": "GET",
+      "url": "https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
     "submit_job": {
       "method": "POST",

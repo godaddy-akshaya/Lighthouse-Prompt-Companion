@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useState } from 'react';
+import { debounce } from 'lodash';
 import FilterCards from './filter-cards';
 import Card from '@ux/card';
 import { Module } from '@ux/layout';
 import DateInput from '@ux/date-input';
+import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
-import SiblingSet from '@ux/sibling-set';
 
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
@@ -18,9 +19,21 @@ const TableFilter = ({ filters, onSubmit }) => {
         column_selected_values: [startDateValue[0], endDateValue[0]],
         column_data_type: 'date',
     });
+    const [lexicalSearch, setLexicalSearch] = useState('');
     function handleTableRowSubmit(e) {
-        console.log(filterOptions.length);
-        onSubmit({ filterOptions, dateValue })
+        const lexicalSearchModel = {
+            column_name: 'lexicalsearch',
+            column_selected_values: lexicalSearch.split(' '), // split the string into an array of words
+            column_data_type: 'string',
+        };
+        const extras = [lexicalSearchModel, dateValue];
+        onSubmit(filterOptions, extras);
+    }
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch(value), 100), [],);
+
+
+    function handleLexicalSearch(e) {
+        debounceHandleLexicalSearch(e);
     }
     function handleSelectAll(e) {
         let _filters = [...filterOptions.map(filter => {
@@ -79,15 +92,14 @@ const TableFilter = ({ filters, onSubmit }) => {
         <Card id='table-params-card' stretch={true} title='Parameters'>
             <Module>
                 {filterOptions?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                {/* <SiblingSet gap='sm' stretch={true} >
-                        <DateInput id='start' name='start-date' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                        <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                    </SiblingSet> */}
                 <div className='lh-filter-container'>
                     <div className='lh-container lh-between'>
-                        <DateInput id='start' name='start-date' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                        <DateInput id='start' name='start-date' className='m-r-1' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
                         <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                     </div>
+                </div>
+                <div className='lh-filter-container'>
+                    <TextInput id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                 </div>
                 <div className='lh-filter-container'>
                     {
