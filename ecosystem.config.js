@@ -6,7 +6,7 @@ module.exports = {
             autorestart: false, // Automatically restart on crashes
             watch: false, // Restart on file changes
             script: 'gasket start --env development',
-            env: {
+            env_development: {
                 NODE_ENV: 'development',
                 PORT: 8080,
             }
@@ -14,7 +14,7 @@ module.exports = {
         {
             name: 'prod-lighthouse',
             script: 'gasket start --env production',
-            env: {
+            env_production: {
                 NODE_ENV: 'production',
                 PORT: 8080,
 
