@@ -12,42 +12,42 @@ module.exports = {
     }
   },
   "api": {
-    "table_listing": {
+    "table-listing": {
       "method": "GET",
       "url": "https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "table_filters": {
+    "table-filters": {
       "method": "GET",
       "url": "https://xk89vym7gd.execute-api.us-west-2.amazonaws.com/gddeploy",
       "params": {
-        "table_name": "string"
+        "table-name": "string"
       }
     },
-    "table_data_row_count": {
+    "table-data-row-count": {
       "method": "POST",
       "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "view_status": {
+    "view-status": {
       "method": "GET",
       "url": "https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "submit_job": {
+    "submit-job": {
       "method": "POST",
       "url": "https://70bwwwm445.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "cancel_job": {
+    "cancel-job": {
       "method": "POST",
       "url": "https://7y9v81tazb.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "view_results": {
+    "view-results": {
       "method": "GET",
       "url": "https://nk7y0uidib.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "view_summary": {
+    "view-summary": {
       "method": "GET",
       "url": "https://jkb6iltdd7.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "submit_summary_job": {
+    "submit-summary-job": {
       "method": "POST",
       "url": "https://o4aj4d6r36.execute-api.us-west-2.amazonaws.com/gddeploy"
     }

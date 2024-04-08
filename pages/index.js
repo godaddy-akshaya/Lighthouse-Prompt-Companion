@@ -1,11 +1,11 @@
 import React from 'react';
-import { Lockup, Block, Module } from '@ux/layout';
+import { Lockup, Block } from '@ux/layout';
 import { withLocaleRequired } from '@gasket/react-intl';
 import PropTypes from 'prop-types';
 import Head from '../components/head';
 import Button from '@ux/button';
 import text from '@ux/text';
-import Card, { spaceOptions } from '@ux/card';
+import Card from '@ux/card';
 import Logo from '../components/logo';
 import session from '../lib/session';
 import TableSelect from '../components/table-select';
