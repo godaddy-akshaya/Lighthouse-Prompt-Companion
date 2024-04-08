@@ -35,15 +35,14 @@ const localHttpsConfig = {
 //   const parts = url.split('/');
 //   return parts.pop();
 // }
-// const getUrlForProxy = (req) => {
-//   console.log('req', req.url);
-//   Object.keys(req).forEach(key => console.log(key));
-//   const id = getLastElementInUrl(req.url);
-//   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
-//   const { url } = req.config?.api[id] || {};
-//   // logger.info(`${logPrefix}: Using url ${url} for proxy`);
-//   return url;
-// }
+const getUrlForProxy = (req) => {
+  console.log('req', req.url);
+  const id = 'table-listing';
+  //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
+  const { url } = req.config?.api[id] || {};
+  // logger.info(`${logPrefix}: Using url ${url} for proxy`);
+  return url;
+}
 module.exports = {
   env,
   http: 8080,
@@ -82,8 +81,7 @@ module.exports = {
     proxies: {
       getSecureData: {
         url: '/aws/secure-data',
-        // targetUrl: ({ req }) => getUrlForProxy(req),
-        targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
+        targetUrl: ({ req }) => getUrlForProxy(req),
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
