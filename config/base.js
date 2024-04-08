@@ -12,11 +12,11 @@ module.exports = {
     }
   },
   "api": {
-    "table_listing": {
+    "table-listing": {
       "method": "GET",
       "url": "https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev"
     },
-    "view_status": {
+    "view-status": {
       "method": "GET",
       "url": "https://ys6kxhlx6f.execute-api.us-west-2.amazonaws.com/dev"
     },

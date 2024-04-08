@@ -1,11 +1,13 @@
 const fetch = require('@gasket/fetch');
 
+
 module.exports = {
-    name: 'example',
+    name: 'secureProxy',
     hooks: {
         middleware: function (gasket) {
             function proxy(uri, req) {
                 return async function (params) {
+
                     // Use params here to build the correct url/body
                     const url = 'https://api.endpoint.base.url' + uri;
                     const response = await fetch(url, {

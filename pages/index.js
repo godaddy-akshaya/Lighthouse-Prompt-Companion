@@ -23,7 +23,6 @@ export const IndexPage = ({ authDetails }) => {
             <text.h3 as='title' text='Insights Platform' />
           </Lockup>
         </Block>
-
       </div>
       <div className='lh-container lh-between'>
         <Block>
