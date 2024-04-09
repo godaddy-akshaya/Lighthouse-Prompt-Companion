@@ -46,7 +46,7 @@ const localHttpsConfig = {
 //   return parts.pop();
 // }
 const getUrlForProxy = (req) => {
-  console.log('req', req.headers);
+  console.log('req', req.cookies['auth_jomax']);
   console.log('req', req.url);
   console.log('req', req.config);
   const id = 'table-listing';
@@ -97,9 +97,9 @@ module.exports = {
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
-            'Content-Type': 'application/json',
+            'content-type': 'application/json',
             'weblogin': 'pizza',
-            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+            'Authorization': `sso-jwt ${req.cookies['auth_jomax']}`
           },
           options: {
             credentials: 'include'
