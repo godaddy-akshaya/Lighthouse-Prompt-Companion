@@ -41,15 +41,15 @@ const localHttpsConfig = {
 // The last element is the name of the api endpoint
 // The api configuration and metat data is stored in the config object
 // Each request will go through the proxy and the proxy will use the api configuration to make the request
-// const getLastElementInUrl = (url) => {
-//   const parts = url.split('/');
-//   return parts.pop();
-// }
+const getLastElementInUrl = (url) => {
+  const parts = url.split('/');
+  return parts.pop();
+}
 const getUrlForProxy = (req) => {
-  const id = 'table-listing';
+  const id = getLastElementInUrl(req.url);
   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
   const { url } = req.config?.api[id] || {};
-  // logger.info(`${logPrefix}: Using url ${url} for proxy`);
+  console.log(`${logPrefix}: Using url ${url} for proxy`);
   return url;
 }
 module.exports = {
