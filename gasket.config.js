@@ -80,9 +80,6 @@ module.exports = {
     localprod: {
       ...localProdHttpConfig
     },
-    production: {
-      ...localProdHttpConfig
-    }
   },
   presentationCentral: {
     params: {
