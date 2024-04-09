@@ -15,7 +15,17 @@ const withAHeader = realm => ({ req }) => request => {
     }
   };
 };
-
+const localProdHttpConfig = {
+  hostname: 'local-prd.c3.int.gdcorp.tools',
+  http: false,
+  https: {
+    root: 'certs',
+    key: 'local-prd.c3.int.gdcorp.tools.key',
+    cert: [
+      'local-prd.c3.int.gdcorp.tools.crt'
+    ]
+  }
+}
 
 const localHttpsConfig = {
   hostname: 'local.c3.int.dev-gdcorp.tools',
@@ -36,7 +46,6 @@ const localHttpsConfig = {
 //   return parts.pop();
 // }
 const getUrlForProxy = (req) => {
-  console.log('req', req.url);
   const id = 'table-listing';
   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
   const { url } = req.config?.api[id] || {};
@@ -63,11 +72,17 @@ module.exports = {
   },
   environments: {
     local: {
-      ...localHttpsConfig,
+      ...localProdHttpConfig
     },
     development: isCI
       ? localHttpsConfig
-      : {}
+      : {},
+    localprod: {
+      ...localProdHttpConfig
+    },
+    production: {
+      ...localProdHttpConfig
+    }
   },
   presentationCentral: {
     params: {
@@ -81,14 +96,12 @@ module.exports = {
     proxies: {
       getSecureData: {
         url: '/aws/secure-data',
-        targetUrl: ({ req }) => getUrlForProxy(req),
+        targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
+            ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
-          },
-          options: {
-            credentials: 'include'
           }
         })
       }
