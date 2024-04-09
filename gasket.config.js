@@ -41,15 +41,17 @@ const localHttpsConfig = {
 // The last element is the name of the api endpoint
 // The api configuration and metat data is stored in the config object
 // Each request will go through the proxy and the proxy will use the api configuration to make the request
-// const getLastElementInUrl = (url) => {
-//   const parts = url.split('/');
-//   return parts.pop();
-// }
+const getLastElementInUrl = (url) => {
+  const parts = url.split('/');
+  return parts.pop();
+}
 const getUrlForProxy = (req) => {
-  const id = 'table-listing';
+  const id = getLastElementInUrl(req.url);
+  console.log(`${logPrefix}: Using id ${id} for proxy`);
+
   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
-  const { url } = req.config?.api[id] || {};
-  // logger.info(`${logPrefix}: Using url ${url} for proxy`);
+  const { url } = req.config?.api[id] || '';
+  console.log(`${logPrefix}: Using url ${url} for proxy`);
   return url;
 }
 module.exports = {
@@ -72,14 +74,14 @@ module.exports = {
   },
   environments: {
     local: {
-      ...localProdHttpConfig
+      ...localHttpsConfig
     },
     development: isCI
       ? localHttpsConfig
       : {},
     localprod: {
       ...localProdHttpConfig
-    },
+    }
   },
   presentationCentral: {
     params: {
@@ -91,9 +93,21 @@ module.exports = {
   },
   proxy: {
     proxies: {
+      // getSecureData: {
+      //   url: '/aws/secure-data',
+      //   targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
+      //   requestTransform: ({ req }) => request => ({
+      //     ...request,
+      //     headers: {
+      //       ...request.headers,
+      //       Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+      //     }
+      //   })
+      // },
       getSecureData: {
-        url: '/aws/secure-data',
-        targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
+        url: '/aws/secure-data/:id',
+        targetUrl: ({ req }) => getUrlForProxy(req),
+        // targetUrl: 'https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev',
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
