@@ -14,8 +14,7 @@ module.exports = {
   "api": {
     "table-listing": {
       "method": "GET",
-      "url": "https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy"
-      // "url": "https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev"
+      "url": "https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev"
     },
     "view-status": {
       "method": "GET",

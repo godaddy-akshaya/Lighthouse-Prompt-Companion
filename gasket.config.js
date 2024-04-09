@@ -47,8 +47,10 @@ const getLastElementInUrl = (url) => {
 }
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
+  console.log(`${logPrefix}: Using id ${id} for proxy`);
+
   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
-  const { url } = req.config?.api[id] || {};
+  const { url } = req.config?.api[id] || '';
   console.log(`${logPrefix}: Using url ${url} for proxy`);
   return url;
 }
@@ -72,7 +74,7 @@ module.exports = {
   },
   environments: {
     local: {
-      ...localProdHttpConfig
+      ...localHttpsConfig
     },
     development: isCI
       ? localHttpsConfig
@@ -91,20 +93,21 @@ module.exports = {
   },
   proxy: {
     proxies: {
+      // getSecureData: {
+      //   url: '/aws/secure-data',
+      //   targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
+      //   requestTransform: ({ req }) => request => ({
+      //     ...request,
+      //     headers: {
+      //       ...request.headers,
+      //       Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+      //     }
+      //   })
+      // },
       getSecureData: {
-        url: '/aws/secure-data',
-        targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
-        requestTransform: ({ req }) => request => ({
-          ...request,
-          headers: {
-            ...request.headers,
-            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
-          }
-        })
-      },
-      getSecureData2: {
         url: '/aws/secure-data/:id',
         targetUrl: ({ req }) => getUrlForProxy(req),
+        // targetUrl: 'https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev',
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
