@@ -46,9 +46,6 @@ const localHttpsConfig = {
 //   return parts.pop();
 // }
 const getUrlForProxy = (req) => {
-  console.log('req', req.cookies['auth_jomax']);
-  console.log('req', req.url);
-  console.log('req', req.config);
   const id = 'table-listing';
   //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
   const { url } = req.config?.api[id] || {};
@@ -75,11 +72,17 @@ module.exports = {
   },
   environments: {
     local: {
-      ...localHttpsConfig
+      ...localProdHttpConfig
     },
     development: isCI
       ? localHttpsConfig
-      : {}
+      : {},
+    localprod: {
+      ...localProdHttpConfig
+    },
+    production: {
+      ...localProdHttpConfig
+    }
   },
   presentationCentral: {
     params: {
@@ -93,16 +96,12 @@ module.exports = {
     proxies: {
       getSecureData: {
         url: '/aws/secure-data',
-        targetUrl: ({ req }) => getUrlForProxy(req),
+        targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
-            'content-type': 'application/json',
-            'weblogin': 'pizza',
-            'Authorization': `sso-jwt ${req.cookies['auth_jomax']}`
-          },
-          options: {
-            credentials: 'include'
+            ...request.headers,
+            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
           }
         })
       }
