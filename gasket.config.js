@@ -79,7 +79,7 @@ module.exports = {
       : {},
     localprod: {
       ...localProdHttpConfig
-    },
+    }
   },
   presentationCentral: {
     params: {
@@ -94,6 +94,17 @@ module.exports = {
       getSecureData: {
         url: '/aws/secure-data',
         targetUrl: 'https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy',
+        requestTransform: ({ req }) => request => ({
+          ...request,
+          headers: {
+            ...request.headers,
+            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+          }
+        })
+      },
+      getSecureData2: {
+        url: '/aws/secure-data/:id',
+        targetUrl: ({ req }) => getUrlForProxy(req),
         requestTransform: ({ req }) => request => ({
           ...request,
           headers: {
