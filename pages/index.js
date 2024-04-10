@@ -13,14 +13,7 @@ import TableSelect from '../components/table-select';
 
 
 export const IndexPage = ({ authDetails }) => {
-  const [tables, setTables] = useState(null);
-  useEffect(() => {
-    if (!tables) {
-      getTables().then(data => {
-        setTables(data);
-      });
-    }
-  }, []);
+
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
   return (
     <><Head title='GoDaddy Lighthouse' route='home' />
@@ -45,8 +38,7 @@ export const IndexPage = ({ authDetails }) => {
         </Block>
         <Block>
           <Card id='try-prompt-out' className='grey-card'>
-            {tables &&
-              <TableSelect initTables={tables} />}
+            <TableSelect />
           </Card>
         </Block>
       </div>
