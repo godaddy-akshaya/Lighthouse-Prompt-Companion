@@ -115,7 +115,7 @@ const PromptBuilder = ({ authDetails }) => {
                 setIsLoading(false);
             });
         }
-    }, [routeParams]);
+    }, []);
     return (
         <>  <Head title='Prompt Parameters' route='table' />
             {showUserMessage &&

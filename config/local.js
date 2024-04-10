@@ -24,6 +24,10 @@ module.exports = {
       "method": "GET",
       "url": "https://o3un8ndnb8.execute-api.us-west-2.amazonaws.com/dev"
     },
+    "row-count": {
+      "method": "POST",
+      "url": "https://4qyj0h6rz2.execute-api.us-west-2.amazonaws.com/dev"
+    },
     "table-data-row-count": {
       "method": "POST",
       "url": "https://4qyj0h6rz2.execute-api.us-west-2.amazonaws.com/dev"

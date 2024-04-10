@@ -54,7 +54,6 @@ const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   console.log(`${logPrefix}: Using id ${id} for proxy`);
 
-  //  return req.config?.api[id]?.url || `https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev`;
   const { url } = req.config?.api[id] || '';
   console.log(`${logPrefix}: Using url ${url} for proxy`);
   return url;
@@ -106,6 +105,24 @@ module.exports = {
           headers: {
             ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+          }
+        })
+      },
+      getPostData: {
+        url: '/aws/post-data/:id',
+        method: 'POST',
+        targetUrl: ({ req }) => getUrlForProxy(req),
+        requestTransform: ({ req }) => request => ({
+          ...request,
+          headers: {
+            ...request.headers,
+            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+          },
+          options: {
+            ...request.options
+          },
+          body: {
+            ...request.body
           }
         })
       }
