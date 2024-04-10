@@ -7,7 +7,6 @@ import Head from '../../components/head';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import '@ux/icon/home/index.css';
-import Add from '@ux/icon/add';
 import '@ux/text-input/styles';
 import '@ux/card/styles';
 import Button from '@ux/button';
@@ -70,9 +69,12 @@ const PromptBuilder = ({ authDetails }) => {
                 evaluation_model: formValues.evaluationModel || '',
                 evaluation_prompt: formValues.evaluationPrompt || '',
             }
-
             submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(data => {
                 router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
+            }, error => {
+                setErrorMessage(error);
+                setIsLoading(false);
+                setShowUserMessage(true);
             });
         })();
     }

@@ -109,9 +109,9 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                 <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
                     label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert'
                     onChange={handlePrompt} value={prompt} multiline size={10} />
-                <Card id='evaluation' className='m-t-1' stretch='true' title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+                <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
                     <Lockup orientation='vertical'>
-                        <Checkbox label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                        <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
                     </Lockup>
                     {includeEval ?
                         <div className="eval m-t-1">

@@ -119,7 +119,7 @@ const TableFilter = ({ filters, onSubmit }) => {
                     {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
                 </div>
                 <div className='lh-filter-container'>
-                    <TextInput id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                    <TextInput id='lexicalsearch' stretch={true} onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                 </div>
                 <div className='lh-filter-container'>
                     {
