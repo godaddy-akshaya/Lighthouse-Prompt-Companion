@@ -23,6 +23,10 @@ module.exports = {
         "table-name": "string"
       }
     },
+    "row-count": {
+      "method": "POST",
+      "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
     "table-data-row-count": {
       "method": "POST",
       "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
