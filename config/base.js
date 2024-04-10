@@ -36,6 +36,10 @@ module.exports = {
       "method": "POST",
       "url": "https://hhlm0qg1c9.execute-api.us-west-2.amazonaws.com/dev"
     },
+    "row-count": {
+      "method": "POST",
+      "url": "https://4qyj0h6rz2.execute-api.us-west-2.amazonaws.com/dev"
+    },
     "view-results": {
       "method": "GET",
       "url": "https://9kj0a6h69a.execute-api.us-west-2.amazonaws.com/dev"
