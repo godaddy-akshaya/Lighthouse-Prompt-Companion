@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Lockup, Block } from '@ux/layout';
 import { withLocaleRequired } from '@gasket/react-intl';
 import PropTypes from 'prop-types';
@@ -8,10 +8,19 @@ import text from '@ux/text';
 import Card from '@ux/card';
 import Logo from '../components/logo';
 import session from '../lib/session';
+import { getTables } from '../lib/api';
 import TableSelect from '../components/table-select';
 
 
 export const IndexPage = ({ authDetails }) => {
+  const [tables, setTables] = useState(null);
+  useEffect(() => {
+    if (!tables) {
+      getTables().then(data => {
+        setTables(data);
+      });
+    }
+  }, []);
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
   return (
     <><Head title='GoDaddy Lighthouse' route='home' />
@@ -36,7 +45,8 @@ export const IndexPage = ({ authDetails }) => {
         </Block>
         <Block>
           <Card id='try-prompt-out' className='grey-card'>
-            <TableSelect />
+            {tables &&
+              <TableSelect initTables={tables} />}
           </Card>
         </Block>
       </div>
@@ -45,7 +55,10 @@ export const IndexPage = ({ authDetails }) => {
 };
 
 IndexPage.propTypes = {
-  authDetails: PropTypes.object
+  authDetails: PropTypes.object,
+  tables: PropTypes.array
 };
+
+
 
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);

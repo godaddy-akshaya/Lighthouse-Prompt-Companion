@@ -1,20 +1,8 @@
-const isCI = process.env.CI === 'true';
+const isCI = process.env.CI === true;
 const env = require('./config/.env');
 const logPrefix = 'config:gasket';
 
-const withAHeader = realm => ({ req }) => request => {
-  // strip out cookie from original headers
-  const { cookie, ...headers } = req.headers; // eslint-ignore-line no-unused-vars
-  return {
-    ...request,
-    headers: {
-      // spread remaining original headers
-      ...headers,
-      // add auth header with jwt from the parsed cookies 
-      Authorization: 'sso-jwt ' + req.cookies[`auth_${realm}`]
-    }
-  };
-};
+
 const localProdHttpConfig = {
   hostname: 'local-prd.c3.int.gdcorp.tools',
   http: false,

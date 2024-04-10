@@ -8,17 +8,17 @@ import text from '@ux/text';
 import SelectInput from '@ux/select-input';
 
 
-const TableSelect = ({ initTables = null }) => {
+const TableSelect = ({ initTables }) => {
     const [tables, setTables] = useState(initTables);
     const router = useRouter();
 
-    useEffect(() => {
-        if (!tables) {
-            getTables().then(data => {
-                setTables(data)
-            });
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (!tables) {
+    //         getTables().then(data => {
+    //             setTables(data)
+    //         });
+    //     }
+    // }, []);
     function handleTableRouteChange(event) {
         const selectedTable = event;
         let display_name = tables.find(table => table.column_name === event).display_name;
