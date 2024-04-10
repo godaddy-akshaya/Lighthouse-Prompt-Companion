@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { debounce } from 'lodash';
 import FilterCards from './filter-cards';
 import Card from '@ux/card';
-import { Module } from '@ux/layout';
+import { Module, Lockup } from '@ux/layout';
+import SiblingSet from '@ux/sibling-set';
 import DateInput from '@ux/date-input';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
@@ -11,9 +12,12 @@ import Button from '@ux/button';
 
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
+    const minDateValue = `${today.getFullYear() - 1}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const [endDateValue, setEndDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`]);
     const [startDateValue, setStartDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`]);
     const [filterOptions, setFilterOptions] = useState([...filters]);
+    const [showDateError, setShowDateError] = useState(false);
+    const [page, setPage] = useState('2024-04-01');
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
         column_selected_values: [startDateValue[0], endDateValue[0]],
@@ -62,9 +66,20 @@ const TableFilter = ({ filters, onSubmit }) => {
         setFilterOptions(_columns);
 
     }
+    //const handleStartDateValue = useCallback((e) => setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] }), []);
+    function checkDateMinValue(e) {
+        return new Date(minDateValue) < new Date(e[0]);
+    }
     function handleStartDateValue(e) {
-        setStartDateValue(e);
-        setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] });
+        if (checkDateMinValue(e)) {
+            setStartDateValue(e);
+            setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] });
+        } else {
+            setShowDateError(true);
+            setStartDateValue([minDateValue]);
+            setDateValue({ ...dateValue, column_selected_values: [minDateValue, endDateValue[0]] });
+        }
+
     }
     function handleEndDateValue(e) {
         setEndDateValue(e);
@@ -94,9 +109,14 @@ const TableFilter = ({ filters, onSubmit }) => {
                 {filterOptions?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
                 <div className='lh-filter-container'>
                     <div className='lh-container lh-between'>
-                        <DateInput id='start' name='start-date' className='m-r-1' value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                        <DateInput id='end' name='end-date' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                        <DateInput id='start' name='start-date'
+                            page={page}
+                            onPaginate={setPage}
+                            className='m-r-1 lh-date-on-top'
+                            value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                        <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                     </div>
+                    {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
                 </div>
                 <div className='lh-filter-container'>
                     <TextInput id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
