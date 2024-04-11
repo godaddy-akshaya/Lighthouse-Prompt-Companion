@@ -93,6 +93,9 @@ module.exports = {
           headers: {
             ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+          },
+          options: {
+            ...request.options
           }
         })
       },
