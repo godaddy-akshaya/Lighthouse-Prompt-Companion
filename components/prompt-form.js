@@ -85,55 +85,61 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
         setIncludeEval(!includeEval);
     }
     return (
-        <>
+        <Card className='lh-prompt-form-card' id='para-card' stretch={true}>
             <Module>
-                <text.h4 as='title' text='Parameters' />
-                <p>
+                <Block>
                     <Tag emphasis='neutral'>
                         {`Number of Transactions ${numOfTransactions}`}
                     </Tag>
-                </p>
-                <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
-                    <option value='claude-instant-v1'>claude-instant-v1</option>
-                    <option value='claude-v2'>claude-v2</option>
-                </SelectInput>
-                <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
-                    className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
-                    onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                <Menu id='my-menu' size='small' className='m-t-1'>
-                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                    <MenuList className='lh-menu' design='primary'>
-                        <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-                    </MenuList>
-                </Menu>
-                <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
-                    label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert'
-                    onChange={handlePrompt} value={prompt} multiline size={10} />
-                <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                    <Lockup orientation='vertical'>
-                        <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                </Block>
+                <Block>
+                    <Lockup>
+                        <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
+                            <option value='claude-instant-v1'>claude-instant-v1</option>
+                            <option value='claude-v2'>claude-v2</option>
+                        </SelectInput>
                     </Lockup>
-                    {includeEval ?
-                        <div className="eval m-t-1">
-                            <text.label as='label' text='Evaluation Parameters' />
-                            <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model'>
-                                <option value='claude-instant-v1'>claude-instant-v1</option>
-                                <option value='claude-v2'>claude-v2</option>
-                            </SelectInput>
-                            <Menu id='my-menu-for-eval' className='m-t-1'>
-                                <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                                <MenuList className='lh-menu' design='primary'>
-                                    <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
-                                    <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertActionEval}>llm_response</MenuItem>
-                                </MenuList>
-                            </Menu>
-
-                            <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} errorMessage={evalPromptErrorMessage} helpMessage='[transcript] and [llm_response] are required prompt inserts' value={evaluationPrompt} multiline size={7} />
-                        </div> : null}
-                </Card>
+                </Block>
+                <Block>
+                    <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
+                        className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
+                        onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                    <Menu id='my-menu' size='small' className='m-t-1'>
+                        <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                        <MenuList className='lh-menu' design='primary'>
+                            <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
+                        </MenuList>
+                    </Menu>
+                    <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
+                        label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert'
+                        onChange={handlePrompt} value={prompt} multiline size={10} />
+                </Block>
+                <Block>
+                    <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+                        <Lockup orientation='vertical'>
+                            <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
+                        </Lockup>
+                        {includeEval ?
+                            <div className="eval m-t-1">
+                                <text.label as='label' text='Evaluation Parameters' />
+                                <SelectInput id='model-select' className='m-t-1' name='model-select' onChange={handleEvalModelChange} label='Model'>
+                                    <option value='claude-instant-v1'>claude-instant-v1</option>
+                                    <option value='claude-v2'>claude-v2</option>
+                                </SelectInput>
+                                <Menu id='my-menu-for-eval' className='m-t-1'>
+                                    <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                                    <MenuList className='lh-menu' design='primary'>
+                                        <MenuItem key='transcript' onSelect={insertActionEval}>transcript</MenuItem>
+                                        <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertActionEval}>llm_response</MenuItem>
+                                    </MenuList>
+                                </Menu>
+                                <TextInput label='Prompt' name='evalPromp' onChange={handleEvalPrompt} errorMessage={evalPromptErrorMessage} helpMessage='[transcript] and [llm_response] are required prompt inserts' value={evaluationPrompt} multiline size={7} />
+                            </div> : null}
+                    </Card>
+                </Block>
                 <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
             </Module>
-        </>
+        </Card>
 
     )
 }
