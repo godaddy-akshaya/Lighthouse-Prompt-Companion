@@ -10,6 +10,16 @@ import text from '@ux/text';
 import Button from '@ux/button';
 import FilterUpload from './upload/filter-upload';
 
+
+// Object to hold the filter options
+const DefaultFilterModel = {
+    column_name: '',
+    column_selected_values: [],
+    has_been_modified: false,
+    column_data_type: 'string',
+};
+
+
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
     const formRef = React.createRef();
@@ -23,25 +33,28 @@ const TableFilter = ({ filters, onSubmit }) => {
         column_name: 'rpt_mst_date',
         column_selected_values: [startDateValue[0], endDateValue[0]],
         column_data_type: 'date',
+        has_been_modified: true
     });
     const [uploadData, setUploadData] = useState({
-        column_name: '',
+        ...DefaultFilterModel,
+        column_name: 'interaction_id',
         column_selected_values: [],
         column_data_type: 'string',
         has_been_modified: false,
     });
-    const [lexicalSearch, setLexicalSearch] = useState('');
+    const [lexicalSearch, setLexicalSearch] = useState({
+        ...DefaultFilterModel,
+        column_name: 'lexicalsearch',
+        column_selected_values: [],
+        column_data_type: 'string',
+        has_been_modified: false
+    });
 
     function handleTableRowSubmit(e) {
-        const lexicalSearchModel = {
-            column_name: 'lexicalsearch',
-            column_selected_values: lexicalSearch.split(' '), // split the string into an array of words
-            column_data_type: 'string',
-        };
-        const extras = [lexicalSearchModel, dateValue, uploadData];
+        const extras = [lexicalSearch, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
         onSubmit(filterOptions, extras);
     }
-    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch(value), 100), [],);
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: value.split(' ') }), 100), [],);
 
     function handleLexicalSearch(e) {
         debounceHandleLexicalSearch(e);
@@ -140,9 +153,8 @@ const TableFilter = ({ filters, onSubmit }) => {
                     </Block>
                     <Block>
                         <Lockup>
-                            <FilterUpload onChange={handleUploadChange} />
+                            <FilterUpload onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} onChange={handleUploadChange} />
                         </Lockup>
-
                     </Block>
                     <Block>
                         <div className='lh-filter-container'>
