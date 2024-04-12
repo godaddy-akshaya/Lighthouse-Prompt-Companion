@@ -138,37 +138,43 @@ const PromptBuilder = ({ authDetails }) => {
             {
                 !isLoading && !showTableSelect && <>
                     <Block as='stack' orientation='vertical'>
-                        <Block orientation='horizontal'>
-                            <Lockup >
-                                <text.h3 text={routeParams.display_name || 'missing'} as='heading' />
-                            </Lockup>
-                        </Block>
+                        <Lockup >
+                            <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
+                        </Lockup>
                         <div className='lh-container lh-between'>
                             <Block>
                                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
                             </Block>
                             <Block>
                                 {isPromptVisible &&
-                                    <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
-                                        {showMessage && <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                                            <Block as='stack' className='text-center' orientation='vertical'>
-                                                <text.label as='label' text='Getting number of transcripts based on your selections' />
-                                                <br />
-                                                <Spinner />
-                                            </Block>
-                                        </MessageOverlay>}
+                                    <><text.h3 as='title' text='Parameters' />
+                                        {showMessage &&
+                                            <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                                <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                                    <Block as='stack' className='text-center' orientation='vertical'>
+                                                        <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                                        <br />
+                                                        <Spinner />
+                                                    </Block>
+                                                </MessageOverlay>
+                                            </Card>
+                                        }
                                         {numOfTransactions == 0 && <>
-                                            <Block>
-                                                <text.h4 as='title' text='No Transactions Found' />
-                                                <text.p text='No transactions found based on your selections' />
-                                            </Block>
+                                            <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                                <Block>
+                                                    <text.h4 as='title' text='No Transactions Found' />
+                                                    <text.p text='No transactions found based on your selections' />
+                                                </Block>
+                                            </Card>
                                         </>
                                         }
-                                        {numOfTransactions > 0 &&
-                                            <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
-                                        }
+                                        {isPromptVisible && numOfTransactions > 0 &&
 
-                                    </Card>}
+                                            <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
+
+                                        }
+                                    </>
+                                }
                             </Block>
                         </div>
                     </Block>

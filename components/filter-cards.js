@@ -40,7 +40,6 @@ const filterCards = ({ options, label, id, open, onChange, onSelectAll, onDesele
         <>
             <Card className='lh-filter-card' stretch={true} id={id}>
                 <Collapsible defaultOpen={open ? open : false} id={id} aria-label='collaspible-container' className='lh-no-padding' title={<SelectionCountTitle />}>
-
                     <Block className='lh-content'>
                         <div className='lh-controls'>
                             <SiblingSet gap='sm' aria-label='sib-set-actions'>
@@ -48,12 +47,12 @@ const filterCards = ({ options, label, id, open, onChange, onSelectAll, onDesele
                                 <Button design='inline' onClick={handleRemoveAll} size='small' aria-label='Remove All' icon={<Remove />} />
                             </SiblingSet>
                         </div>
-
                         <div className={`columns ${optionSize}`}>
                             {options?.checkbox_columns?.map(item => <div key={item.label} className='column'><Checkbox key={item.label} id={item.label} label={item.label} name={item.label} onClick={handleOnChange} checked={item.value} /></div>) || null}
                         </div>
                         <text.label as='caption' text={`${options?.checkbox_columns.filter(r => r.value).length} of ${options?.column_values.length}`} />
-                    </Block> </Collapsible>
+                    </Block>
+                </Collapsible>
             </Card>
 
 

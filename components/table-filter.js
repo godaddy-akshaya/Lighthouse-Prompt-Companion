@@ -1,17 +1,18 @@
 import React, { useCallback } from 'react';
 import { useState } from 'react';
-import { debounce } from 'lodash';
+import { debounce, has } from 'lodash';
 import FilterCards from './filter-cards';
 import Card from '@ux/card';
-import { Module, Lockup } from '@ux/layout';
-import SiblingSet from '@ux/sibling-set';
+import { Module, Block, Lockup } from '@ux/layout';
 import DateInput from '@ux/date-input';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
+import FilterUpload from './upload/filter-upload';
 
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
+    const formRef = React.createRef();
     const minDateValue = `${today.getFullYear() - 1}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const [endDateValue, setEndDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`]);
     const [startDateValue, setStartDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`]);
@@ -23,18 +24,24 @@ const TableFilter = ({ filters, onSubmit }) => {
         column_selected_values: [startDateValue[0], endDateValue[0]],
         column_data_type: 'date',
     });
+    const [uploadData, setUploadData] = useState({
+        column_name: '',
+        column_selected_values: [],
+        column_data_type: 'string',
+        has_been_modified: false,
+    });
     const [lexicalSearch, setLexicalSearch] = useState('');
+
     function handleTableRowSubmit(e) {
         const lexicalSearchModel = {
             column_name: 'lexicalsearch',
             column_selected_values: lexicalSearch.split(' '), // split the string into an array of words
             column_data_type: 'string',
         };
-        const extras = [lexicalSearchModel, dateValue];
+        const extras = [lexicalSearchModel, dateValue, uploadData];
         onSubmit(filterOptions, extras);
     }
     const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch(value), 100), [],);
-
 
     function handleLexicalSearch(e) {
         debounceHandleLexicalSearch(e);
@@ -64,7 +71,6 @@ const TableFilter = ({ filters, onSubmit }) => {
             return column;
         })];
         setFilterOptions(_columns);
-
     }
     //const handleStartDateValue = useCallback((e) => setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] }), []);
     function checkDateMinValue(e) {
@@ -80,6 +86,9 @@ const TableFilter = ({ filters, onSubmit }) => {
             setDateValue({ ...dateValue, column_selected_values: [minDateValue, endDateValue[0]] });
         }
 
+    }
+    function handleUploadChange(e) {
+        setUploadData({ ...uploadData, column_selected_values: e.data, column_name: e.name, has_been_modified: true })
     }
     function handleEndDateValue(e) {
         setEndDateValue(e);
@@ -104,33 +113,50 @@ const TableFilter = ({ filters, onSubmit }) => {
         setFilterOptions(_filters);
     }
     return (
-        <Card id='table-params-card' stretch={true} title='Parameters'>
-            <Module>
-                {filterOptions?.length > 0 ? <text.h4 as='title' text='Available Filters' /> : null}
-                <div className='lh-filter-container'>
-                    <div className='lh-container lh-between'>
-                        <DateInput id='start' name='start-date'
-                            page={page}
-                            onPaginate={setPage}
-                            className='m-r-1 lh-date-on-top'
-                            value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                        <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                    </div>
-                    {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
-                </div>
-                <div className='lh-filter-container'>
-                    <TextInput id='lexicalsearch' stretch={true} onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
-                </div>
-                <div className='lh-filter-container'>
-                    {
-                        filterOptions?.map((field, index) =>
-                            <FilterCards key={field.column_name} open={false} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
-                        )
-                    }
-                </div>
-                <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
-            </Module>
-        </Card>
+        <>  <text.h3 as='title' text='Available Filters' />
+            <Card id='table-params-card' stretch={true}>
+                <Module ref={formRef}>
+                    <Block>
+                        <Lockup>
+                            <div className='lh-filter-container'>
+                                <div className='lh-container lh-between'>
+                                    <DateInput id='start' name='start-date' onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
+                                        page={page}
+                                        onPaginate={setPage}
+                                        className='m-r-1 lh-date-on-top'
+                                        value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                                    <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                                </div>
+                                {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
+                            </div>
+                        </Lockup>
+                    </Block>
+
+
+                    <Block>
+                        <Lockup>
+                            <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch={true} onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                        </Lockup>
+                    </Block>
+                    <Block>
+                        <Lockup>
+                            <FilterUpload onChange={handleUploadChange} />
+                        </Lockup>
+
+                    </Block>
+                    <Block>
+                        <div className='lh-filter-container'>
+                            {
+                                filterOptions?.map((field, index) =>
+                                    <FilterCards key={field.column_name} open={false} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
+                                )
+                            }
+                        </div>
+                    </Block>
+
+                    <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
+                </Module>
+            </Card>       </>
     )
 }
 
