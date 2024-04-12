@@ -9,7 +9,7 @@ const UploadTemplate = ({ }) => {
     }
     return (
         <>
-            <Button size='small' design='inline' as='button' text='Template for convenience' onClick={handleClick} icon={<Download />} />
+            <Button size='small' as='button' design='inline' text='Template for convenience' onClick={handleClick} icon={<Download />} />
         </>
     )
 }

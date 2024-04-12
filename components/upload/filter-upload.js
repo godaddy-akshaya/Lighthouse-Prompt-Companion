@@ -25,16 +25,20 @@ const ButtonTitle = ({ }) => {
     )
 }
 
-const FilterFreeFormText = ({ }) => {
+const FilterFreeFormText = ({ eventChange, textValue = '' }) => {
+    function handleChange(e) {
+        let separator = e.includes(',') ? ',' : ' ';
+        let result = e.split(separator);
+        eventChange({ data: result, name: 'interaction_id' });
+    }
     return (
-        <TextInput label='Interaction IDs' name='example' helpMessage='Paste Interaction Ids seperated by space or comma' />
+        <TextInput className='m-t-1' label='Paste Interaction IDs' value={textValue} onChange={handleChange} name='example' helpMessage='Paste Interaction Ids seperated by space or comma' />
     )
 }
 const FilterUpload = ({ onChange }) => {
     const buttonRef = React.useRef();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [file, setFile] = useState(null);
     const [fileData, setFileData] = useState(null);
     const [rowCount, setRowCount] = useState(null);
     const [preCheckTag, setPreCheckTag] = useState(null);
@@ -49,7 +53,6 @@ const FilterUpload = ({ onChange }) => {
             }
         }
     };
-
     const processCSVFile = (uploadedFile) => {
         Papa.parse(uploadedFile, {
             error: (error) => {
@@ -60,8 +63,8 @@ const FilterUpload = ({ onChange }) => {
             complete: (result) => {
                 console.log(result);
                 const columnName = Object.keys(result.data[0])[0];
-                setFile(uploadedFile);
                 setRowCount(`${result.data?.length - 1 || 0}`)
+                setFileData(result.data.map((row) => row[columnName]));
                 setPreCheckTag('success');
                 setLoading(false);
                 onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
@@ -69,10 +72,18 @@ const FilterUpload = ({ onChange }) => {
             header: true
         });
     };
+    const handleFilterFreeForm = ((data) => {
+        console.log(data);
+        setRowCount(data.data.length);
+        setFileData(data.data);
+        setOpen(false);
+        onChange(data);
+    });
     const handleCancel = useCallback(() => {
-        setFile(null);
         setRowCount(null);
         setLoading(false);
+        setFileData(null);
+        setOpen(false);
         onChange({ data: [], name: '' });
     });
     const handleFileChange = useCallback((e) => {
@@ -86,51 +97,47 @@ const FilterUpload = ({ onChange }) => {
             <Flyout className='z-me' stretch={false} anchorRef={buttonRef}>
                 {open &&
                     <Card>
-                        <Block orientation='vertical'>
+                        <Block className='text-center' orientation='vertical'>
+                            <>
 
-                            <>  <Block>
-                                <text.span as='caption' text='Upload a CSV file with a single column of Interaction IDs' />
-                            </Block>
+                                <text.label as='label' text='Upload a CSV file with a single column of Interaction IDs' /><br />
+                                <Block>
 
-                                <Block>
-                                    <input className='ux-button ux-button-secondary' type="file" onChange={handleFileChange} />
-                                </Block>
-                                <Block>
-                                    <UploadTemplate />
-                                </Block>
-
-                                {/* <div class='text-center'>
-                                    <text.label text='OR' as='label' />
-                                </div>
-                                <Block>
                                     <Lockup>
-                                        <FilterFreeFormText />
+                                        <input className='m-t-1 ux-button ux-button-secondary' type="file" onChange={handleFileChange} />
                                     </Lockup>
-                                </Block> */}
-                            </>
 
+
+                                </Block>
+
+                                <text.label text=' - OR -' as='label' />
+
+
+                                <Lockup>
+                                    <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
+                                </Lockup>
+
+                            </>
                             <Block>
                                 <SiblingSet gap='sm'>
-                                    {file && <Button text='Cancel' size='small' design='critical' onClick={() => setFile(null)} />}
+                                    {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
                                     <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
                                 </SiblingSet>
                             </Block>
-
+                            <UploadTemplate className='m-t-1' />
                         </Block>
                     </Card>
                 }
             </Flyout>
             <Block>
                 {loading && <Spinner size='sm' />}
-                {file &&
+                {fileData &&
                     <SiblingSet gap='sm'>
-                        <text.span as='caption' text='Interaction_ID' />
-                        <Button text={`${rowCount} rows`} size='small' design='secondary' />
+                        <text.label as='label' text={`Interaction_ID (${rowCount})`} />
                         <Button text='' icon={<X />} size='small' design='critical' onClick={handleCancel} />
                     </SiblingSet>
                 }
             </Block>
-
         </Lockup>
     )
 };
