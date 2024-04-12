@@ -138,18 +138,16 @@ const PromptBuilder = ({ authDetails }) => {
             {
                 !isLoading && !showTableSelect && <>
                     <Block as='stack' orientation='vertical'>
-                        <Block orientation='horizontal'>
-                            <Lockup >
-                                <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
-                            </Lockup>
-                        </Block>
+                        <Lockup >
+                            <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
+                        </Lockup>
                         <div className='lh-container lh-between'>
                             <Block>
                                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
                             </Block>
                             <Block>
                                 {isPromptVisible &&
-                                    <><text.h4 as='title' text='Parameters' />
+                                    <><text.h3 as='title' text='Parameters' />
                                         {showMessage &&
                                             <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
                                                 <MessageOverlay onEventBehind={handleTableRowSubmit} >

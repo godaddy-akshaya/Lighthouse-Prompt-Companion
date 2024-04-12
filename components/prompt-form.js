@@ -88,9 +88,12 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
         <Card className='lh-prompt-form-card' id='para-card' stretch={true}>
             <Module>
                 <Block>
-                    <Tag emphasis='neutral'>
-                        {`Number of Transactions ${numOfTransactions}`}
-                    </Tag>
+                    <Lockup>
+                        <Tag emphasis='neutral'>
+                            {`Number of Transactions ${numOfTransactions}`}
+                        </Tag>
+                    </Lockup>
+
                 </Block>
                 <Block>
                     <Lockup>
@@ -99,19 +102,23 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                             <option value='claude-v2'>claude-v2</option>
                         </SelectInput>
                     </Lockup>
-                </Block>
-                <Block>
-                    <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
-                        className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
-                        onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-                    <Menu id='my-menu' size='small' className='m-t-1'>
-                        <MenuButton icon={<Add />} text='Insert' design='secondary' />
-                        <MenuList className='lh-menu' design='primary'>
-                            <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-                        </MenuList>
-                    </Menu>
+                    <Lockup>
+                        <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
+                            className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
+                            onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+                    </Lockup>
+                    <Lockup>
+                        <Menu id='my-menu' size='small' className='m-t-1'>
+                            <MenuButton icon={<Add />} text='Insert' design='secondary' />
+                            <MenuList className='lh-menu' design='primary'>
+                                <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
+                            </MenuList>
+                        </Menu>
+                    </Lockup>
+                    <text.p as='paragraph' className='m-t-1' text='Do not insert MNPI (Material Non-Public Information) into Lighthouse' emphasis='critical' />
+
                     <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
-                        label='Prompt' className='m-t-1' name='prompt' helpMessage='[transcript] is a required prompt insert'
+                        label='Prompt' name='prompt' helpMessage='[transcript] is a required prompt insert'
                         onChange={handlePrompt} value={prompt} multiline size={10} />
                 </Block>
                 <Block>

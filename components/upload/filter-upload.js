@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useState } from 'react';
 import { Block, Lockup } from '@ux/layout';
 import Card from '@ux/card';
@@ -11,58 +11,32 @@ import Button from '@ux/button';
 import FileUpload from '@ux/file-upload';
 import Upload from '@ux/icon/upload';
 import Flyout from '@ux/flyout';
+import Spinner from '@ux/spinner';
 import Table from '@ux/table';
+import X from '@ux/icon/x';
+import '@ux/icon/x/index.css';
+import UploadTemplate from './upload-template';
+import Download from '@ux/icon/download';
 
 
-const UploadCount = ({ records }) => {
-    // Count of items uploaded
-    return (
-        <>
-            <text.span as='caption' text='Records' />
-            <text.p as='label' text={records} />
-        </>
-
-    )
-}
-const DownloadTemplate = ({ }) => {
-    // Download template for upload
-    return (
-        <Block>
-            <text.p as='label' text='Download Template' />
-        </Block>
-    )
-
-}
-const UploadDisplay = ({ name }) => {
-    // Will be a list of items that were uploaded
-    return (
-        <Block>
-            <text.p as='label' text={name} />
-        </Block>
-
-    )
-}
 const ButtonTitle = ({ }) => {
     return (
         <text.span as='caption' text='Upload Interaction IDs' />
     )
-
 }
-const ColumnName = ({ columnName }) => {
+
+const FilterFreeFormText = ({ }) => {
     return (
-        <>
-            <text.span as='caption' text='Column Name' />
-            <text.p as='label' text={columnName} />
-        </>
+        <TextInput label='Interaction IDs' name='example' helpMessage='Paste Interaction Ids seperated by space or comma' />
     )
 }
-
 const FilterUpload = ({ onChange }) => {
     const buttonRef = React.useRef();
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [file, setFile] = useState(null);
     const [fileData, setFileData] = useState(null);
-    const [preCheck, setPreCheck] = useState(null);
+    const [rowCount, setRowCount] = useState(null);
     const [preCheckTag, setPreCheckTag] = useState(null);
 
     const processFile = (uploadedFile) => {
@@ -85,56 +59,79 @@ const FilterUpload = ({ onChange }) => {
             },
             complete: (result) => {
                 console.log(result);
+                const columnName = Object.keys(result.data[0])[0];
                 setFile(uploadedFile);
-                setFileData(result.data);
-                setPreCheck(`${result.data?.length - 1 || 0}`)
+                setRowCount(`${result.data?.length - 1 || 0}`)
                 setPreCheckTag('success');
+                setLoading(false);
+                onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
             },
             header: true
         });
     };
-    const handleFileChange = (e) => {
-        processFile(e[0]);
-    };
+    const handleCancel = useCallback(() => {
+        setFile(null);
+        setRowCount(null);
+        setLoading(false);
+        onChange({ data: [], name: '' });
+    });
+    const handleFileChange = useCallback((e) => {
+        setOpen(false);
+        setLoading(true);
+        processFile(e.target.files[0]);
+    });
     return (
-        <>
-            <Button text={<ButtonTitle />} design='secondary' as='select' icon={<Upload />} ref={buttonRef} onClick={() => setOpen(!open)} />
-            <Flyout className='z-me' anchorRef={buttonRef}>
+        <Lockup>
+            <Button ref={buttonRef} text={<ButtonTitle />} design='secondary' as='select' icon={<Upload />} onClick={() => setOpen(!open)} />
+            <Flyout className='z-me' stretch={false} anchorRef={buttonRef}>
                 {open &&
                     <Card>
-                        <Block>
+                        <Block orientation='vertical'>
 
+                            <>  <Block>
+                                <text.span as='caption' text='Upload a CSV file with a single column of Interaction IDs' />
+                            </Block>
 
-                            {!file && <Lockup>
-                                <DownloadTemplate />
-                                <FileUpload multiple={false} onChange={handleFileChange} />
-                            </Lockup>
-                            }
+                                <Block>
+                                    <input className='ux-button ux-button-secondary' type="file" onChange={handleFileChange} />
+                                </Block>
+                                <Block>
+                                    <UploadTemplate />
+                                </Block>
 
-                            <Lockup>
-                                {file &&
-                                    <>
-                                        <Table className='ux ux-table'>
-                                            <tr>
-                                                <td>
-                                                    <UploadCount records={preCheck} />
-                                                </td>
-                                                <td>
-                                                    <ColumnName columnName={fileData?.length > 0 ? Object.keys(fileData[0])[0] : 'Not Found'} />
-                                                </td>
-                                            </tr>
-                                        </Table>
-                                        <Button text='Cancel' size='small' design='secondary' onClick={() => setFile(null)} />
-                                    </>
-                                }
-                            </Lockup>
-                            <Button className='m-t-1' text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                                {/* <div class='text-center'>
+                                    <text.label text='OR' as='label' />
+                                </div>
+                                <Block>
+                                    <Lockup>
+                                        <FilterFreeFormText />
+                                    </Lockup>
+                                </Block> */}
+                            </>
+
+                            <Block>
+                                <SiblingSet gap='sm'>
+                                    {file && <Button text='Cancel' size='small' design='critical' onClick={() => setFile(null)} />}
+                                    <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                                </SiblingSet>
+                            </Block>
+
                         </Block>
                     </Card>
                 }
-            </Flyout >
-        </>
+            </Flyout>
+            <Block>
+                {loading && <Spinner size='sm' />}
+                {file &&
+                    <SiblingSet gap='sm'>
+                        <text.span as='caption' text='Interaction_ID' />
+                        <Button text={`${rowCount} rows`} size='small' design='secondary' />
+                        <Button text='' icon={<X />} size='small' design='critical' onClick={handleCancel} />
+                    </SiblingSet>
+                }
+            </Block>
 
+        </Lockup>
     )
 };
 
