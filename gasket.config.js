@@ -40,10 +40,9 @@ const getLastElementInUrl = (url) => {
 }
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
-  console.log(`${logPrefix}: Using id ${id} for proxy`);
-
   const { url } = req.config?.api[id] || '';
-  console.log(`${logPrefix}: Using url ${url} for proxy`);
+  const { info_accountName } = JSON.parse(req.cookies['info_jomax']) || 'unknown';
+  console.log(`${logPrefix}: Requested by ${info_accountName} ${id} - ${url} `);
   return url;
 }
 module.exports = {
@@ -58,7 +57,8 @@ module.exports = {
       '@gasket/fetch',
       '@gasket/plugin-config',
       '@godaddy/gasket-plugin-auth',
-      '@godaddy/gasket-plugin-proxy'
+      '@godaddy/gasket-plugin-proxy',
+      '@gasket/plugin-express',
     ]
   },
   helmet: {

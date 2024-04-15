@@ -17,7 +17,8 @@ import X from '@ux/icon/x';
 import '@ux/icon/x/index.css';
 import UploadTemplate from './upload-template';
 import Download from '@ux/icon/download';
-
+import FieldFrame from '@ux/field-frame';
+const UPLOAD_LIMIT = 10000;
 
 const ButtonTitle = ({ }) => {
     return (
@@ -61,7 +62,6 @@ const FilterUpload = ({ onChange }) => {
                 setPreCheckTag('error');
             },
             complete: (result) => {
-                console.log(result);
                 const columnName = Object.keys(result.data[0])[0];
                 setRowCount(`${result.data?.length - 1 || 0}`)
                 setFileData(result.data.map((row) => row[columnName]));
@@ -73,7 +73,6 @@ const FilterUpload = ({ onChange }) => {
         });
     };
     const handleFilterFreeForm = ((data) => {
-        console.log(data);
         setRowCount(data.data.length);
         setFileData(data.data);
         setOpen(false);
@@ -98,26 +97,25 @@ const FilterUpload = ({ onChange }) => {
                 {open &&
                     <Card>
                         <Block className='text-center' orientation='vertical'>
-                            <>
+                            <Block>
+                                <text.label as='label' text='Upload a CSV file with a single column of Interaction IDs' />
+                            </Block>
+                            <Block>
+                                <Lockup>
+                                    <FieldFrame>
+                                        <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
+                                    </FieldFrame>
+                                </Lockup>
 
-                                <text.label as='label' text='Upload a CSV file with a single column of Interaction IDs' /><br />
-                                <Block>
-
-                                    <Lockup>
-                                        <input className='m-t-1 ux-button ux-button-secondary' type="file" onChange={handleFileChange} />
-                                    </Lockup>
-
-
-                                </Block>
-
-                                <text.label text=' - OR -' as='label' />
-
+                                <text.span className='m-t-1' as='caption' text=' - OR -' />
 
                                 <Lockup>
                                     <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
                                 </Lockup>
+                            </Block>
 
-                            </>
+
+
                             <Block>
                                 <SiblingSet gap='sm'>
                                     {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
