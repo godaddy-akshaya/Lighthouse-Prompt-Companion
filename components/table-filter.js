@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useState } from 'react';
-import { debounce, has } from 'lodash';
+import { debounce, has, set } from 'lodash';
 import FilterCards from './filter-cards';
 import Card from '@ux/card';
 import { Module, Block, Lockup } from '@ux/layout';
@@ -9,6 +9,7 @@ import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
 import FilterUpload from './upload/filter-upload';
+import SiblingSet from '@ux/sibling-set';
 
 
 // Object to hold the filter options
@@ -23,6 +24,7 @@ const DefaultFilterModel = {
 const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
     const formRef = React.createRef();
+    const [dateOpen, setDateOpen] = useState(false);
     const minDateValue = `${today.getFullYear() - 1}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const [endDateValue, setEndDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`]);
     const [startDateValue, setStartDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`]);
@@ -98,7 +100,9 @@ const TableFilter = ({ filters, onSubmit }) => {
             setStartDateValue([minDateValue]);
             setDateValue({ ...dateValue, column_selected_values: [minDateValue, endDateValue[0]] });
         }
-
+    }
+    function handleOpenChange(e) {
+        setDateOpen(e);
     }
     function handleUploadChange(e) {
         setUploadData({ ...uploadData, column_selected_values: e.data, column_name: e.name, has_been_modified: true })
@@ -130,22 +134,15 @@ const TableFilter = ({ filters, onSubmit }) => {
             <Card id='table-params-card' stretch={true}>
                 <Module ref={formRef}>
                     <Block>
-                        <Lockup>
-                            <div className='lh-filter-container'>
-                                <div className='lh-container lh-between'>
-                                    <DateInput id='start' name='start-date' onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
-                                        page={page}
-                                        onPaginate={setPage}
-                                        className='m-r-1 lh-date-on-top'
-                                        value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                                    <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                                </div>
-                                {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
-                            </div>
-                        </Lockup>
+                        <div className='lh-container lh-between'>
+                            <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
+                                page={page}
+                                onPaginate={setPage}
+                                value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                            <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+                        </div>
+                        {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
                     </Block>
-
-
                     <Block>
                         <Lockup>
                             <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch={true} onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />

@@ -13,5 +13,4 @@ const UploadTemplate = ({ }) => {
         </>
     )
 }
-
 export default UploadTemplate;

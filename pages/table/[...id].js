@@ -85,25 +85,51 @@ const PromptBuilder = ({ authDetails }) => {
     }
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setJobModel({ ...jobModel, filterOptions, extras });
-        setIsPromptVisible(true);
-        setShowMessage(true);
-        submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
-            if (data?.errorMessage) {
-                setNumOfTransactions(0);
-                setErrorMessage(data.errorMessage);
+
+        try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setJobModel({ ...jobModel, filterOptions, extras });
+            setIsPromptVisible(true);
+            setShowMessage(true);
+            submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
+                if (data?.errorMessage) {
+                    setNumOfTransactions(0);
+                    setErrorMessage(data.errorMessage);
+                    setShowUserMessage(true);
+                    setShowMessage(false);
+                } else {
+                    setNumOfTransactions(data || 0);
+                    setShowMessage(false);
+                }
+            }, error => {
+                setErrorMessage(error);
+                setIsLoading(false);
                 setShowUserMessage(true);
-                setShowMessage(false);
-            } else {
-                setNumOfTransactions(data || 0);
-                setShowMessage(false);
-            }
-        }, error => {
+            });
+        } catch (error) {
             setErrorMessage(error);
             setIsLoading(false);
             setShowUserMessage(true);
-        });
+        }
+
+        // setJobModel({ ...jobModel, filterOptions, extras });
+        // setIsPromptVisible(true);
+        // setShowMessage(true);
+        // submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
+        //     if (data?.errorMessage) {
+        //         setNumOfTransactions(0);
+        //         setErrorMessage(data.errorMessage);
+        //         setShowUserMessage(true);
+        //         setShowMessage(false);
+        //     } else {
+        //         setNumOfTransactions(data || 0);
+        //         setShowMessage(false);
+        //     }
+        // }, error => {
+        //     setErrorMessage(error);
+        //     setIsLoading(false);
+        //     setShowUserMessage(true);
+        // });
     }
 
     useEffect(() => {
