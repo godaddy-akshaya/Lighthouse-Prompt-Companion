@@ -43,13 +43,7 @@ import { withPageEnhancers } from '@godaddy/gasket-next';
 import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
-const groups = process.env.GROUPS || [];
-console.log('Groups:', groups);
-let options = {
-    realm: 'jomax',
-    groups
-};
 
 export default withPageEnhancers([
-    withLocaleRequired('/locales', { initialProps: true }), withAuthRequired(options)
+    withLocaleRequired('/locales', { initialProps: true }), withAuthRequired()
 ])(App);

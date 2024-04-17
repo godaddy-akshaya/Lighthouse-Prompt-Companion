@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 
 module.exports = async function express(gasket, app) {
   const gasketConfig = gasket.config;
+  console.log('Gasket Config:', gasketConfig);
   console.log('Lifecycle: express');
   app.use(bodyParser.raw({ limit: 2000000 }));
   app.use(bodyParser.json({ limit: 2000000 }));
