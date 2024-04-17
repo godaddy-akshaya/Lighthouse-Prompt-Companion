@@ -1,7 +1,7 @@
 const isCI = process.env.CI === true;
 const env = require('./config/.env');
 const logPrefix = 'config:gasket';
-
+const bodyParser = require('body-parser');
 
 const localProdHttpConfig = {
   hostname: 'local-prd.c3.int.gdcorp.tools',
@@ -82,6 +82,12 @@ module.exports = {
       uxcore: '2301',
       theme: 'godaddy-antares'
     }
+
+  },
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
   },
   proxy: {
     proxies: {

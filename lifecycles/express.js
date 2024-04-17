@@ -1,11 +1,5 @@
 
 const bodyParser = require('body-parser');
-const {
-  loggerMiddleware,
-  loggerErrorMiddleware,
-  noCache,
-} = require('../lib/middleware/logging');
-
 
 module.exports = async function express(gasket, app) {
   console.log('Lifecycle: express');

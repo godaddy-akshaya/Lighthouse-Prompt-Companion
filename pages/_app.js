@@ -43,10 +43,17 @@ import { withPageEnhancers } from '@godaddy/gasket-next';
 import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
-const options = {
+let options = {
     realm: 'jomax',
-    groups: ['lighthouse-ui-group'],
+    groups: [],
 };
+
+App.getInitialProps = async (appContext) => {
+    console.log('APP:getInitialProps');
+    const { groups } = appContext.ctx.req.config?.sso || [];
+    options.groups = groups;
+};
+
 export default withPageEnhancers([
     withLocaleRequired('/locales', { initialProps: true }), withAuthRequired(options)
 ])(App);

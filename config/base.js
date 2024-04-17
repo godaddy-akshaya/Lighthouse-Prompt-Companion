@@ -4,7 +4,7 @@ module.exports = {
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
   "sso": {
     "root": "https://sso.dev-gdcorp.tools",
-    "groups": ["lighthouse-ui-group"],
+    "groups": [],
     "cookie": {
       "domain": ".dev-gdcorp.tools",
       "path": "/",
@@ -52,6 +52,15 @@ module.exports = {
     "submit-summary-job": {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
-    }
+    },
+    gdlh_get_interction_ids: {
+      "method": "GET",
+      "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    gdlh_save_interaction_ids: {
+      "method": "POST",
+      "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
+    },
   }
 }
+
