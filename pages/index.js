@@ -10,7 +10,7 @@ import Logo from '../components/logo';
 import session from '../lib/session';
 import { getTables } from '../lib/api';
 import TableSelect from '../components/table-select';
-
+import TwoColumnLayout from '../components/layout/two-column-layout';
 
 export const IndexPage = ({ authDetails }) => {
 
@@ -26,22 +26,21 @@ export const IndexPage = ({ authDetails }) => {
           </Lockup>
         </Block>
       </div>
-      <div className='lh-container lh-between'>
-        <Block>
-          <Card id='learn-more'>
-            <Block orientation='horizontal' >
-              <text.h4 as='title' text='What is Lighthouse?' />
-              <text.p as='paragraph' text='GoDaddy Lighthouse is an insights platform powered by large language models. The platform allows users throughout the company to craft, manage and evaluate prompts against any text-based data.' />
-              <Button text='Learn More' design='primary' as='cta' href='https://godaddy-corp.atlassian.net/wiki/spaces/BI/pages/3343751333/GoDaddy+Lighthouse+-+an+Insights+Platform' />
-            </Block>
-          </Card>
-        </Block>
-        <Block>
-          <Card id='try-prompt-out' className='grey-card'>
-            <TableSelect />
-          </Card>
-        </Block>
-      </div>
+      <TwoColumnLayout>
+
+        <Card id='learn-more' stretch={true}>
+          <Block>
+            <text.h4 as='title' text='What is Lighthouse?' />
+            <text.p as='paragraph' text='GoDaddy Lighthouse is an insights platform powered by large language models. The platform allows users throughout the company to craft, manage and evaluate prompts against any text-based data.' />
+            <Button text='Learn More' design='primary' as='cta' href='https://godaddy-corp.atlassian.net/wiki/spaces/BI/pages/3343751333/GoDaddy+Lighthouse+-+an+Insights+Platform' />
+          </Block>
+        </Card>
+
+        <Card id='try-prompt-out' className='grey-card' stretch={true}>
+          <TableSelect />
+        </Card>
+
+      </TwoColumnLayout>
     </>
   )
 };
