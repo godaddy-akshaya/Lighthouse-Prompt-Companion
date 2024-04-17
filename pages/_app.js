@@ -43,15 +43,11 @@ import { withPageEnhancers } from '@godaddy/gasket-next';
 import { withAuthRequired } from '@godaddy/gasket-auth';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
+const groups = process.env.GROUPS || [];
+console.log('Groups:', groups);
 let options = {
     realm: 'jomax',
-    groups: [],
-};
-
-App.getInitialProps = async (appContext) => {
-    console.log('APP:getInitialProps');
-    const { groups } = appContext.ctx.req.config?.sso || [];
-    options.groups = groups;
+    groups
 };
 
 export default withPageEnhancers([
