@@ -4,7 +4,7 @@ module.exports = {
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
   "sso": {
     "root": "https://sso.dev-gdcorp.tools",
-    "groups": ["lighthouse-ui-group"],
+    "groups": [],
     "cookie": {
       "domain": ".dev-gdcorp.tools",
       "path": "/",
