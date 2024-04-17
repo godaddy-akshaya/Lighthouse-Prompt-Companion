@@ -93,7 +93,7 @@ module.exports = {
     appName: 'lighthouse-ui',
     basePath: '',
     realm: 'jomax',
-    groups: ['lighthouse-ui-devs'],
+    groups: process.env.AD_GROUPS,
   },
   proxy: {
     proxies: {
