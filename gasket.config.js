@@ -80,6 +80,7 @@ module.exports = {
       app: 'lighthouse-ui',
       header: 'internal-sidebar',
       uxcore: '2301',
+      market: 'en-us',
       theme: 'godaddy-antares'
     }
   },
@@ -121,12 +122,12 @@ module.exports = {
             ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
           },
-          options: {
-            ...request.options
-          },
-          body: {
-            ...request.body
-          }
+          // options: {
+          //   ...request.options
+          // },
+          // body: {
+          //   ...request.body
+          // }
         })
       }
     }
