@@ -3,8 +3,9 @@ module.exports = {
   "region": "us-west-2",
   "root": "https://local.c3.int.dev-gdcorp.tools:8443",
   // "sso": {
+  //   "app": "lighthouse-ui",
   //   "root": "https://sso.dev-gdcorp.tools",
-  //   "groups": ["lighthouse-ui-devs"],
+  //   "groups": ['lighthouse-ui-devs'],
   //   "cookie": {
   //     "domain": ".dev-gdcorp.tools",
   //     "path": "/",

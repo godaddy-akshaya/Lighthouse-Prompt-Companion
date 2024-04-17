@@ -2,16 +2,17 @@ module.exports = {
   "env": "production",
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.gdcorp.tools",
-  "sso": {
-    "root": "https://sso.gdcorp.tools",
-    "groups": ["lighthouse-ui-group"],
-    "cookie": {
-      "domain": ".gdcorp.tools",
-      "path": "/",
-      "secure": true,
-      "httpOnly": true
-    }
-  },
+  // "sso": {
+  //   "app": "lighthouse-ui",
+  //   "root": "https://sso.gdcorp.tools",
+  //   "groups": ["lighthouse-ui-group"],
+  //   "cookie": {
+  //     "domain": ".gdcorp.tools",
+  //     "path": "/",
+  //     "secure": true,
+  //     "httpOnly": true
+  //   }
+  // },
   "api": {
     "table-listing": {
       "method": "GET",

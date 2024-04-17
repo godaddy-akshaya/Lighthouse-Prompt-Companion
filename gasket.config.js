@@ -82,7 +82,6 @@ module.exports = {
       uxcore: '2301',
       theme: 'godaddy-antares'
     }
-
   },
   api: {
     bodyParser: {
@@ -124,15 +123,5 @@ module.exports = {
         })
       }
     }
-    //   getSecureDataExtra: {
-    //     url: '/aws/secure-data/:id',
-    //     targetUrl: ({ req }) => getUrlForProxy(req),
-    //     requestTransform: ({ req }) => request => ({
-    //       ...request,
-    //       headers: {
-    //         Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
-    //       }
-    //     })
-    //   }
   }
 }
