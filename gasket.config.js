@@ -88,6 +88,13 @@ module.exports = {
       sizeLimit: '100mb',
     },
   },
+  auth: {
+    host: ['dev-gdcorp.tools', 'dev-godaddy.com'],
+    appName: 'lighthouse-ui',
+    basePath: '',
+    realm: 'jomax',
+    groups: ['lighthouse-ui-devs'],
+  },
   proxy: {
     proxies: {
       getSecureData: {
