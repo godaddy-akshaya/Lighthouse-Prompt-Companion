@@ -94,28 +94,7 @@ module.exports = {
     appName: 'lighthouse-ui',
     basePath: '',
     realm: 'jomax',
-    groups: [
-      'SCUI-CARE-SERVICES',
-      'SCUI-MARKETING',
-      'SCUI-COMMERCE',
-      'SCUI-PARTNERS',
-      'SCUI-MARKETING',
-      'SCUI-MASTER',
-      'SCUI-USI',
-      'SCUI-CORPORATE',
-      'SCUI-GDII',
-      'SCUI-DRI',
-      'SCUI-GDII-CHINA',
-      'SCUI-GDII-GERMANY',
-      'SCUI-GDII-INDIA',
-      'SCUI-GDII-AU',
-      'SCUI-GDII-UK',
-      'SCUI-GDII-ROW',
-      'SCUI-GDII-US',
-      'SCUI-GDII-CA',
-      'SCUI-GDII-EMEA',
-      'SCUI-GDII-OVERALL'
-    ]
+    groups: ['lighthouse-ui-devs'],
   },
   proxy: {
     proxies: {
