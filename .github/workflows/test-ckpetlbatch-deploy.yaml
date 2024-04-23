@@ -1,0 +1,11 @@
+name: test-ckpetlbatch-deploy
+on:
+  push: {}
+
+jobs:
+  hello_world:
+    runs-on:
+      labels: self-hosted
+      group: 6429-hadoopmigratione
+    steps:
+      - run: echo "Hello World!"
