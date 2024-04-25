@@ -71,7 +71,7 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: ['warning', 'security', 'info'],
+    level: ['warning'],
     transports: [
       new transports.File({
         filename: 'error.log',

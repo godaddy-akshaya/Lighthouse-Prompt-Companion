@@ -79,14 +79,12 @@ const PromptBuilder = ({ authDetails }) => {
             });
         })();
     }
-
     function handleCloseError(e) {
         setShowUserMessage(false);
         setErrorMessage('');
     }
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
-
         try {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setJobModel({ ...jobModel, filterOptions, extras });
