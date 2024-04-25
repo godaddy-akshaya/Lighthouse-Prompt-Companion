@@ -1,7 +1,8 @@
 const isCI = process.env.CI === true;
 const env = require('./config/.env');
 const logPrefix = 'config:gasket';
-const bodyParser = require('body-parser');
+const { transports } = require('winston');
+
 
 const localProdHttpConfig = {
   hostname: 'local-prd.c3.int.gdcorp.tools',
@@ -24,6 +25,9 @@ const localHttpsConfig = {
     cert: [
       'local.c3.int.dev-gdcorp.tools.crt'
     ]
+  },
+  winston: {
+    level: 'debug'
   }
 };
 // The last element is the name of the api endpoint
@@ -41,8 +45,6 @@ const getLastElementInUrl = (url) => {
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   const { url } = req.config?.api[id] || '';
-  const { info_accountName } = JSON.parse(req.cookies['info_jomax']) || 'unknown';
-  console.log(`${logPrefix}: Requested by ${info_accountName} ${id} - ${url} `);
   return url;
 }
 module.exports = {
@@ -56,10 +58,37 @@ module.exports = {
     add: [
       '@gasket/fetch',
       '@gasket/plugin-config',
+      '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
+      '@godaddy/gasket-plugin-security-auth-logging',
+      '@godaddy/gasket-plugin-security-logger',
+      '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
     ]
+  },
+  log: {
+    prefix: 'lighthouse'
+  },
+  winston: {
+    level: ['warning', 'security', 'info'],
+    transports: [
+      new transports.File({
+        filename: 'error.log',
+        level: 'error'
+      }),
+      new transports.File({
+        filename: 'combined.log',
+        level: 'info'
+      })
+    ]
+  },
+  securityLogger: {
+    aws: {
+      accountId: '123456789',
+      accountName: 'gd-aws-usa-gpd-myteam-prod'
+    },
+    serviceName: 'name-of-my-service'
   },
   helmet: {
     contentSecurityPolicy: false
