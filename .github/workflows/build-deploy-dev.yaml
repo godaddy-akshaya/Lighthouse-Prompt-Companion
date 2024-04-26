@@ -1,8 +1,6 @@
 name: Lighthouse Build and Publish - therandomd
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 jobs:
   build_publish_promote:

@@ -85,10 +85,10 @@ module.exports = {
   },
   securityLogger: {
     aws: {
-      accountId: '123456789',
-      accountName: 'gd-aws-usa-gpd-myteam-prod'
+      accountId: '722577363440',
+      accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
     },
-    serviceName: 'name-of-my-service'
+    serviceFullName: 'lighthouse-ui-logger'
   },
   helmet: {
     contentSecurityPolicy: false
