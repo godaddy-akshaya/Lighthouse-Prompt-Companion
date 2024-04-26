@@ -60,8 +60,8 @@ module.exports = {
       '@gasket/plugin-config',
       '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
-      '@godaddy/gasket-plugin-security-auth-logging',
-      '@godaddy/gasket-plugin-security-logger',
+      // '@godaddy/gasket-plugin-security-auth-logging',
+      // '@godaddy/gasket-plugin-security-logger',
       '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
@@ -83,13 +83,13 @@ module.exports = {
       })
     ]
   },
-  securityLogger: {
-    aws: {
-      accountId: '722577363440',
-      accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
-    },
-    serviceFullName: 'lighthouse-ui-logger'
-  },
+  // securityLogger: {
+  //   aws: {
+  //     accountId: '722577363440',
+  //     accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
+  //   },
+  //   serviceFullName: 'lighthouse-ui-logger'
+  // },
   helmet: {
     contentSecurityPolicy: false
   },
