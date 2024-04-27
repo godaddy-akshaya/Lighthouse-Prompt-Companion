@@ -28,6 +28,7 @@ import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
 import TableFilter from '../../components/table-filter';
 import PromptForm from '../../components/prompt-form';
+import TwoColumnLayout from '../../components/layout/two-column-layout';
 
 
 const PromptBuilder = ({ authDetails }) => {
@@ -78,14 +79,12 @@ const PromptBuilder = ({ authDetails }) => {
             });
         })();
     }
-
     function handleCloseError(e) {
         setShowUserMessage(false);
         setErrorMessage('');
     }
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
-
         try {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setJobModel({ ...jobModel, filterOptions, extras });
@@ -167,7 +166,49 @@ const PromptBuilder = ({ authDetails }) => {
                         <Lockup >
                             <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
                         </Lockup>
-                        <div className='lh-container lh-between'>
+                        <TwoColumnLayout>
+
+                            <Block>
+                                <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
+                            </Block>
+                            <Block>
+                                <div>
+
+
+                                    {isPromptVisible &&
+                                        <><text.h3 as='title' text='Parameters' />
+                                            {showMessage &&
+                                                <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                                    <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                                        <Block as='stack' className='text-center' orientation='vertical'>
+                                                            <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                                            <br />
+                                                            <Spinner />
+                                                        </Block>
+                                                    </MessageOverlay>
+                                                </Card>
+                                            }
+                                            {numOfTransactions == 0 && <>
+                                                <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                                    <Block>
+                                                        <text.h4 as='title' text='No Transactions Found' />
+                                                        <text.p text='No transactions found based on your selections' />
+                                                    </Block>
+                                                </Card>
+                                            </>
+                                            }
+                                            {isPromptVisible && numOfTransactions > 0 &&
+
+                                                <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
+
+                                            }
+                                        </>
+                                    }
+                                </div>
+                            </Block>
+
+                        </TwoColumnLayout>
+                        {/* <div className='lh-container lh-between'>
                             <Block>
                                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
                             </Block>
@@ -202,7 +243,7 @@ const PromptBuilder = ({ authDetails }) => {
                                     </>
                                 }
                             </Block>
-                        </div>
+                        </div> */}
                     </Block>
                 </>
             }

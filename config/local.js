@@ -2,16 +2,17 @@ module.exports = {
   "env": "local",
   "region": "us-west-2",
   "root": "https://local.c3.int.dev-gdcorp.tools:8443",
-  "sso": {
-    "root": "https://sso.dev-gdcorp.tools",
-    "groups": ["lighthouse-ui-group"],
-    "cookie": {
-      "domain": ".dev-gdcorp.tools",
-      "path": "/",
-      "secure": true,
-      "httpOnly": true
-    }
-  },
+  // "sso": {
+  //   "app": "lighthouse-ui",
+  //   "root": "https://sso.dev-gdcorp.tools",
+  //   "groups": ['lighthouse-ui-devs'],
+  //   "cookie": {
+  //     "domain": ".dev-gdcorp.tools",
+  //     "path": "/",
+  //     "secure": true,
+  //     "httpOnly": true
+  //   }
+  // },
   "api": {
     "table-listing": {
       "method": "GET",
@@ -52,6 +53,14 @@ module.exports = {
     "submit-summary-job": {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
-    }
+    },
+    "gdlh-get-interction-ids": {
+      "method": "GET",
+      "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "gdlh-save-interaction-ids": {
+      "method": "POST",
+      "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
+    },
   }
 }
