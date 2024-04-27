@@ -1,8 +1,8 @@
-name: LH Build and Deply ckpetlbatch
+name: Prod Deploy ckpetlbatch
 
 on:
   push:
-    branches: [dev]
+    branches: [prod-deploy]
   workflow_dispatch:
 jobs:
   build_publish_promote:
@@ -28,7 +28,7 @@ jobs:
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
       - name: Build Container
         run: |
-          docker build  --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg NODE_ENV=production -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
+          docker build --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg NODE_ENV=production -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
 
       - id: katana-publish
         name: Publish Katana Artifact
@@ -49,5 +49,5 @@ jobs:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: prod
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
