@@ -100,8 +100,10 @@ module.exports = {
     development: isCI
       ? localHttpsConfig
       : {},
-    localprod: {
-      ...localProdHttpConfig
+    production: {
+      hostname: 'localhost',
+      http: 8080,
+
     }
   },
   presentationCentral: {

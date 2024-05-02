@@ -4,8 +4,6 @@ const { loggerErrorMiddleware, loggerMiddleware } = require('../lib/middleware/l
 module.exports = async function express(gasket, app) {
   console.log('Lifecycle:express');
   app.use(checkAdGroup);
-  app.use(bodyParser.raw({ limit: 2000000 }));
-  app.use(bodyParser.json({ limit: 2000000 }));
   app.use(loggerMiddleware);
   app.use(loggerErrorMiddleware);
   return app;
