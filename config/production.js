@@ -3,17 +3,6 @@ module.exports = {
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.gdcorp.tools",
   "groups": ['lighthouse-ui-group', 'lighthouse-ui-devs'],
-  // "sso": {
-  //   "app": "lighthouse-ui",
-  //   "root": "https://sso.gdcorp.tools",
-  //   "groups": ["lighthouse-ui-group"],
-  //   "cookie": {
-  //     "domain": ".gdcorp.tools",
-  //     "path": "/",
-  //     "secure": true,
-  //     "httpOnly": true
-  //   }
-  // },
   "api": {
     "table-listing": {
       "method": "GET",
