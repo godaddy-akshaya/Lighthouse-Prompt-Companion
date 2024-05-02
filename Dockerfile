@@ -2,7 +2,7 @@
 FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
 
 ARG NPM_AUTH_TOKEN
-ARG THE_ENV
+ARG NODE_ENV
 USER root
 
 RUN apk add bash
@@ -49,7 +49,7 @@ COPY --chown=worker ./manifest.xml /app/manifest.xml
 
 RUN ls -l
 
-RUN gasket build --env $THE_ENV
+RUN gasket build --env $NODE_ENV
 
 
 CMD ["gasket", "start", "--env", "production"]
