@@ -84,8 +84,8 @@ const PromptBuilder = ({ authDetails }) => {
     }
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         try {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
             setJobModel({ ...jobModel, filterOptions, extras });
             setIsPromptVisible(true);
             setShowMessage(true);
