@@ -30,10 +30,6 @@ module.exports = {
       "method": "POST",
       "url": "https://jtluzmgd8e.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    "table-data-row-count": {
-      "method": "POST",
-      "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
-    },
     "view-status": {
       "method": "GET",
       "url": "https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy"
