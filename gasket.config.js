@@ -4,17 +4,7 @@ const logPrefix = 'config:gasket';
 const { transports } = require('winston');
 
 
-const localProdHttpConfig = {
-  hostname: 'local-prd.c3.int.gdcorp.tools',
-  http: false,
-  https: {
-    root: 'certs',
-    key: 'local-prd.c3.int.gdcorp.tools.key',
-    cert: [
-      'local-prd.c3.int.gdcorp.tools.crt'
-    ]
-  }
-}
+
 
 const localHttpsConfig = {
   hostname: 'local.c3.int.dev-gdcorp.tools',
@@ -100,11 +90,6 @@ module.exports = {
     development: isCI
       ? localHttpsConfig
       : {},
-    production: {
-      hostname: 'localhost',
-      http: 8080,
-
-    }
   },
   presentationCentral: {
     params: {
@@ -121,9 +106,8 @@ module.exports = {
     },
   },
   auth: {
-    host: ['dev-gdcorp.tools', 'dev-godaddy.com'],
     appName: 'lighthouse-ui',
-    basePath: '',
+    basePath: '/',
     realm: 'jomax',
     groups: ['lighthouse-ui-devs', 'lighthouse-ui-group'],
   },
