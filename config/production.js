@@ -28,7 +28,7 @@ module.exports = {
     },
     "row-count": {
       "method": "POST",
-      "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://jtluzmgd8e.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
     "table-data-row-count": {
       "method": "POST",
