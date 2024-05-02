@@ -43,7 +43,7 @@ jobs:
             {
               "ports": [8080,8443]
             }
-      - name: Promote to dev-private Environment
+      - name: Promote to Production Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
