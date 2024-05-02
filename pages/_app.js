@@ -45,5 +45,5 @@ import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
 
 export default withPageEnhancers([
-    withLocaleRequired('/locales', { initialProps: true }), withAuthRequired({ realm: 'jomax', groups: ['lighthouse-ui-devs'] })
+    withLocaleRequired('/locales', { initialProps: true }), withAuthRequired({ realm: 'jomax', groups: ['lighthouse-ui-group'] })
 ])(App);
