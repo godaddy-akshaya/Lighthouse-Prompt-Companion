@@ -19,7 +19,6 @@ import '@ux/field-frame/styles';
 import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
-
 import TableSelect from '../../components/table-select';
 import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/api';
 import Alert from '@ux/alert';
@@ -110,25 +109,6 @@ const PromptBuilder = ({ authDetails }) => {
             setIsLoading(false);
             setShowUserMessage(true);
         }
-
-        // setJobModel({ ...jobModel, filterOptions, extras });
-        // setIsPromptVisible(true);
-        // setShowMessage(true);
-        // submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
-        //     if (data?.errorMessage) {
-        //         setNumOfTransactions(0);
-        //         setErrorMessage(data.errorMessage);
-        //         setShowUserMessage(true);
-        //         setShowMessage(false);
-        //     } else {
-        //         setNumOfTransactions(data || 0);
-        //         setShowMessage(false);
-        //     }
-        // }, error => {
-        //     setErrorMessage(error);
-        //     setIsLoading(false);
-        //     setShowUserMessage(true);
-        // });
     }
 
     useEffect(() => {

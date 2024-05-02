@@ -1,1 +1,1 @@
-module.exports = process.env.GASKET_ENV || 'development';
+module.exports = process.env.GASKET_ENV || 'local';
