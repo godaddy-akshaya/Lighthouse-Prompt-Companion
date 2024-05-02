@@ -2,7 +2,7 @@
 FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
 
 ARG NPM_AUTH_TOKEN
-
+ARG NODE_ENV
 USER root
 
 RUN apk add bash
@@ -23,10 +23,7 @@ COPY --chown=worker .npmrc.template /app
 
 RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > /app/.npmrc
 RUN cat /app/.npmrc
-# Need to login to NPM 
-#ENV NPM_AUTH_TOKEN=$NPM_AUTH_TOKEN
-#RUN test -n "$NPM_AUTH_TOKEN" || (echo 'NPM AUTH TOKEN is not set' && exit 1)
-#RUN echo "//gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/:_auth=${NPM_AUTH_TOKEN}" > /app/.npmrc
+
 
 RUN ls -l
 
@@ -46,14 +43,16 @@ COPY --chown=worker ./public /app/public
 COPY --chown=worker ./redux /app/redux
 COPY --chown=worker ./styles /app/styles
 COPY --chown=worker ./gasket.config.js /app/gasket.config.js
+COPY --chown=worker ./next.config.js /app/next.config.js
+COPY --chown=worker ./.env.production /app/.env.production
 COPY --chown=worker ./manifest.xml /app/manifest.xml
 
 RUN ls -l
 
-RUN gasket build --env development
-ENV NODE_ENV=development
+RUN gasket build --env $NODE_ENV
 
-CMD ["gasket", "start", "--env", "development"]
+
+CMD ["gasket", "start", "--env", "production"]
 EXPOSE 8080
 
 

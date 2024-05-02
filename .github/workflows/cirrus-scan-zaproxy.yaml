@@ -20,7 +20,7 @@ jobs:
   cirrus-scan-dev:
     runs-on:
       labels: self-hosted
-      group: 7416-therandomdrunner
+      group: 6429-hadoopmigratione
 
     # Config env vars as necessary for the job.
     env:

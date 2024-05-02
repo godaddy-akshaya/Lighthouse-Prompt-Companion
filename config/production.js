@@ -2,16 +2,18 @@ module.exports = {
   "env": "production",
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.gdcorp.tools",
-  "sso": {
-    "root": "https://sso.gdcorp.tools",
-    "groups": ["lighthouse-ui-group"],
-    "cookie": {
-      "domain": ".gdcorp.tools",
-      "path": "/",
-      "secure": true,
-      "httpOnly": true
-    }
-  },
+  "groups": ['lighthouse-ui-group', 'lighthouse-ui-devs'],
+  // "sso": {
+  //   "app": "lighthouse-ui",
+  //   "root": "https://sso.gdcorp.tools",
+  //   "groups": ["lighthouse-ui-group"],
+  //   "cookie": {
+  //     "domain": ".gdcorp.tools",
+  //     "path": "/",
+  //     "secure": true,
+  //     "httpOnly": true
+  //   }
+  // },
   "api": {
     "table-listing": {
       "method": "GET",
@@ -26,7 +28,7 @@ module.exports = {
     },
     "row-count": {
       "method": "POST",
-      "url": "https://kby0c37h1j.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://jtluzmgd8e.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
     "table-data-row-count": {
       "method": "POST",

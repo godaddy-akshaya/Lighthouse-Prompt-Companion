@@ -1,6 +1,7 @@
 const isCI = process.env.CI === true;
 const env = require('./config/.env');
 const logPrefix = 'config:gasket';
+const { transports } = require('winston');
 
 
 const localProdHttpConfig = {
@@ -24,6 +25,9 @@ const localHttpsConfig = {
     cert: [
       'local.c3.int.dev-gdcorp.tools.crt'
     ]
+  },
+  winston: {
+    level: 'debug'
   }
 };
 // The last element is the name of the api endpoint
@@ -41,8 +45,6 @@ const getLastElementInUrl = (url) => {
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   const { url } = req.config?.api[id] || '';
-  const { info_accountName } = JSON.parse(req.cookies['info_jomax']) || 'unknown';
-  console.log(`${logPrefix}: Requested by ${info_accountName} ${id} - ${url} `);
   return url;
 }
 module.exports = {
@@ -56,11 +58,38 @@ module.exports = {
     add: [
       '@gasket/fetch',
       '@gasket/plugin-config',
+      '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
+      // '@godaddy/gasket-plugin-security-auth-logging',
+      // '@godaddy/gasket-plugin-security-logger',
+      '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
     ]
   },
+  log: {
+    prefix: 'lighthouse'
+  },
+  winston: {
+    level: ['warning'],
+    transports: [
+      new transports.File({
+        filename: 'error.log',
+        level: 'error'
+      }),
+      new transports.File({
+        filename: 'combined.log',
+        level: 'info'
+      })
+    ]
+  },
+  // securityLogger: {
+  //   aws: {
+  //     accountId: '722577363440',
+  //     accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
+  //   },
+  //   serviceFullName: 'lighthouse-ui-logger'
+  // },
   helmet: {
     contentSecurityPolicy: false
   },
@@ -71,8 +100,10 @@ module.exports = {
     development: isCI
       ? localHttpsConfig
       : {},
-    localprod: {
-      ...localProdHttpConfig
+    production: {
+      hostname: 'localhost',
+      http: 8080,
+
     }
   },
   presentationCentral: {
@@ -80,8 +111,21 @@ module.exports = {
       app: 'lighthouse-ui',
       header: 'internal-sidebar',
       uxcore: '2301',
+      market: 'en-us',
       theme: 'godaddy-antares'
     }
+  },
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
+  },
+  auth: {
+    host: ['dev-gdcorp.tools', 'dev-godaddy.com'],
+    appName: 'lighthouse-ui',
+    basePath: '',
+    realm: 'jomax',
+    groups: ['lighthouse-ui-devs', 'lighthouse-ui-group'],
   },
   proxy: {
     proxies: {
@@ -109,24 +153,14 @@ module.exports = {
             ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
           },
-          options: {
-            ...request.options
-          },
-          body: {
-            ...request.body
-          }
+          // options: {
+          //   ...request.options
+          // },
+          // body: {
+          //   ...request.body
+          // }
         })
       }
     }
-    //   getSecureDataExtra: {
-    //     url: '/aws/secure-data/:id',
-    //     targetUrl: ({ req }) => getUrlForProxy(req),
-    //     requestTransform: ({ req }) => request => ({
-    //       ...request,
-    //       headers: {
-    //         Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
-    //       }
-    //     })
-    //   }
   }
 }
