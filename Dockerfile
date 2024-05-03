@@ -51,7 +51,7 @@ RUN ls -l
 RUN gasket build --env $NODE_ENV
 
 
-CMD ["gasket", "start", "--env", $NODE_ENV]
+CMD gasket start --env $NODE_ENV
 EXPOSE 8080
 
 
