@@ -5,7 +5,7 @@ on:
   # Run after the 'Tests' workflow completes on the repo's default branch. Change this to suit your the CI workflows adopted by your team.
   workflow_run:
     workflows:
-      - build-deploy-dev
+      - main
     branches:
       - $default-branch
     types:
@@ -50,7 +50,6 @@ jobs:
       - name: Pull latest CirrusScan container image
         run: |
           docker pull ${{ secrets.AUDIT_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com/cirrus-scan-cicd:latest
-
       # PAT supplied to GITHUB_AUTH below needs full repo access. cirrus-scan-cicd uses it to submit GitHub status webhook.
       - name: Run CirrusScan checks
         run: |

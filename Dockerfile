@@ -44,7 +44,6 @@ COPY --chown=worker ./redux /app/redux
 COPY --chown=worker ./styles /app/styles
 COPY --chown=worker ./gasket.config.js /app/gasket.config.js
 COPY --chown=worker ./next.config.js /app/next.config.js
-COPY --chown=worker ./.env.production /app/.env.production
 COPY --chown=worker ./manifest.xml /app/manifest.xml
 
 RUN ls -l
@@ -52,7 +51,7 @@ RUN ls -l
 RUN gasket build --env $NODE_ENV
 
 
-CMD ["gasket", "start", "--env", "production"]
+CMD ["gasket", "start", "--env", "${NODE_ENV}"]
 EXPOSE 8080
 
 
