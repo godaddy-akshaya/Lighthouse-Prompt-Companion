@@ -27,6 +27,10 @@ module.exports = {
       "method": "GET",
       "url": "https://o3un8ndnb8.execute-api.us-west-2.amazonaws.com/dev"
     },
+    "row-count-2": {
+      "method": "POST",
+      "url": "https://0nc6ejrszd.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
     "submit-job": {
       "method": "POST",
       "url": "https://eest1tmtp4.execute-api.us-west-2.amazonaws.com/dev"

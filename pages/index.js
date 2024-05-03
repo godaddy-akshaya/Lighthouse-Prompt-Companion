@@ -8,7 +8,6 @@ import text from '@ux/text';
 import Card from '@ux/card';
 import Logo from '../components/logo';
 import session from '../lib/session';
-import { getTables } from '../lib/api';
 import TableSelect from '../components/table-select';
 import TwoColumnLayout from '../components/layout/two-column-layout';
 
@@ -36,10 +35,9 @@ export const IndexPage = ({ authDetails }) => {
           </Block>
         </Card>
 
-        <Card id='try-prompt-out' className='grey-card' stretch={true}>
+        <Card id='try-prompt-out' className='grey-card'>
           <TableSelect />
         </Card>
-
       </TwoColumnLayout>
     </>
   )
