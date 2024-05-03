@@ -48,7 +48,7 @@ COPY --chown=worker ./manifest.xml /app/manifest.xml
 
 RUN ls -l
 
-RUN gasket build --env $NODE_ENV
+RUN gasket build --env development
 
 
 CMD ["gasket", "start", "--env", "development"]
