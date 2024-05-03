@@ -1,4 +1,4 @@
-name: Prod Deploy ckpetlbatch
+name: Stage Deploy ckpetlbatch
 
 on:
   push:
