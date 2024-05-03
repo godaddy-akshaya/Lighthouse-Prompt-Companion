@@ -20,7 +20,7 @@ import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
 import TableSelect from '../../components/table-select';
-import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/api';
+import { submitRowCountRequest, submitRowCountRequest2, getTableFilters, submitPromptJob } from '../../lib/api';
 import Alert from '@ux/alert';
 import session from '../../lib/session';
 import { getGuid } from '../../lib/utils';
@@ -109,6 +109,11 @@ const PromptBuilder = ({ authDetails }) => {
             setIsLoading(false);
             setShowUserMessage(true);
         }
+        try {
+            submitRowCountRequest2(routeParams.table, filterOptions, extras).then(data => console.log(data));
+        } catch (error) {
+            console.log('This api did not work', error);
+        }
     }
 
     useEffect(() => {
@@ -188,42 +193,8 @@ const PromptBuilder = ({ authDetails }) => {
                             </Block>
 
                         </TwoColumnLayout>
-                        {/* <div className='lh-container lh-between'>
-                            <Block>
-                                <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
-                            </Block>
-                            <Block>
-                                {isPromptVisible &&
-                                    <><text.h3 as='title' text='Parameters' />
-                                        {showMessage &&
-                                            <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
-                                                <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                                                    <Block as='stack' className='text-center' orientation='vertical'>
-                                                        <text.label as='label' text='Getting number of transcripts based on your selections' />
-                                                        <br />
-                                                        <Spinner />
-                                                    </Block>
-                                                </MessageOverlay>
-                                            </Card>
-                                        }
-                                        {numOfTransactions == 0 && <>
-                                            <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
-                                                <Block>
-                                                    <text.h4 as='title' text='No Transactions Found' />
-                                                    <text.p text='No transactions found based on your selections' />
-                                                </Block>
-                                            </Card>
-                                        </>
-                                        }
-                                        {isPromptVisible && numOfTransactions > 0 &&
 
-                                            <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
 
-                                        }
-                                    </>
-                                }
-                            </Block>
-                        </div> */}
                     </Block>
                 </>
             }
