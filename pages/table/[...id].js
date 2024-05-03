@@ -109,11 +109,6 @@ const PromptBuilder = ({ authDetails }) => {
             setIsLoading(false);
             setShowUserMessage(true);
         }
-        try {
-            submitRowCountRequest2(routeParams.table, filterOptions, extras).then(data => console.log(data));
-        } catch (error) {
-            console.log('This api did not work', error);
-        }
     }
 
     useEffect(() => {
