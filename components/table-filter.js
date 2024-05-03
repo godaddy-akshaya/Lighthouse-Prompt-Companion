@@ -148,11 +148,11 @@ const TableFilter = ({ filters, onSubmit }) => {
                             <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch={true} onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                         </Lockup>
                     </Block>
-                    <Block>
+                    {/* <Block>
                         <Lockup>
                             <FilterUpload onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} onChange={handleUploadChange} />
                         </Lockup>
-                    </Block>
+                    </Block> */}
                     <Block>
                         <div className='lh-filter-container'>
                             {

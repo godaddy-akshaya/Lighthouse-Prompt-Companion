@@ -15,6 +15,10 @@ module.exports = {
         "table-name": "string"
       }
     },
+    "row-count-2": {
+      "method": "POST",
+      "url": "https://0nc6ejrszd.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
     "row-count": {
       "method": "POST",
       "url": "https://jtluzmgd8e.execute-api.us-west-2.amazonaws.com/gddeploy"
