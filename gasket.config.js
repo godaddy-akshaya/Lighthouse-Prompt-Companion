@@ -61,7 +61,7 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: ['warning'],
+    level: ['info', 'error'],
     transports: [
       new transports.File({
         filename: 'error.log',
@@ -137,12 +137,6 @@ module.exports = {
             ...request.headers,
             Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
           },
-          // options: {
-          //   ...request.options
-          // },
-          // body: {
-          //   ...request.body
-          // }
         })
       }
     }
