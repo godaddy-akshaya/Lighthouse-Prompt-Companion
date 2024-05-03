@@ -1,6 +1,8 @@
-name: Dev Deploy ckpetlbatch
+name: Prod Deploy ckpetlbatch
 
 on:
+  push:
+    branches: [prod-stage]
   workflow_dispatch:
 jobs:
   build_publish_promote:
@@ -26,7 +28,7 @@ jobs:
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
       - name: Build Container
         run: |
-          docker build --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg THE_ENV=development -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
+          docker build --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg THE_ENV=production -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
 
       - id: katana-publish
         name: Publish Katana Artifact
@@ -41,11 +43,11 @@ jobs:
             {
               "ports": [8080,8443]
             }
-      - name: Promote to dev-private Environment
+      - name: Promote to Staging Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: prod-stage
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
