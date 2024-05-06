@@ -90,6 +90,7 @@ const PromptBuilder = ({ authDetails }) => {
             setIsPromptVisible(true);
             setShowMessage(true);
             submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
+                console.log(data);
                 if (data?.errorMessage) {
                     setNumOfTransactions(0);
                     setErrorMessage(data.errorMessage);
@@ -108,11 +109,6 @@ const PromptBuilder = ({ authDetails }) => {
             setErrorMessage(error);
             setIsLoading(false);
             setShowUserMessage(true);
-        }
-        try {
-            submitRowCountRequest2(routeParams.table, filterOptions, extras).then(data => console.log(data));
-        } catch (error) {
-            console.log('This api did not work', error);
         }
     }
 
