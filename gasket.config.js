@@ -81,7 +81,8 @@ module.exports = {
   //   serviceFullName: 'lighthouse-ui-logger'
   // },
   helmet: {
-    contentSecurityPolicy: false
+    contentSecurityPolicy: false,
+
   },
   environments: {
     local: {
@@ -102,9 +103,13 @@ module.exports = {
   },
   api: {
     bodyParser: {
-      sizeLimit: '100mb',
+      sizeLimit: '5mb',
+      externalResolver: true,
+
     },
   },
+  // Specifies the maximum allowed duration for this function to execute (in seconds)
+  maxDuration: 5,
   auth: {
     appName: 'lighthouse-ui',
     basePath: '/',
