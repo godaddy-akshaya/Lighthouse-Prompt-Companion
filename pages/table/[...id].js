@@ -10,8 +10,7 @@ import '@ux/icon/home/index.css';
 import '@ux/text-input/styles';
 import '@ux/card/styles';
 import Button from '@ux/button';
-import SelectInput from '@ux/select-input';
-import Checkbox from '@ux/checkbox';
+
 import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
@@ -20,7 +19,7 @@ import '@ux/date-input/styles';
 import Card, { spaceOptions } from '@ux/card';
 import '@ux/filter/styles';
 import TableSelect from '../../components/table-select';
-import { submitRowCountRequest, submitRowCountRequest2, getTableFilters, submitPromptJob } from '../../lib/api';
+import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/api';
 import Alert from '@ux/alert';
 import session from '../../lib/session';
 import { getGuid } from '../../lib/utils';
@@ -38,6 +37,7 @@ const PromptBuilder = ({ authDetails }) => {
     const [showTableSelect, setShowTableSelect] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
     const [filters, setFilters] = useState();
+
     const [jobModel, setJobModel] = useState({
         prompt: '',
         evaluation: false,
@@ -148,7 +148,6 @@ const PromptBuilder = ({ authDetails }) => {
                             <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
                         </Lockup>
                         <TwoColumnLayout>
-
                             <Block>
                                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
                             </Block>
@@ -179,9 +178,7 @@ const PromptBuilder = ({ authDetails }) => {
                                             </>
                                             }
                                             {isPromptVisible && numOfTransactions > 0 &&
-
                                                 <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
-
                                             }
                                         </>
                                     }
