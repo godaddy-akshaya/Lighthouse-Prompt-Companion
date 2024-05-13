@@ -17,7 +17,7 @@ const localHttpsConfig = {
     ]
   },
   winston: {
-    level: 'debug'
+    level: 'warning',
   }
 };
 // The last element is the name of the api endpoint
@@ -35,6 +35,7 @@ const getLastElementInUrl = (url) => {
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   const { url } = req.config?.api[id] || '';
+  console.log(url);
   return url;
 }
 module.exports = {
@@ -61,7 +62,7 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: ['info'],
+    level: 'warning',
     transports: [
       new transports.File({
         filename: 'error.log',
@@ -82,7 +83,6 @@ module.exports = {
   // },
   helmet: {
     contentSecurityPolicy: false,
-
   },
   environments: {
     local: {
@@ -90,7 +90,7 @@ module.exports = {
     },
     development: isCI
       ? localHttpsConfig
-      : {},
+      : {}
   },
   presentationCentral: {
     params: {
@@ -100,13 +100,6 @@ module.exports = {
       market: 'en-us',
       theme: 'godaddy-antares'
     }
-  },
-  api: {
-    bodyParser: {
-      sizeLimit: '5mb',
-      externalResolver: true,
-
-    },
   },
   // Specifies the maximum allowed duration for this function to execute (in seconds)
   maxDuration: 5,

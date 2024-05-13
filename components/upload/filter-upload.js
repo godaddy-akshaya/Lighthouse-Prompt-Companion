@@ -85,6 +85,14 @@ const FilterUpload = ({ onChange }) => {
         setOpen(false);
         onChange({ data: [], name: '' });
     });
+    const handleOpen = useCallback(() => {
+        if (!open) {
+            setTimeout(() => {
+                window.scrollTo()
+            }, 500);
+        }
+        setOpen(!open);
+    })
     const handleFileChange = useCallback((e) => {
         setOpen(false);
         setLoading(true);
@@ -93,29 +101,55 @@ const FilterUpload = ({ onChange }) => {
     return (
         <Lockup>
             <Button ref={buttonRef} text={<ButtonTitle />} design='secondary' as='select' icon={<Upload />} onClick={() => setOpen(!open)} />
-            <Flyout className='z-me' stretch={false} anchorRef={buttonRef}>
+
+            {open &&
+                <Card>
+                    <Block className='text-center' orientation='horizontal'>
+                        <Block>
+                            <text.label as='label' text='Upload a CSV file with a single column of Interaction IDs' />
+                        </Block>
+                        <Block className='lh-between'>
+                            <Lockup>
+                                <FieldFrame>
+                                    <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
+                                </FieldFrame>
+                            </Lockup>
+                            <text.span className='m-t-1' as='caption' text=' - OR -' />
+
+                            <Lockup>
+                                <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
+                            </Lockup>
+                        </Block>
+                        <Block>
+                            <SiblingSet gap='sm'>
+                                {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
+                                <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                            </SiblingSet>
+                        </Block>
+                        <UploadTemplate className='m-t-1' />
+                    </Block>
+                </Card>
+            }
+
+            {/* <Flyout className='z-me' stretch={false} anchorRef={buttonRef}>
                 {open &&
                     <Card>
-                        <Block className='text-center' orientation='vertical'>
+                        <Block className='text-center' orientation='horizontal'>
                             <Block>
                                 <text.label as='label' text='Upload a CSV file with a single column of Interaction IDs' />
                             </Block>
-                            <Block>
+                            <Block className='lh-between'>
                                 <Lockup>
                                     <FieldFrame>
                                         <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
                                     </FieldFrame>
                                 </Lockup>
-
                                 <text.span className='m-t-1' as='caption' text=' - OR -' />
 
                                 <Lockup>
                                     <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
                                 </Lockup>
                             </Block>
-
-
-
                             <Block>
                                 <SiblingSet gap='sm'>
                                     {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
@@ -126,7 +160,7 @@ const FilterUpload = ({ onChange }) => {
                         </Block>
                     </Card>
                 }
-            </Flyout>
+            </Flyout> */}
             <Block>
                 {loading && <Spinner size='sm' />}
                 {fileData &&

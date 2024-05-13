@@ -28,9 +28,7 @@ it is recommended to import those directly to `pages/_app.js`
     height: 80vh !important;
     overflow: auto !important;
 }
-.z-me {
-    z-index: 1000 !important;
-}
+
 .lh-table-full-view-with-scroll { 
     // thead { 
     //     display: block !important; 
@@ -138,8 +136,17 @@ it is recommended to import those directly to `pages/_app.js`
 .m-t-1 {
     margin-top: 1rem !important;
 }
+.m-t-0 {
+    margin-top: 0rem !important;
+    padding-top: 0rem !important;
+}
 .m-b-1 {
     margin-bottom: 1rem !important;
+}
+.m-b-0 {
+    padding-bottom: 0rem !important;
+    margin-bottom: 0rem !important;
+
 }
 .m-l-1 {
     margin-left: 1rem !important;
