@@ -35,7 +35,7 @@ const getLastElementInUrl = (url) => {
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   const { url } = req.config?.api[id] || '';
-  console.log(url);
+
   return url;
 }
 module.exports = {
@@ -53,7 +53,7 @@ module.exports = {
       '@godaddy/gasket-plugin-auth',
       // '@godaddy/gasket-plugin-security-auth-logging',
       // '@godaddy/gasket-plugin-security-logger',
-      '@godaddy/gasket-plugin-healthcheck',
+      // '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
     ]
