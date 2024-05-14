@@ -49,10 +49,10 @@ COPY --chown=worker ./manifest.xml /app/manifest.xml
 
 RUN ls -l
 
-RUN gasket build --env development 
+RUN gasket build --env production 
 
 
-CMD ["gasket", "start", "--env", "development"]
+CMD ["gasket", "start", "--env", "production"]
 EXPOSE 8080
 
 
