@@ -51,7 +51,7 @@ module.exports = {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
     },
-    " gdlh_get_interaction_ids": {
+    "gdlh_get_interaction_ids": {
       "method": "GET",
       "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
     },
