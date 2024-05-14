@@ -27,20 +27,11 @@ import TwoColumnLayout from '../layout/two-column-layout';
 import SaveObjectForm from './save-object-form';
 import { set } from 'lodash';
 import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
+import FilterFreeFormText from './filter-free-form-text';
 const UPLOAD_LIMIT = 10000;
 
 
 
-const FilterFreeFormText = ({ eventChange, textValue = '' }) => {
-    function handleChange(e) {
-        let separator = e.includes(',') ? ',' : ' ';
-        let result = e.split(separator);
-        eventChange({ data: result, name: 'interaction_id' });
-    }
-    return (
-        <TextInput label='Paste comma seperated values' placeHolder='"000123", "123455", "823455"' value={textValue} onChange={handleChange} name='freeForm' />
-    )
-}
 const FilterUpload = ({ onChange }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -120,6 +111,7 @@ const FilterUpload = ({ onChange }) => {
         setLoading(false);
         setFileData(null);
         setOpen(false);
+        setHasBeenSaved(false);
         onChange({ data: [], name: '' });
     });
     const handleOpen = useCallback((e) => {
@@ -179,7 +171,6 @@ const FilterUpload = ({ onChange }) => {
                                 </Lockup>
                             }
                         </Block>
-
                         <Block>
                             <SiblingSet gap='sm'>
                                 {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
@@ -190,9 +181,6 @@ const FilterUpload = ({ onChange }) => {
 
                 </>
             }
-            <Block>
-
-            </Block>
         </>
     )
 };
