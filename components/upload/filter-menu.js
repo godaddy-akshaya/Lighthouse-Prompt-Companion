@@ -94,10 +94,15 @@ const FilterUpload = ({ onChange }) => {
     const handleLoadFilter = useCallback((e) => {
         setLoading(true);
         filterParamsMgmtService.getFilterValues(e).then((data) => {
+            // Check if string or array
+            if (typeof data === 'string') {
+                data = data.split(',');
+            }
             setRowCount(data.length);
+            console.log(data);
             setFileData(data);
             setLoading(false);
-            onChange({ data: data, column: 'Interaction_id', name: e });
+            onChange({ data: data, column: 'interaction_id', name: e });
         });
 
     });
