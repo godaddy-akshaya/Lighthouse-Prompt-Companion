@@ -98,11 +98,15 @@ const FilterUpload = ({ onChange }) => {
             if (typeof data === 'string') {
                 data = data.split(',');
             }
-            setRowCount(data.length);
-            console.log(data);
+            setRowCount(data?.length);
             setFileData(data);
             setLoading(false);
             onChange({ data: data, column: 'interaction_id', name: e });
+        }).catch((error) => {
+            setLoading(false);
+            setFileData([]);
+            setRowCount(0);
+            console.log(error);
         });
 
     });
