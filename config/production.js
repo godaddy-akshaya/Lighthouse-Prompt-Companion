@@ -43,7 +43,7 @@ module.exports = {
       "method": "POST",
       "url": "https://o4aj4d6r36.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
-    gdlh_get_interction_ids: {
+    gdlh_get_interaction_ids: {
       "method": "GET",
       "url": "https://nnb0qzh6nc.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
