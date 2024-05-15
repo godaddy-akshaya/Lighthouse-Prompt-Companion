@@ -26,7 +26,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
     const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
 
     function insertAction(e) {
-        console.log(e, prompt);
         let text = prompt + ` [${e}]`;
         setPrompt(text);
     }
@@ -93,7 +92,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                             {`Number of Transactions ${numOfTransactions}`}
                         </Tag>
                     </Lockup>
-
                 </Block>
                 <Block>
                     <Lockup>
@@ -147,7 +145,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                 <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
             </Module>
         </Card>
-
     )
 }
 

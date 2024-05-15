@@ -51,7 +51,7 @@ RUN ls -l
 
 RUN gasket build --env $THE_ENV
 
-CMD ["gasket", "start", "--env", "development"]
+CMD ["gasket", "start", "--env", "production"]
 EXPOSE 8080
 
 
