@@ -12,33 +12,26 @@ import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
 import FileUpload from '@ux/file-upload';
 import Upload from '@ux/icon/upload';
-import Flyout from '@ux/flyout';
-import Filter from '@ux/icon/filter';
 import Spinner from '@ux/spinner';
 import Table from '@ux/table';
-import Add from '@ux/icon/add';
-import X from '@ux/icon/x';
+import SaveObjectForm from './save-object-form';
 import '@ux/icon/x/index.css';
+
 import UploadTemplate from './upload-template';
-import Download from '@ux/icon/download';
-import Settings from '@ux/icon/settings';
 import FieldFrame from '@ux/field-frame';
 import TwoColumnLayout from '../layout/two-column-layout';
-import SaveObjectForm from './save-object-form';
-import { set } from 'lodash';
 import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
 import FilterFreeFormText from './filter-free-form-text';
 const UPLOAD_LIMIT = 10000;
 
 
 
-const FilterUpload = ({ onChange }) => {
+const FilterMenu = ({ onChange, OnOpen }) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fileData, setFileData] = useState(null);
     const [fileName, setFileName] = useState(null);
     const [rowCount, setRowCount] = useState(null);
-    const [filterDataMeta, setFilterDataMeta] = useState(null);
     const [preCheckTag, setPreCheckTag] = useState(null);
     const [savedFilters, setSavedFilters] = useState([]);
     const [hasBeenSaved, setHasBeenSaved] = useState(false);
@@ -53,13 +46,6 @@ const FilterUpload = ({ onChange }) => {
             }
         }
     };
-    const handleSaveResults = (e) => {
-        console.log(e);
-        filterParamsMgmtService.saveFilterOptions({ value: fileData, filename: e }).then((data) => {
-            console.log(data);
-            setHasBeenSaved(true);
-        });
-    };
     useEffect(() => {
         filterParamsMgmtService.getFilterOptions().then((data) => setSavedFilters(data?.sort()));
     }, []);
@@ -71,7 +57,6 @@ const FilterUpload = ({ onChange }) => {
             },
             complete: (result) => {
                 const columnName = Object.keys(result.data[0])[0];
-
                 setRowCount(`${result.data?.length - 1 || 0}`)
                 setFileName(columnName);
                 setFileData(result.data.map((row) => row[columnName]));
@@ -80,6 +65,13 @@ const FilterUpload = ({ onChange }) => {
                 onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
             },
             header: true
+        });
+    };
+    const handleSaveResults = (e) => {
+        setLoading(true);
+        filterParamsMgmtService.saveFilterOptions({ value: fileData, filename: e }).then((data) => {
+            setHasBeenSaved(true);
+            setLoading(false);
         });
     };
     const handleLoadFilter = useCallback((e) => {
@@ -97,7 +89,6 @@ const FilterUpload = ({ onChange }) => {
             setLoading(false);
             setFileData([]);
             setRowCount(0);
-            console.log(error);
         });
 
     });
@@ -123,23 +114,25 @@ const FilterUpload = ({ onChange }) => {
     });
     return (
         <>
-            <Lockup className='lh-container lh-end'>
-                {loading && <Spinner size='sm' />}
-                <Menu id='filter-menu'>
-                    <MenuButton icon={<Filter />} text='Interaction IDs' />
-                    <MenuList>
-                        <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
-                        <MenuSeperator />
-                        <MenuGroup label='Saved Lists'>
-                            {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
-                            {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
-                        </MenuGroup>
-                    </MenuList>
-                </Menu>
-            </Lockup>
+            {!open &&
+                <Lockup className='lh-container lh-start'>
+                    {loading && <Spinner size='sm' />}
+                    <Menu id='filter-menu'>
+                        <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
+                        <MenuList>
+                            <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
+                            <MenuSeperator />
+                            <MenuGroup label='Saved Lists'>
+                                {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
+                                {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
+                            </MenuGroup>
+                        </MenuList>
+                    </Menu>
+                </Lockup>
+            }
             {open &&
                 <>
-                    <Lockup>
+                    <Lockup className='m-t-1'>
                         <text.h3 text='Upload Interaction IDs' as='title' />
                     </Lockup>
                     <Card className='card-dark-background' id='upload' stretch={true}>
@@ -150,7 +143,7 @@ const FilterUpload = ({ onChange }) => {
                             </Lockup>
                             {loading && <Spinner size='sm' />}
                             {!fileData &&
-                                <Block>
+                                <Lockup>
                                     <TwoColumnLayout>
                                         <Lockup>
                                             <text.label as='label' text='Upload File Interaction IDs' />
@@ -162,7 +155,7 @@ const FilterUpload = ({ onChange }) => {
                                             <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
                                         </Lockup>
                                     </TwoColumnLayout>
-                                </Block>
+                                </Lockup>
                             }
                             {fileData &&
                                 <Lockup>
@@ -172,9 +165,10 @@ const FilterUpload = ({ onChange }) => {
                             }
                         </Block>
                         <Block>
-                            <SiblingSet gap='sm'>
-                                {fileData && <Button text='Cancel' size='small' design='critical' onClick={handleCancel} />}
+                            <SiblingSet gap='md'>
+
                                 <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                                {fileData && <Button text='Reset/Clear' size='small' design='critical' onClick={handleCancel} />}
                             </SiblingSet>
                         </Block>
                     </Card>
@@ -185,4 +179,4 @@ const FilterUpload = ({ onChange }) => {
     )
 };
 
-export default FilterUpload;
+export default FilterMenu;

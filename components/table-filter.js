@@ -11,6 +11,7 @@ import text from '@ux/text';
 import Button from '@ux/button';
 import FilterMenu from './upload/filter-menu';
 import LoadedFilter from './upload/loaded-filter';
+import filterParamsMgmtService from '../lib/filter-params-mgmt-service';
 
 
 // Object to hold the filter options
@@ -30,8 +31,9 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
     const [endDateValue, setEndDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`]);
     const [startDateValue, setStartDateValue] = useState([`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`]);
     const [filterOptions, setFilterOptions] = useState([...filters]);
+    const [enableFilterMenu, setEnableFilterMenu] = useState(true);
     const [showDateError, setShowDateError] = useState(false);
-    const [page, setPage] = useState('2024-04-01');
+    const [page, setPage] = useState(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
     const [dateValue, setDateValue] = useState({
         column_name: 'rpt_mst_date',
         column_selected_values: [startDateValue[0], endDateValue[0]],
@@ -88,7 +90,6 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
         })];
         setFilterOptions(_columns);
     }
-    //const handleStartDateValue = useCallback((e) => setDateValue({ ...dateValue, column_selected_values: [e[0], endDateValue[0]] }), []);
     function checkDateMinValue(e) {
         return new Date(minDateValue) < new Date(e[0]);
     }
@@ -102,16 +103,18 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
             setDateValue({ ...dateValue, column_selected_values: [minDateValue, endDateValue[0]] });
         }
     }
+
     function handleOpenChange(e) {
         setDateOpen(e);
     }
-
     function handleUploadChange(e) {
-        console.log(e);
         setUploadData({ ...uploadData, column_selected_values: e.data, column_name: e.column, has_been_modified: true })
     }
     function handleCancelFilterLoad(e) {
         setUploadData({ ...uploadData, column_name: e, column_selected_values: [], has_been_modified: false });
+    }
+    function handleFilterMenuOpen() {
+        setEnableFilterMenu(!enableFilterMenu);
     }
     function handleEndDateValue(e) {
         setEndDateValue(e);
@@ -138,18 +141,8 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
     return (
         <>  <text.h3 as='title' text='Available Filters' />
             <Card id='table-params-card' stretch={true}>
-                <Block className='m-b-0'>
-                    <Lockup>
-                        <FilterMenu onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} onChange={handleUploadChange} />
-                    </Lockup>
-                </Block>
-                <Module className='m-t-0' ref={formRef}>
-                    {uploadData.column_selected_values.length > 0 &&
-                        <Block>
-                            <LoadedFilter rowCount={uploadData?.column_selected_values.length} columnName='Loaded Interaction IDs' onClear={handleCancelFilterLoad} />
-                        </Block>
-                    }
-                    <Block className='m-t-0'>
+                <Module ref={formRef}>
+                    <Block>
                         <div className='lh-container lh-between'>
                             <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
                                 page={page}
@@ -159,17 +152,23 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
                         </div>
                         {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
                     </Block>
-
+                    <Block>
+                        {enableFilterMenu &&
+                            <Lockup>
+                                <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} onChange={handleUploadChange} />
+                            </Lockup>
+                        }
+                        {uploadData.column_selected_values.length > 0 &&
+                            <Lockup>
+                                <LoadedFilter rowCount={uploadData?.column_selected_values.length} columnName='Loaded Interaction IDs' onClear={handleCancelFilterLoad} />
+                            </Lockup>
+                        }
+                    </Block>
                     <Block>
                         <Lockup>
                             <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                         </Lockup>
                     </Block>
-                    {/* <Block>
-                        <Lockup>
-                            <FilterUpload onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} onChange={handleUploadChange} />
-                        </Lockup>
-                    </Block> */}
                     <Block>
                         <div className='lh-filter-container'>
                             {
