@@ -51,6 +51,7 @@ module.exports = {
       '@gasket/plugin-config',
       '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
+      '@gasket/plugin-elastic-apm',
       // '@godaddy/gasket-plugin-security-auth-logging',
       // '@godaddy/gasket-plugin-security-logger',
       // '@godaddy/gasket-plugin-healthcheck',
