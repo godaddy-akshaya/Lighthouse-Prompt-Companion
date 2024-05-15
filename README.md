@@ -37,4 +37,5 @@ npm config set registry https://gdartifactory1.jfrog.io/artifactory/api/npm/node
 docker build -t lighthouse-ui --build-arg NPM_TOKEN=[token] --build-arg AWS_ENV=[env]. --no-cache
 ```
 
+docker run -d -p 8443:8443 --name local.c3.int.dev-gdcorp.tools lighthouse
 npm login --registry=https://gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/ --auth-type=legacy
