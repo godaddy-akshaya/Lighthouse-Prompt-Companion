@@ -1,0 +1,182 @@
+import React, { use, useCallback, useEffect, useState } from 'react';
+import { Block, Lockup } from '@ux/layout';
+import Card from '@ux/card';
+import Alert from '@ux/alert';
+import Papa from 'papaparse';
+import text from '@ux/text';
+import Tag from '@ux/tag';
+import TextInput from '@ux/text-input';
+import SelectInput from '@ux/select-input';
+import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
+import SiblingSet from '@ux/sibling-set';
+import Button from '@ux/button';
+import FileUpload from '@ux/file-upload';
+import Upload from '@ux/icon/upload';
+import Spinner from '@ux/spinner';
+import Table from '@ux/table';
+import SaveObjectForm from './save-object-form';
+import '@ux/icon/x/index.css';
+
+import UploadTemplate from './upload-template';
+import FieldFrame from '@ux/field-frame';
+import TwoColumnLayout from '../layout/two-column-layout';
+import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
+import FilterFreeFormText from './filter-free-form-text';
+const UPLOAD_LIMIT = 10000;
+
+
+
+const FilterMenu = ({ onChange, OnOpen }) => {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [fileData, setFileData] = useState(null);
+    const [fileName, setFileName] = useState(null);
+    const [rowCount, setRowCount] = useState(null);
+    const [preCheckTag, setPreCheckTag] = useState(null);
+    const [savedFilters, setSavedFilters] = useState([]);
+    const [hasBeenSaved, setHasBeenSaved] = useState(false);
+
+    const processFile = (uploadedFile) => {
+        if (uploadedFile) {
+            const fileExtension = uploadedFile.name.split('.').pop();
+            if (fileExtension === 'csv') {
+                processCSVFile(uploadedFile);
+            } else {
+                alert('Invalid file type');
+            }
+        }
+    };
+    useEffect(() => {
+        filterParamsMgmtService.getFilterOptions().then((data) => setSavedFilters(data?.sort()));
+    }, []);
+    const processCSVFile = (uploadedFile) => {
+        Papa.parse(uploadedFile, {
+            error: (error) => {
+                setPreCheck('Error parsing file');
+                setPreCheckTag('error');
+            },
+            complete: (result) => {
+                const columnName = Object.keys(result.data[0])[0];
+                setRowCount(`${result.data?.length - 1 || 0}`)
+                setFileName(columnName);
+                setFileData(result.data.map((row) => row[columnName]));
+                setPreCheckTag('success');
+                setLoading(false);
+                onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
+            },
+            header: true
+        });
+    };
+    const handleSaveResults = (e) => {
+        setLoading(true);
+        filterParamsMgmtService.saveFilterOptions({ value: fileData, filename: e }).then((data) => {
+            setHasBeenSaved(true);
+            setLoading(false);
+        });
+    };
+    const handleLoadFilter = useCallback((e) => {
+        setLoading(true);
+        filterParamsMgmtService.getFilterValues(e).then((data) => {
+            // Check if string or array
+            if (typeof data === 'string') {
+                data = data.split(',');
+            }
+            setRowCount(data?.length);
+            setFileData(data);
+            setLoading(false);
+            onChange({ data: data, column: 'interaction_id', name: e });
+        }).catch((error) => {
+            setLoading(false);
+            setFileData([]);
+            setRowCount(0);
+        });
+
+    });
+    const handleFilterFreeForm = ((data) => {
+        setRowCount(data.data.length);
+        setFileData(data.data);
+        onChange(data);
+    });
+    const handleCancel = useCallback(() => {
+        setRowCount(null);
+        setLoading(false);
+        setFileData(null);
+        setOpen(false);
+        setHasBeenSaved(false);
+        onChange({ data: [], name: '' });
+    });
+    const handleOpen = useCallback((e) => {
+        setOpen(!open);
+    })
+    const handleFileChange = useCallback((e) => {
+        setLoading(true);
+        processFile(e.target.files[0]);
+    });
+    return (
+        <>
+            {!open &&
+                <Lockup className='lh-container lh-start'>
+                    {loading && <Spinner size='sm' />}
+                    <Menu id='filter-menu'>
+                        <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
+                        <MenuList>
+                            <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
+                            <MenuSeperator />
+                            <MenuGroup label='Saved Lists'>
+                                {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
+                                {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
+                            </MenuGroup>
+                        </MenuList>
+                    </Menu>
+                </Lockup>
+            }
+            {open &&
+                <>
+                    <Lockup className='m-t-1'>
+                        <text.h3 text='Upload Interaction IDs' as='title' />
+                    </Lockup>
+                    <Card className='card-dark-background' id='upload' stretch={true}>
+                        <Block>
+                            <Lockup>
+                                <Tag type='highlight'>Create New</Tag>
+                                <text.p as='paragraph' className='m-t-1' text='Chose one of the options below to upload and save filter options' />
+                            </Lockup>
+                            {loading && <Spinner size='sm' />}
+                            {!fileData &&
+                                <Lockup>
+                                    <TwoColumnLayout>
+                                        <Lockup>
+                                            <text.label as='label' text='Upload File Interaction IDs' />
+                                            <FieldFrame helpMessage={<UploadTemplate className='m-t-1' />}>
+                                                <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
+                                            </FieldFrame>
+                                        </Lockup>
+                                        <Lockup>
+                                            <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
+                                        </Lockup>
+                                    </TwoColumnLayout>
+                                </Lockup>
+                            }
+                            {fileData &&
+                                <Lockup>
+                                    <text.label as='label' text={`Loaded Interaction IDs : ${rowCount} rows`} />
+                                    <SaveObjectForm hasBeenSaved={hasBeenSaved} onSave={handleSaveResults}></SaveObjectForm>
+                                </Lockup>
+                            }
+                        </Block>
+                        <Block>
+                            <SiblingSet gap='md'>
+
+                                <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                                {fileData && <Button text='Reset/Clear' size='small' design='critical' onClick={handleCancel} />}
+                            </SiblingSet>
+                        </Block>
+                    </Card>
+
+                </>
+            }
+        </>
+    )
+};
+
+export default FilterMenu;

@@ -2,7 +2,7 @@ module.exports = {
   "env": "development",
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
-  "groups": ['lighthouse-ui-group'],
+  "groups": ['lighthouse-ui-devs'],
   // "sso": {
   //   "app": "lighthouse-ui",
   //   "root": "https://sso.dev-gdcorp.tools",
@@ -55,14 +55,14 @@ module.exports = {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
     },
-    gdlh_get_interction_ids: {
+    gdlh_get_interaction_ids: {
       "method": "GET",
       "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
     },
     gdlh_save_interaction_ids: {
       "method": "POST",
       "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
-    },
+    }
   }
 }
 

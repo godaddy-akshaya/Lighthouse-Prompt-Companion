@@ -47,5 +47,5 @@ jobs:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: dev-private-1
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}

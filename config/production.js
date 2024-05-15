@@ -42,6 +42,14 @@ module.exports = {
     "submit-summary-job": {
       "method": "POST",
       "url": "https://o4aj4d6r36.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
+    gdlh_get_interaction_ids: {
+      "method": "GET",
+      "url": "https://nnb0qzh6nc.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
+    gdlh_save_interaction_ids: {
+      "method": "POST",
+      "url": "https://shmuxe5fik.execute-api.us-west-2.amazonaws.com/gddeploy"
     }
   }
 }
