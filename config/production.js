@@ -49,7 +49,7 @@ module.exports = {
     },
     gdlh_save_interaction_ids: {
       "method": "POST",
-      "url": "https://udfi1nezze.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://shmuxe5fik.execute-api.us-west-2.amazonaws.com/gddeploy"
     }
   }
 }
