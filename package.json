@@ -4,7 +4,8 @@
   "description": "Lighthouse UI ",
   "scripts": {
     "build": "gasket build",
-    "start:dev": "gasket start --env development",
+    "build:dev": "gasket build --env development",
+    "start:dev": "gasket start --env development  --require elastic-apm-node/start",
     "start": "gasket start --require elastic-apm-node/start",
     "local": "gasket local",
     "analyze": "gasket analyze",
