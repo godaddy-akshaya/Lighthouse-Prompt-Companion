@@ -5,6 +5,7 @@ import { Block } from '@ux/layout';
 import text from '@ux/text';
 import Button from '@ux/button';
 import SiblingSet from '@ux/sibling-set';
+import TextInput from '@ux/text-input';
 import Checkmark from '@ux/icon/checkmark';
 import Remove from '@ux/icon/remove';
 import Collapsible from '@ux/collapsible';
@@ -43,6 +44,7 @@ const filterCards = ({ options, label, id, open, onChange, onSelectAll, onDesele
                     <Block className='lh-content'>
                         <div className='lh-controls'>
                             <SiblingSet gap='sm' aria-label='sib-set-actions'>
+                                <TextInput id='filter' placeholder='Filter' />
                                 <Button design='inline' onClick={handleSelectAll} size='small' aria-label='Select All' icon={<Checkmark />} />
                                 <Button design='inline' onClick={handleRemoveAll} size='small' aria-label='Remove All' icon={<Remove />} />
                             </SiblingSet>

@@ -85,31 +85,27 @@ const PromptBuilder = ({ authDetails }) => {
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setJobModel({ ...jobModel, filterOptions, extras });
+        setIsPromptVisible(true);
+        setShowMessage(true);
         try {
-            setJobModel({ ...jobModel, filterOptions, extras });
-            setIsPromptVisible(true);
-            setShowMessage(true);
-            submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
-                console.log(data);
-                if (data?.errorMessage) {
-                    setNumOfTransactions(0);
-                    setErrorMessage(data.errorMessage);
-                    setShowUserMessage(true);
-                    setShowMessage(false);
-                } else {
-                    setNumOfTransactions(data || 0);
-                    setShowMessage(false);
-                }
-            }, error => {
-                setErrorMessage(error);
-                setIsLoading(false);
+            const data = submitRowCountRequest(routeParams.table, filterOptions, extras);
+            if (data?.errorMessage) {
+                setNumOfTransactions(0);
+                setErrorMessage(data.errorMessage);
                 setShowUserMessage(true);
-            });
+            } else {
+                setNumOfTransactions(data || 0);
+            }
+            setShowMessage(false);
         } catch (error) {
-            setErrorMessage(error);
-            setIsLoading(false);
-            setShowUserMessage(true);
-        }
+            handleError(error);
+        };
+    }
+    function handleError(error) {
+        setErrorMessage(error);
+        setIsLoading(false);
+        setShowUserMessage(true);
     }
 
     useEffect(() => {
