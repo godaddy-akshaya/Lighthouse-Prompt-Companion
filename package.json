@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Lighthouse UI ",
   "scripts": {
-    "build": "gasket build",
+    "build": "gasket build --env production",
     "build:dev": "gasket build --env development",
     "start:dev": "gasket start --env development  --require elastic-apm-node/start",
-    "start": "gasket start --require elastic-apm-node/start",
+    "start": "gasket start --env production --require elastic-apm-node/start",
     "local": "gasket local",
     "analyze": "gasket analyze",
     "upload-coverage": "upload-coverage ",
