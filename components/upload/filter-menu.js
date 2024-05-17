@@ -57,6 +57,7 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             },
             complete: (result) => {
                 const columnName = Object.keys(result.data[0])[0];
+                console.log(columnName);
                 setRowCount(`${result.data?.length - 1 || 0}`)
                 setFileName(columnName);
                 setFileData(result.data.map((row) => row[columnName]));
@@ -84,7 +85,7 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             setRowCount(data?.length);
             setFileData(data);
             setLoading(false);
-            onChange({ data: data, column: 'interaction_id', name: e });
+            onChange({ data: data, column_name: 'interaction_id', name: e });
         }).catch((error) => {
             setLoading(false);
             setFileData([]);
