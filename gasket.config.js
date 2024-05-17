@@ -52,8 +52,8 @@ module.exports = {
       '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
       '@gasket/plugin-elastic-apm',
-      '@godaddy/gasket-plugin-security-auth-logging',
-      '@godaddy/gasket-plugin-security-logger',
+      // '@godaddy/gasket-plugin-security-auth-logging',
+      // '@godaddy/gasket-plugin-security-logger',
       '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
@@ -73,18 +73,18 @@ module.exports = {
       })
     ]
   },
-  fluentd: {
-    host: 'localhost',
-    port: 24224,
-    timeout: 3
-  },
-  securityLogger: {
-    aws: {
-      accountId: '255575434142',
-      accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
-    },
-    serviceFullName: 'lighthouse-ui'
-  },
+  // fluentd: {
+  //   host: 'localhost',
+  //   port: 24224,
+  //   timeout: 3
+  // },
+  // securityLogger: {
+  //   aws: {
+  //     accountId: '255575434142',
+  //     accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
+  //   },
+  //   serviceFullName: 'lighthouse-ui'
+  // },
   helmet: {
     contentSecurityPolicy: false,
   },
