@@ -27,6 +27,7 @@ import MessageOverlay from '@ux/message-overlay';
 import TableFilter from '../../components/table-filter';
 import PromptForm from '../../components/prompt-form';
 import TwoColumnLayout from '../../components/layout/two-column-layout';
+import { set } from 'lodash';
 
 
 const PromptBuilder = ({ authDetails }) => {
@@ -84,11 +85,15 @@ const PromptBuilder = ({ authDetails }) => {
     }
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsPromptVisible(true);
+        setShowMessage(true);
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 0);
+
         try {
             setJobModel({ ...jobModel, filterOptions, extras });
-            setIsPromptVisible(true);
-            setShowMessage(true);
+
             submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
                 console.log(data);
                 if (data?.errorMessage) {
@@ -110,6 +115,15 @@ const PromptBuilder = ({ authDetails }) => {
             setIsLoading(false);
             setShowUserMessage(true);
         }
+    }
+
+
+
+    function handleError(error) {
+        setErrorMessage(error);
+        setIsLoading(false);
+        setShowUserMessage(true);
+        setShowMessage(false);
     }
 
     useEffect(() => {
@@ -152,22 +166,21 @@ const PromptBuilder = ({ authDetails }) => {
                                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
                             </Block>
                             <Block>
-                                <div>
 
-
-                                    {isPromptVisible &&
-                                        <><text.h3 as='title' text='Parameters' />
-                                            {showMessage &&
-                                                <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
-                                                    <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                                                        <Block as='stack' className='text-center' orientation='vertical'>
-                                                            <text.label as='label' text='Getting number of transcripts based on your selections' />
-                                                            <br />
-                                                            <Spinner />
-                                                        </Block>
-                                                    </MessageOverlay>
-                                                </Card>
-                                            }
+                                {isPromptVisible &&
+                                    <><text.h3 as='title' text='Parameters' />
+                                        {showMessage &&
+                                            <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+                                                <MessageOverlay onEventBehind={handleTableRowSubmit} >
+                                                    <Block as='stack' className='text-center' orientation='vertical'>
+                                                        <text.label as='label' text='Getting number of transcripts based on your selections' />
+                                                        <br />
+                                                        <Spinner />
+                                                    </Block>
+                                                </MessageOverlay>
+                                            </Card>
+                                        }
+                                        {!showMessage && <>
                                             {numOfTransactions == 0 && <>
                                                 <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
                                                     <Block>
@@ -177,12 +190,14 @@ const PromptBuilder = ({ authDetails }) => {
                                                 </Card>
                                             </>
                                             }
-                                            {isPromptVisible && numOfTransactions > 0 &&
+                                            {numOfTransactions > 0 &&
                                                 <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
                                             }
-                                        </>
-                                    }
-                                </div>
+                                        </>}
+
+                                    </>
+                                }
+
                             </Block>
 
                         </TwoColumnLayout>

@@ -57,6 +57,7 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             },
             complete: (result) => {
                 const columnName = Object.keys(result.data[0])[0];
+                console.log(columnName);
                 setRowCount(`${result.data?.length - 1 || 0}`)
                 setFileName(columnName);
                 setFileData(result.data.map((row) => row[columnName]));
@@ -84,7 +85,7 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             setRowCount(data?.length);
             setFileData(data);
             setLoading(false);
-            onChange({ data: data, column: 'interaction_id', name: e });
+            onChange({ data: data, column_name: 'interaction_id', name: e });
         }).catch((error) => {
             setLoading(false);
             setFileData([]);
@@ -139,24 +140,31 @@ const FilterMenu = ({ onChange, OnOpen }) => {
                         <Block>
                             <Lockup>
                                 <Tag type='highlight'>Create New</Tag>
-                                <text.p as='paragraph' className='m-t-1' text='Chose one of the options below to upload and save filter options' />
+                                <text.p as='paragraph' className='m-t-1' text='Please choose one of the options below to upload and save filter options. For file uploads, ensure that `interaction_id` is listed as a header. If you encounter any issues with saving or uploading, please use the provided template.' />
+
                             </Lockup>
                             {loading && <Spinner size='sm' />}
                             {!fileData &&
-                                <Lockup>
-                                    <TwoColumnLayout>
+                                <>
+                                    <Block className='m-t-0'>
                                         <Lockup>
-                                            <text.label as='label' text='Upload File Interaction IDs' />
-                                            <FieldFrame helpMessage={<UploadTemplate className='m-t-1' />}>
-                                                <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
-                                            </FieldFrame>
+                                            <UploadTemplate />
                                         </Lockup>
-                                        <Lockup>
-                                            <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
-                                        </Lockup>
-                                    </TwoColumnLayout>
-                                </Lockup>
-                            }
+                                    </Block>
+                                    <Lockup>
+                                        <TwoColumnLayout>
+                                            <Lockup>
+                                                <text.label as='label' text='Upload File Interaction IDs' />
+                                                <FieldFrame>
+                                                    <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
+                                                </FieldFrame>
+                                            </Lockup>
+                                            <Lockup>
+                                                <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
+                                            </Lockup>
+                                        </TwoColumnLayout>
+                                    </Lockup>
+                                </>}
                             {fileData &&
                                 <Lockup>
                                     <text.label as='label' text={`Loaded Interaction IDs : ${rowCount} rows`} />

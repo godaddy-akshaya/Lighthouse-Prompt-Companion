@@ -42,9 +42,12 @@ import '@ux/icon/save/index.css';
 import { withLocaleRequired } from '@gasket/react-intl';
 import { withPageEnhancers } from '@godaddy/gasket-next';
 import { withAuthRequired } from '@godaddy/gasket-auth';
+import Log from '@gasket/log';
 import { App, reportWebVitals } from '@godaddy/gasket-next';
 export { reportWebVitals };
 
+const logger = new Log('lighthouse-ui');
+logger.info('Starting Lighthouse UI');
 export default withPageEnhancers([
     withLocaleRequired('/locales', { initialProps: true }), withAuthRequired({ app: 'lighthouse', realm: 'jomax', groups: ['lighthouse-ui-group'] })
 ])(App);

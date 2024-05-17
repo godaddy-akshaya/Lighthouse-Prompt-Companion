@@ -46,11 +46,14 @@ COPY --chown=worker ./styles /app/styles
 COPY --chown=worker ./gasket.config.js /app/gasket.config.js
 COPY --chown=worker ./next.config.js /app/next.config.js
 COPY --chown=worker ./manifest.xml /app/manifest.xml
+COPY --chown=worker ./docker-start.sh /app/docker-start.sh
 
-RUN ls -l
+# Build the application
+RUN echo "Building the application"
+RUN echo "THE_ENV: $THE_ENV"
+RUN if [ "$THE_ENV" = "development" ] ; then npm run build:dev ; else npm run build ; fi
 
-RUN gasket build --env $THE_ENV
-
+# CMD ["/bin/sh", "/app/docker-start.sh"]
 CMD ["gasket", "start", "--env", "production"]
 EXPOSE 8080
 

@@ -108,10 +108,10 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
         setDateOpen(e);
     }
     function handleUploadChange(e) {
-        setUploadData({ ...uploadData, column_selected_values: e.data, column_name: e.column, has_been_modified: true })
+        setUploadData({ ...uploadData, column_selected_values: e.data, column_name: 'interaction_id', has_been_modified: true })
     }
     function handleCancelFilterLoad(e) {
-        setUploadData({ ...uploadData, column_name: e, column_selected_values: [], has_been_modified: false });
+        setUploadData({ ...uploadData, column_name: 'interaction_id', column_selected_values: [], has_been_modified: false });
     }
     function handleFilterMenuOpen() {
         setEnableFilterMenu(!enableFilterMenu);

@@ -51,9 +51,10 @@ module.exports = {
       '@gasket/plugin-config',
       '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
+      '@gasket/plugin-elastic-apm',
       // '@godaddy/gasket-plugin-security-auth-logging',
       // '@godaddy/gasket-plugin-security-logger',
-      // '@godaddy/gasket-plugin-healthcheck',
+      '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
     ]
@@ -62,35 +63,44 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: 'info',
+    level: 'warning',
     transports: [
+      // Unified errors.log for all error messages
+      // in all environments
       new transports.File({
-        filename: 'error.log',
+        filename: 'errors.log',
         level: 'error'
-      }),
-      new transports.File({
-        filename: 'combined.log',
-        level: 'info'
       })
     ]
   },
+  // fluentd: {
+  //   host: 'localhost',
+  //   port: 24224,
+  //   timeout: 3
+  // },
   // securityLogger: {
   //   aws: {
-  //     accountId: '722577363440',
+  //     accountId: '255575434142',
   //     accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
   //   },
-  //   serviceFullName: 'lighthouse-ui-logger'
+  //   serviceFullName: 'lighthouse-ui'
   // },
   helmet: {
     contentSecurityPolicy: false,
   },
   environments: {
     local: {
-      ...localHttpsConfig
+      ...localHttpsConfig,
+      winston: {
+        level: 'debug',
+      }
     },
     development: isCI
       ? localHttpsConfig
-      : {}
+      : {},
+    winston: {
+      level: 'info'
+    }
   },
   presentationCentral: {
     params: {
