@@ -79,6 +79,7 @@
     "react-intl": "^5.25.1",
     "react-redux": "^8.0.0",
     "react-transition-group": "^4.3.0",
+    "react-window": "^1.8.10",
     "redux": "^4.0.5",
     "size-limit": "^7.0.5"
   },

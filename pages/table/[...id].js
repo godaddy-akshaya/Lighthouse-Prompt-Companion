@@ -27,7 +27,7 @@ import MessageOverlay from '@ux/message-overlay';
 import TableFilter from '../../components/table-filter';
 import PromptForm from '../../components/prompt-form';
 import TwoColumnLayout from '../../components/layout/two-column-layout';
-import { set } from 'lodash';
+
 
 
 const PromptBuilder = ({ authDetails }) => {
@@ -83,19 +83,24 @@ const PromptBuilder = ({ authDetails }) => {
         setShowUserMessage(false);
         setErrorMessage('');
     }
+    const handleError = (error) => {
+        setErrorMessage(error);
+        setIsLoading(false);
+        setShowUserMessage(true);
+        setShowMessage(false);
+    }
+
     /*  after posting prompt form -> results page    */
     const handleTableRowSubmit = (filterOptions, extras) => {
         setIsPromptVisible(true);
         setShowMessage(true);
         setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 0);
+        }, 300);
 
         try {
             setJobModel({ ...jobModel, filterOptions, extras });
-
             submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
-                console.log(data);
                 if (data?.errorMessage) {
                     setNumOfTransactions(0);
                     setErrorMessage(data.errorMessage);
@@ -111,20 +116,11 @@ const PromptBuilder = ({ authDetails }) => {
                 setShowUserMessage(true);
             });
         } catch (error) {
-            setErrorMessage(error);
-            setIsLoading(false);
-            setShowUserMessage(true);
+            handleError(error);
         }
     }
 
 
-
-    function handleError(error) {
-        setErrorMessage(error);
-        setIsLoading(false);
-        setShowUserMessage(true);
-        setShowMessage(false);
-    }
 
     useEffect(() => {
         if (routeParams.table === '0') {
@@ -135,7 +131,7 @@ const PromptBuilder = ({ authDetails }) => {
                 setFilters(data);
                 setShowTableSelect(false);
                 setIsLoading(false);
-            });
+            }).catch(error => handleError(error));
         }
     }, []);
     return (

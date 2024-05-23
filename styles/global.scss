@@ -12,6 +12,15 @@ it is recommended to import those directly to `pages/_app.js`
 .lh-no-padding {
     padding: 0px !important;
 }
+.min-width-200 {
+    min-width: 200px !important;
+}
+.max-width-200 {
+    min-width: 200px !important;
+}
+.push-right {
+    margin-left: auto !important;
+}
 .lh-filter-container {
     display: flex;
     width: 100%;
@@ -55,17 +64,13 @@ it is recommended to import those directly to `pages/_app.js`
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
         padding-top: 12px !important;
-        .lh-controls {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;            
-        }
     }
     .lh-tag {
         margin-left: 8px !important;
     }
     .lh-content {
         padding-top: 0px !important;
+        margin-top: 0px !important;
         .columns {   
             overflow-y: auto;
             &.full-height {
@@ -76,6 +81,9 @@ it is recommended to import those directly to `pages/_app.js`
             }
     }
      
+    }
+    &.lh-has-changes {
+        background-color: #D4DBE0;
     }
 }
 .lh-container {
@@ -118,6 +126,7 @@ it is recommended to import those directly to `pages/_app.js`
         margin-left: 16px;
     }
 }
+
 .logo {
     display: inline-block;
     max-width: 130px;
@@ -174,4 +183,8 @@ body.ux-app.gasket-app .ux-app__content {
 }
 .summary-prompt-modal {
     width: 700px !important;
+}
+.restricted-height-overflow {
+    max-height: 250px !important;
+    overflow-y: auto !important;
 }
