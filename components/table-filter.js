@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useState } from 'react';
 import { debounce, get, has, set } from 'lodash';
-import FilterCards from './filter-cards';
+import FilterCards from './filter-card/filter-cards';
 import Card from '@ux/card';
 import { Module, Block, Lockup } from '@ux/layout';
 import FieldFrame from '@ux/field-frame';
@@ -23,7 +23,7 @@ const DefaultFilterModel = {
 };
 
 
-const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
+const TableFilter = ({ filters, onSubmit }) => {
     const today = new Date();
     const formRef = React.createRef();
     const [dateOpen, setDateOpen] = useState(false);
@@ -40,6 +40,7 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
         column_data_type: 'date',
         has_been_modified: true
     });
+
     const [uploadData, setUploadData] = useState({
         ...DefaultFilterModel,
         column_name: 'interaction_id',
@@ -64,32 +65,7 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
     function handleLexicalSearch(e) {
         debounceHandleLexicalSearch(e);
     }
-    function handleSelectAll(e) {
-        let _filters = [...filterOptions.map(filter => {
-            if (filter.column_name === e.column_name) {
-                return {
-                    ...filter,
-                    checkbox_columns: e.checkbox_columns.map(x => ({ ...x, value: true })),
-                    column_selected_values: e.checkbox_columns.map(x => x.label)
-                };
-            }
-            return filter;
-        })];
-        setFilterOptions(_filters);
-    }
-    function handleDeselectAll(e) {
-        let _columns = [...filterOptions.map(column => {
-            if (column.column_name === e.column_name) {
-                return {
-                    ...column,
-                    checkbox_columns: e.checkbox_columns.map(x => ({ ...x, value: false })),
-                    column_selected_values: []
-                };
-            }
-            return column;
-        })];
-        setFilterOptions(_columns);
-    }
+
     function checkDateMinValue(e) {
         return new Date(minDateValue) < new Date(e[0]);
     }
@@ -114,30 +90,31 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
         setUploadData({ ...uploadData, column_name: 'interaction_id', column_selected_values: [], has_been_modified: false });
     }
     function handleFilterMenuOpen() {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
         setEnableFilterMenu(!enableFilterMenu);
     }
     function handleEndDateValue(e) {
         setEndDateValue(e);
         setDateValue({ ...dateValue, column_selected_values: [startDateValue[0], e[0]] });
     }
-    function handleFilterChange(e) {
-        let _filters = filterOptions?.map(filter => {
-            if (filter.column_name.toLowerCase() === e.column.toLowerCase()) {
-                return {
-                    ...filter,
-                    has_been_modified: true,
-                    checkbox_columns: filter.checkbox_columns.map(checkbox_column => {
-                        if (checkbox_column.label === e.label) {
-                            return { ...checkbox_column, value: e.value };
-                        }
-                        return checkbox_column;
-                    })
-                };
-            }
-            return filter;
-        });
+
+    function handleFilterChange({ rowIndex, fresh_values }) {
+        // Find index of the filter
+        if (rowIndex === -1) return;
+        console.log(rowIndex);
+        let _filters = [...filterOptions];
+        _filters[rowIndex] = {
+            ..._filters[rowIndex],
+            has_been_modified: true,
+            checkbox_columns: [...fresh_values],
+            column_selected_values: fresh_values.filter(column => column.value).map(column => column.label)
+        }
+        console.log(_filters[rowIndex]);
         setFilterOptions(_filters);
     }
+    useEffect(() => {
+        console.log('Filter Options have been updated', filterOptions);
+    }, [filterOptions])
     return (
         <>  <text.h3 as='title' text='Available Filters' />
             <Card id='table-params-card' stretch={true}>
@@ -173,7 +150,7 @@ const TableFilter = ({ filters, onSubmit, savedFilters = [] }) => {
                         <div className='lh-filter-container'>
                             {
                                 filterOptions?.map((field, index) =>
-                                    <FilterCards key={field.column_name} open={false} id={field.column_name} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} onChange={handleFilterChange} label={field.label} options={field} />
+                                    <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
                                 )
                             }
                         </div>
