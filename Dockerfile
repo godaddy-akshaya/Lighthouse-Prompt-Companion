@@ -54,7 +54,7 @@ RUN echo "THE_ENV: $THE_ENV"
 RUN if [ "$THE_ENV" = "development" ] ; then npm run build:dev ; else npm run build ; fi
 
 #CMD ["/bin/sh", "/app/docker-start.sh $THE_ENV"]
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start"]
 EXPOSE 8080
 
 
