@@ -1,38 +1,35 @@
 import React, { use, useCallback, useEffect, useState } from 'react';
 import { Block, Lockup } from '@ux/layout';
 import Card from '@ux/card';
-import Alert from '@ux/alert';
 import Papa from 'papaparse';
 import text from '@ux/text';
 import Tag from '@ux/tag';
-import TextInput from '@ux/text-input';
-import SelectInput from '@ux/select-input';
 import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
 import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
-import FileUpload from '@ux/file-upload';
 import Upload from '@ux/icon/upload';
 import Spinner from '@ux/spinner';
-import Table from '@ux/table';
 import SaveObjectForm from './save-object-form';
 import '@ux/icon/x/index.css';
-
+import Alert from '@ux/alert';
 import UploadTemplate from './upload-template';
 import FieldFrame from '@ux/field-frame';
 import TwoColumnLayout from '../layout/two-column-layout';
 import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
 import FilterFreeFormText from './filter-free-form-text';
-const UPLOAD_LIMIT = 10000;
+import { set } from 'lodash';
 
 
 
 const FilterMenu = ({ onChange, OnOpen }) => {
+    const filterMenuRef = React.createRef();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [fileData, setFileData] = useState(null);
     const [fileName, setFileName] = useState(null);
     const [rowCount, setRowCount] = useState(null);
-    const [preCheckTag, setPreCheckTag] = useState(null);
+    const [AlertTag, setAlertTag] = useState(null);
+    const [AlertMessage, setAlertMessage] = useState(null);
     const [savedFilters, setSavedFilters] = useState([]);
     const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
@@ -42,7 +39,11 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             if (fileExtension === 'csv') {
                 processCSVFile(uploadedFile);
             } else {
-                alert('Invalid file type');
+                window.scrollTo(0, 200);
+                setAlertTag('critical');
+                setLoading(false);
+                setAlertMessage('Use CSV file only, no xlsx or xls files allowed. Thank you!');
+
             }
         }
     };
@@ -50,23 +51,33 @@ const FilterMenu = ({ onChange, OnOpen }) => {
         filterParamsMgmtService.getFilterOptions().then((data) => setSavedFilters(data?.sort()));
     }, []);
     const processCSVFile = (uploadedFile) => {
-        Papa.parse(uploadedFile, {
-            error: (error) => {
-                setPreCheck('Error parsing file');
-                setPreCheckTag('error');
-            },
-            complete: (result) => {
-                const columnName = Object.keys(result.data[0])[0];
-                console.log(columnName);
-                setRowCount(`${result.data?.length - 1 || 0}`)
-                setFileName(columnName);
-                setFileData(result.data.map((row) => row[columnName]));
-                setPreCheckTag('success');
-                setLoading(false);
-                onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
-            },
-            header: true
-        });
+        try {
+            Papa.parse(uploadedFile, {
+                error: (error) => {
+                    setAlertMessage('Error loading file, please try again');
+                    setAlertTag('critical');
+                },
+                complete: (result) => {
+                    const columnName = Object.keys(result.data[0])[0];
+                    setRowCount(`${result.data?.length - 1 || 0}`)
+                    setFileName(columnName);
+                    setFileData(result.data.map((row) => row[columnName]));
+                    setAlertTag('success');
+                    setAlertMessage('File loaded successfully');
+                    setLoading(false);
+                    onChange({ data: result.data.map((row) => row[columnName]), name: columnName });
+                    // Set message to null after 5 seconds
+                    setTimeout(() => {
+                        setAlertMessage(null);
+                    }, 5000);
+                },
+                header: true
+            });
+        } catch (error) {
+            setAlertMessage('Error loading file, please try again');
+            setLoading(false);
+            setAlertTag('critical');
+        };
     };
     const handleSaveResults = (e) => {
         setLoading(true);
@@ -104,10 +115,12 @@ const FilterMenu = ({ onChange, OnOpen }) => {
         setFileData(null);
         setOpen(false);
         setHasBeenSaved(false);
+        setAlertMessage(null);
         onChange({ data: [], name: '' });
     });
     const handleOpen = useCallback((e) => {
         setOpen(!open);
+        setAlertMessage(null);
     })
     const handleFileChange = useCallback((e) => {
         setLoading(true);
@@ -118,7 +131,7 @@ const FilterMenu = ({ onChange, OnOpen }) => {
             {!open &&
                 <Lockup className='lh-container lh-start'>
                     {loading && <Spinner size='sm' />}
-                    <Menu id='filter-menu'>
+                    <Menu ref={filterMenuRef} id='filter-menu'>
                         <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
                         <MenuList>
                             <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
@@ -137,11 +150,17 @@ const FilterMenu = ({ onChange, OnOpen }) => {
                         <text.h3 text='Upload Interaction IDs' as='title' />
                     </Lockup>
                     <Card className='card-dark-background' id='upload' stretch={true}>
+                        {AlertMessage &&
+                            <Block>
+                                <Alert title={AlertMessage}
+                                    id='critical-message'
+                                    emphasis={AlertTag}
+                                    actions={<Button design="inline" text="Close" onClick={() => setAlertMessage(null)} />} />
+                            </Block>}
                         <Block>
                             <Lockup>
                                 <Tag type='highlight'>Create New</Tag>
                                 <text.p as='paragraph' className='m-t-1' text='Please choose one of the options below to upload and save filter options. For file uploads, ensure that `interaction_id` is listed as a header. If you encounter any issues with saving or uploading, please use the provided template.' />
-
                             </Lockup>
                             {loading && <Spinner size='sm' />}
                             {!fileData &&
@@ -174,17 +193,14 @@ const FilterMenu = ({ onChange, OnOpen }) => {
                         </Block>
                         <Block>
                             <SiblingSet gap='md'>
-
-                                <Button text='Close' size='small' design='secondary' onClick={() => setOpen(false)} />
+                                <Button text='Close' size='small' design='secondary' onClick={handleOpen} />
                                 {fileData && <Button text='Reset/Clear' size='small' design='critical' onClick={handleCancel} />}
                             </SiblingSet>
                         </Block>
                     </Card>
-
                 </>
             }
         </>
     )
 };
-
 export default FilterMenu;
