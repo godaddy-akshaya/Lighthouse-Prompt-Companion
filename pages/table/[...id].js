@@ -6,8 +6,7 @@ import { Block, Lockup, Module } from '@ux/layout';
 import Head from '../../components/head';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
-import '@ux/icon/home/index.css';
-import '@ux/text-input/styles';
+
 import '@ux/card/styles';
 import Button from '@ux/button';
 
