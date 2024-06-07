@@ -62,6 +62,8 @@ const TableFilter = ({ filters, onSubmit }) => {
         _search.push(e);
         setLexicalSearchItems(_search);
     }
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: [value] }), 100), [],);
+
 
     function handleRemoveSearchItem(e) {
         let _search = [...lexicalSearchItems];

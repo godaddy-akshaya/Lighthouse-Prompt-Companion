@@ -170,6 +170,9 @@ body.ux-app.gasket-app {
 body.ux-app.gasket-app .ux-app__content {
     background-color: var(--ux-cao06b, white) !important;
 }
+.ux-flyout {
+  z-index: 1000 !important;
+}
 .text-center {
     text-align: center !important;
     align-items: center !important;
