@@ -18,10 +18,11 @@ import TwoColumnLayout from '../layout/two-column-layout';
 import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
 import FilterFreeFormText from './filter-free-form-text';
 import { set } from 'lodash';
+import LoadedFilter from './loaded-filter';
 
 
 
-const FilterMenu = ({ onChange, OnOpen }) => {
+const FilterMenu = ({ onChange, OnCancel }) => {
     const filterMenuRef = React.createRef();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -129,20 +130,27 @@ const FilterMenu = ({ onChange, OnOpen }) => {
     return (
         <>
             {!open &&
-                <Lockup className='lh-container lh-start'>
-                    {loading && <Spinner size='sm' />}
-                    <Menu ref={filterMenuRef} id='filter-menu'>
-                        <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
-                        <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
-                            <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
-                            <MenuSeperator />
-                            <MenuGroup label='Saved Lists'>
-                                {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
-                                {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
-                            </MenuGroup>
-                        </MenuList>
-                    </Menu>
-                </Lockup>
+                <>
+                    <Lockup className='lh-container lh-start'>
+                        {loading && <Spinner size='sm' />}
+                        <Menu ref={filterMenuRef} id='filter-menu'>
+                            <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
+                            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
+                                <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
+                                <MenuSeperator />
+                                <MenuGroup label='Saved Lists'>
+                                    {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
+                                    {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
+                                </MenuGroup>
+                            </MenuList>
+                        </Menu>
+                    </Lockup>
+                    {rowCount &&
+                        <Lockup className='lh-container'>
+                            <LoadedFilter rowCount={rowCount} columnName='Loaded Interaction IDs' onClear={handleCancel} />
+                        </Lockup>
+                    }
+                </>
             }
             {open &&
                 <>

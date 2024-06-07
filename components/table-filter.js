@@ -57,26 +57,29 @@ const TableFilter = ({ filters, onSubmit }) => {
         has_been_modified: false
     });
     function handleAddSearchItem(e) {
-
         let _search = [...lexicalSearchItems];
         _search.push(e);
         setLexicalSearchItems(_search);
     }
-    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: [value] }), 100), [],);
-
+    const handleLexicalSearch = ((e) => {
+        let value = [];
+        value.push(e);
+        debounceHandleLexicalSearch(value);
+    });
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: value, has_been_modified: true }), 100), [],);
 
     function handleRemoveSearchItem(e) {
         let _search = [...lexicalSearchItems];
         _search.splice(_search.indexOf(e), 1);
         setLexicalSearchItems(_search);
-
     }
     function handleTableRowSubmit(e) {
         // Apply the Search items to the column filter object
-        let ls = { ...lexicalSearch };
-        ls.column_selected_values = lexicalSearchItems;
-        setLexicalSearch(ls);
-        const extras = [ls, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
+        // let ls = { ...lexicalSearch };
+        // ls.column_selected_values = lexicalSearchItems;
+        // setLexicalSearch(ls);
+        // console.log(ls);
+        const extras = [lexicalSearch, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
         onSubmit(filterOptions, extras);
     }
 
@@ -139,24 +142,23 @@ const TableFilter = ({ filters, onSubmit }) => {
                                     value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
                                 <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                             </div>
-
                             {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
                         </Lockup>
                     </Block>
                     <Block>
-                        {enableFilterMenu &&
-                            <Lockup>
-                                <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} />
-                            </Lockup>
-                        }
-                        {uploadData.column_selected_values.length > 0 &&
-                            <Lockup>
-                                <LoadedFilter rowCount={uploadData?.column_selected_values.length} columnName='Loaded Interaction IDs' onClear={handleCancelFilterLoad} />
-                            </Lockup>
-                        }
+                        <Lockup>
+                            <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} onCancel={handleCancelFilterLoad} />
+                        </Lockup>
                     </Block>
                     <Block onFocus={handleOnFocus}>
-                        <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} />
+                        <Lockup>
+                            <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                        </Lockup>
+                        {/*
+
+                          Possible release when enabling multi-item search
+
+                         <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} /> */}
                     </Block>
                     <Block>
                         <div className='lh-filter-container'>
@@ -167,7 +169,6 @@ const TableFilter = ({ filters, onSubmit }) => {
                             }
                         </div>
                     </Block>
-
                     <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
                 </Module>
             </Card>       </>
