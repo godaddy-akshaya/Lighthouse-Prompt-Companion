@@ -118,9 +118,6 @@ const PromptBuilder = ({ authDetails }) => {
             handleError(error);
         }
     }
-
-
-
     useEffect(() => {
         if (routeParams.table === '0') {
             setShowTableSelect(true);
