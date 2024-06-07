@@ -4,8 +4,6 @@ const logPrefix = 'config:gasket';
 const { transports } = require('winston');
 
 
-
-
 const localHttpsConfig = {
   hostname: 'local.c3.int.dev-gdcorp.tools',
   http: false,
@@ -35,7 +33,6 @@ const getLastElementInUrl = (url) => {
 const getUrlForProxy = (req) => {
   const id = getLastElementInUrl(req.url);
   const { url } = req.config?.api[id] || '';
-
   return url;
 }
 module.exports = {

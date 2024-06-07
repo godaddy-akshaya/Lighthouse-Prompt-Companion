@@ -34,6 +34,8 @@ import '@ux/icon/upload/index.css';
 import '@ux/flyout/styles';
 import '@ux/modal/styles';
 import '@ux/icon/download/index.css';
+import '@ux/icon/home/index.css';
+import '@ux/text-input/styles';
 import '@ux/icon/create-form/index.css';
 import '@ux/flyout/styles';
 import '@ux/message-overlay/styles';
