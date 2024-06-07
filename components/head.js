@@ -44,10 +44,5 @@ Head.propTypes = {
   route: PropTypes.string
 };
 
-Head.defaultProps = {
-  title: 'Godaddy Lighthouse',
-  description: 'Godaddy Lighthouse',
-  route: ''
-};
 
 export default Head;

@@ -26,7 +26,6 @@ export const IndexPage = ({ authDetails }) => {
         </Block>
       </div>
       <TwoColumnLayout>
-
         <Card id='learn-more' stretch={true}>
           <Block>
             <text.h4 as='title' text='What is Lighthouse?' />
@@ -34,7 +33,6 @@ export const IndexPage = ({ authDetails }) => {
             <Button text='Learn More' design='primary' as='cta' href='https://godaddy-corp.atlassian.net/wiki/spaces/BI/pages/3343751333/GoDaddy+Lighthouse+-+an+Insights+Platform' />
           </Block>
         </Card>
-
         <Card id='try-prompt-out' className='grey-card'>
           <TableSelect />
         </Card>
