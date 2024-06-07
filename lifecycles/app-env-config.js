@@ -1,3 +1,4 @@
+// lifecyle to load environment specific configuration
 const logPrefix = 'lifecycle:appEnvConfig';
 
 module.exports = async function (gasket, config) {

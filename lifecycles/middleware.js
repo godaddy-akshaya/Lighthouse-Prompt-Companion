@@ -1,5 +1,4 @@
 const bodyParser = require('body-parser');
-
 /**
  * Introduce new middleware layers to the stack.
  *
