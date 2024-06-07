@@ -188,3 +188,6 @@ body.ux-app.gasket-app .ux-app__content {
     max-height: 250px !important;
     overflow-y: auto !important;
 }
+.ux-flyout {
+  z-index: 1000 !important;
+}
