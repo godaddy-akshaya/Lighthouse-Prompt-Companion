@@ -60,7 +60,7 @@ const TableFilter = ({ filters, onSubmit }) => {
         const extras = [lexicalSearch, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
         onSubmit(filterOptions, extras);
     }
-    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: value.split(' ') }), 100), [],);
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: [value] }), 100), [],);
 
     function handleLexicalSearch(e) {
         debounceHandleLexicalSearch(e);
