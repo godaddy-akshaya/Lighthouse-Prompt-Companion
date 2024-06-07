@@ -57,26 +57,29 @@ const TableFilter = ({ filters, onSubmit }) => {
         has_been_modified: false
     });
     function handleAddSearchItem(e) {
-
         let _search = [...lexicalSearchItems];
         _search.push(e);
         setLexicalSearchItems(_search);
     }
-    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: [value] }), 100), [],);
-
+    const handleLexicalSearch = ((e) => {
+        let value = [];
+        value.push(e);
+        debounceHandleLexicalSearch(value);
+    });
+    const debounceHandleLexicalSearch = useCallback(debounce((value) => setLexicalSearch({ ...lexicalSearch, column_selected_values: value, has_been_modified: true }), 100), [],);
 
     function handleRemoveSearchItem(e) {
         let _search = [...lexicalSearchItems];
         _search.splice(_search.indexOf(e), 1);
         setLexicalSearchItems(_search);
-
     }
     function handleTableRowSubmit(e) {
         // Apply the Search items to the column filter object
-        let ls = { ...lexicalSearch };
-        ls.column_selected_values = lexicalSearchItems;
-        setLexicalSearch(ls);
-        const extras = [ls, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
+        // let ls = { ...lexicalSearch };
+        // ls.column_selected_values = lexicalSearchItems;
+        // setLexicalSearch(ls);
+        // console.log(ls);
+        const extras = [lexicalSearch, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
         onSubmit(filterOptions, extras);
     }
 
@@ -156,7 +159,11 @@ const TableFilter = ({ filters, onSubmit }) => {
                         }
                     </Block>
                     <Block onFocus={handleOnFocus}>
-                        <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} />
+
+                        <Lockup>
+                            <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                        </Lockup>
+                        {/* <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} /> */}
                     </Block>
                     <Block>
                         <div className='lh-filter-container'>
