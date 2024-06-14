@@ -1,0 +1,16 @@
+name: UploadCoverage
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  SPAQActions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: SPAQ Actions
+        uses: gdcorp-appservices/spaq-actions@v1
+        with:
+          coveragePath: coverage/lcov.info
