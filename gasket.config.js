@@ -64,10 +64,7 @@ module.exports = {
     transports: [
       // Unified errors.log for all error messages
       // in all environments
-      new transports.File({
-        filename: 'errors.log',
-        level: 'error'
-      })
+
     ]
   },
   // fluentd: {
