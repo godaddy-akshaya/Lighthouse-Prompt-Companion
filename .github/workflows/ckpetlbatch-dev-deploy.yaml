@@ -40,7 +40,7 @@ jobs:
           artifact_options_json: |
             {
               "ports": [8080,8443],
-              "healthcheckPath": "/healthcheck",
+              "healthcheckPath": "/healthcheck"
             }
       - name: Promote to dev-private Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
