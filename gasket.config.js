@@ -79,10 +79,10 @@ module.exports = {
   // },
   securityLogger: {
     aws: {
-      accountId: '255575434142',
-      accountName: 'GD-AWS-USA-GPD-CKPEtlBatch-Dev-Private'
+      accountId: process.env.AWS_ACCT_ID || '000',
+      accountName: process.env.AWS_ACCT_NAME || 'unknown',
     },
-    serviceFullName: 'lighthouse-ui'
+    serviceFullName: 'de-gd-lighthouse-ui',
   },
   helmet: {
     contentSecurityPolicy: false,
