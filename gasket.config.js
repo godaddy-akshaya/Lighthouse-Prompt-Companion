@@ -67,6 +67,11 @@ module.exports = {
 
     ]
   },
+  autotls: {
+    // eslint-disable-next-line no-process-env
+    enabled: process.env.AUTO_TLS_ENABLED === 'true',
+    expiryInDays: 3650
+  },
   // fluentd: {
   //   host: 'localhost',
   //   port: 24224,
