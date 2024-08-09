@@ -6,7 +6,7 @@
     "build": "gasket build --env production",
     "build:dev": "gasket build --env development",
     "start:dev": "gasket start --env development",
-    "start": "gasket start -r ./start-me-first.js ",
+    "start": "gasket start -r start-me-first.js ",
     "local": "gasket local",
     "analyze": "gasket analyze",
     "upload-coverage": "upload-coverage ",
