@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import session from '../../lib/session';
 import Head from '../../components/head';
-import Table from '@ux/table';
+import Table from '@ux/table-legacy';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
 import text from '@ux/text';
