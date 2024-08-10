@@ -49,8 +49,8 @@ module.exports = {
       '@gasket/plugin-log',
       '@godaddy/gasket-plugin-auth',
       '@gasket/plugin-elastic-apm',
-      // '@godaddy/gasket-plugin-security-auth-logging',
-      // '@godaddy/gasket-plugin-security-logger',
+      '@godaddy/gasket-plugin-security-auth-logging',
+      '@godaddy/gasket-plugin-security-logger',
       '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
       '@gasket/plugin-express',
@@ -60,25 +60,25 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: 'warning',
-    transports: [
-      // Unified errors.log for all error messages
-      // in all environments
-
-    ]
+    level: 'warn'
+  },
+  autotls: {
+    // eslint-disable-next-line no-process-env
+    enabled: process.env.AUTO_TLS_ENABLED === 'true',
+    expiryInDays: 3650
   },
   // fluentd: {
   //   host: 'localhost',
   //   port: 24224,
   //   timeout: 3
   // },
-  // securityLogger: {
-  //   aws: {
-  //     accountId: '255575434142',
-  //     accountName: 'gd-aws-usa-gpd-ckpgluecatal-dev-private'
-  //   },
-  //   serviceFullName: 'lighthouse-ui'
-  // },
+  securityLogger: {
+    aws: {
+      accountId: process.env.AWS_ACCT_ID || '000',
+      accountName: process.env.AWS_ACCT_NAME || 'unknown',
+    },
+    serviceFullName: 'de-gd-lighthouse-ui',
+  },
   helmet: {
     contentSecurityPolicy: false,
   },
@@ -93,7 +93,7 @@ module.exports = {
       ? localHttpsConfig
       : {},
     winston: {
-      level: 'info'
+      level: 'warn',
     }
   },
   presentationCentral: {
