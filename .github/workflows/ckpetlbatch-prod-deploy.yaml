@@ -29,7 +29,11 @@ jobs:
       - name: Build Container
         run: |
           docker build --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg THE_ENV=production -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
-
+      - name: Set up build vars for metadata
+        run: |
+          echo "BUILT_SHORT_SHA=$(git rev-parse HEAD | cut -c1-8)" | tee -a $GITHUB_ENV
+          echo "BUILT_BRANCH=$(git branch --show-current)" | tee -a $GITHUB_ENV
+          echo "BUILT_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" | tee -a $GITHUB_ENV
       - id: katana-publish
         name: Publish Katana Artifact
         uses: gdcorp-actions/katana-publish-artifact@v1
@@ -41,7 +45,13 @@ jobs:
           artifact_kind: ecs
           artifact_options_json: |
             {
-              "ports": [8080,8443]
+              "ports": [8080,8443],
+              "healthcheckPath": "/healthcheck",
+              "environmentVariables": [
+                { "name": "BUILT_SHORT_SHA", "value": "${{ env.BUILT_SHORT_SHA }}" },
+                { "name": "BUILT_BRANCH", "value": "${{ env.BUILT_BRANCH }}" },
+                { "name": "BUILT_AT", "value": "${{ env.BUILT_AT }}" } 
+              ]
             }
       - name: Promote to Production Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
