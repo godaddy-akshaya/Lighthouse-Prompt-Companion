@@ -60,12 +60,7 @@ module.exports = {
     prefix: 'lighthouse'
   },
   winston: {
-    level: 'warning',
-    transports: [
-      // Unified errors.log for all error messages
-      // in all environments
-
-    ]
+    level: 'warn'
   },
   autotls: {
     // eslint-disable-next-line no-process-env
@@ -98,7 +93,7 @@ module.exports = {
       ? localHttpsConfig
       : {},
     winston: {
-      level: 'error',
+      level: 'warn',
     }
   },
   presentationCentral: {
