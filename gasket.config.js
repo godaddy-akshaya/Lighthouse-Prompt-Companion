@@ -100,7 +100,7 @@ module.exports = {
     params: {
       app: 'lighthouse-ui',
       header: 'internal-sidebar',
-      uxcore: '2301',
+      uxcore: '2400',
       market: 'en-us',
       theme: 'godaddy-antares'
     }
