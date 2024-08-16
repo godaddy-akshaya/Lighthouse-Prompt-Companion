@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import session from '../../lib/session';
 import Head from '../../components/head';
 import { getResultsByRunId } from '../../lib/api';
-import Table from '@ux/table';
+import Table from '@ux/table-legacy';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
 import { Module, Block } from '@ux/layout';

@@ -47,6 +47,7 @@ COPY --chown=worker ./gasket.config.js /app/gasket.config.js
 COPY --chown=worker ./next.config.js /app/next.config.js
 COPY --chown=worker ./manifest.xml /app/manifest.xml
 COPY --chown=worker ./docker-start.sh /app/docker-start.sh
+COPY --chown=worker ./start-me-first.js /app/start-me-first.js
 
 # Build the application
 RUN echo "Building the application"

@@ -28,7 +28,6 @@ const MultiItemTextEntry = ({ items, label, onAddItem, onRemoveItem }) => {
         setSearchInput(e);
     });
     const handleItemAdd = (e) => {
-        console.log('Add ', searchInput);
         onAddItem(searchInput);
     }
     const handleItemRemove = (e) => {

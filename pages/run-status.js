@@ -111,18 +111,20 @@ export const RunStatusPage = ({ authDetails }) => {
                     <Lockup >
                         <text.h3 text={'Run Status'} as='heading' />
                     </Lockup>
-                    <Lockup></Lockup>
-                    {/* <Search
+                    <Lockup>
+                        {/* <Search
                         id='my-search'
                         style={{ 'width': '25%' }}
                         placeholder='Search for Run ID....'
                     /> */}
+                    </Lockup>
+
                 </div>
                 <Card stretch={true} id='results' title='Results'>
                     <Module>
                         {tableLoading && <text.p text='Loading...' />}
                         {!tableLoading &&
-                            <Table
+                            <table
                                 className='table table-hover'
                                 sortable={true}>
                                 <thead>
@@ -155,7 +157,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                         </tr>
                                     )) || null}
                                 </tbody>
-                            </Table>
+                            </table>
                         }
                     </Module>
                 </Card>
