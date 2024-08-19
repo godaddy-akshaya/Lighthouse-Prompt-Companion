@@ -24,6 +24,13 @@ const Head = (props) => {
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
           active: props?.route === 'status' ? true : false
+        }, {
+          caption: 'Semantic Search',
+          'key': '3',
+          'href': '/semantic-search',
+          'eid': 'pep.prompt-ui.nav.semantic-search.click',
+          'icon': 'search',
+          'active': props?.route === 'search' ? true : false
         }
       ]);
     });
