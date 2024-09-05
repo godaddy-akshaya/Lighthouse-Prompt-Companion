@@ -9,18 +9,32 @@ it is recommended to import those directly to `pages/_app.js`
 
 @see: docs/css-imports.md
 */
+#editor_holder {
+    font-size: x-small;
+    line-height: normal;
+}
+
+.code-block-custom-styles {
+    font-size: x-small;
+    line-height: normal;
+}
+
 .lh-no-padding {
     padding: 0px !important;
 }
+
 .min-width-200 {
     min-width: 200px !important;
 }
+
 .max-width-200 {
     min-width: 200px !important;
 }
+
 .push-right {
     margin-left: auto !important;
 }
+
 .lh-filter-container {
     display: flex;
     width: 100%;
@@ -29,16 +43,19 @@ it is recommended to import those directly to `pages/_app.js`
     flex: 1;
     flex-grow: 1;
 }
+
 .lh-prompt-form-card {
     min-height: 300px;
 }
+
 .lh-view-card {
     max-width: 100% !important;
     height: 80vh !important;
     overflow: auto !important;
 }
 
-.lh-table-full-view-with-scroll { 
+.lh-table-full-view-with-scroll {
+
     // thead { 
     //     display: block !important; 
     //     position: sticky !important; 
@@ -48,10 +65,14 @@ it is recommended to import those directly to `pages/_app.js`
     // }
     tbody thead {
         display: block !important;
-        max-height: 100vh !important; /* Adjust this value to fit your needs */
-        overflow-y: auto !important; /* Enable vertical scrolling */
-        overflow-x: auto !important;/* Enable horizontal scrolling */
-      }
+        max-height: 100vh !important;
+        /* Adjust this value to fit your needs */
+        overflow-y: auto !important;
+        /* Enable vertical scrolling */
+        overflow-x: auto !important;
+        /* Enable horizontal scrolling */
+    }
+
     thead {
         position: sticky !important;
         top: 0 !important;
@@ -60,65 +81,83 @@ it is recommended to import those directly to `pages/_app.js`
 
 .lh-filter-card {
     margin-bottom: 16px !important;
+
     .lh-title {
         margin-bottom: 0px !important;
     }
+
     .lh-tag {
         margin-left: 8px !important;
     }
+
     .lh-content {
         padding-top: 0px !important;
         margin-top: 0px !important;
-        .columns {   
+
+        .columns {
             overflow-y: auto;
+
             &.full-height {
                 height: 100%;
             }
+
             &.restricted-height {
                 max-height: 250px;
             }
+        }
+
     }
-     
-    }
+
     &.lh-has-changes {
         background-color: #D4DBE0;
     }
 }
+
 .lh-container {
     display: flex;
     flex-direction: row;
     padding-top: 0px !important;
+
     &.lh-center {
         justify-content: center;
     }
+
     &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;
     }
+
     &.lh-between {
         justify-content: space-between;
-         // Add this to make all children equal width
-         > * {
+
+        // Add this to make all children equal width
+        >* {
             flex: 1;
         }
     }
+
     &.lh-b {
         justify-content: space-between;
     }
+
     &.lh-start-and-end {
         justify-content: space-between;
         margin-right: 16px;
-        > * {
+
+        >* {
             flex: 0.35;
         }
     }
+
     &.lh-start {
         justify-content: flex-start;
         margin-right: 16px;
-        > * {
+
+        >* {
             flex: 0.35;
         }
     }
+
     &.lh-end {
         justify-content: flex-end;
         margin-left: 16px;
@@ -134,30 +173,38 @@ it is recommended to import those directly to `pages/_app.js`
     padding: 8px;
     margin: 16px;
 }
+
 .grey-card {
     background-color: var(--ux-1vw9arb, #D4DBE0) !important;
 }
+
 .lh-menu {
     max-height: 250px !important;
 }
+
 .m-t-1 {
     margin-top: 1rem !important;
 }
+
 .m-t-0 {
     margin-top: 0rem !important;
     padding-top: 0rem !important;
 }
+
 .m-b-1 {
     margin-bottom: 1rem !important;
 }
+
 .m-b-0 {
     padding-bottom: 0rem !important;
     margin-bottom: 0rem !important;
 
 }
+
 .m-l-1 {
     margin-left: 1rem !important;
 }
+
 .m-r-1 {
     margin-right: 1rem !important;
 }
@@ -165,12 +212,15 @@ it is recommended to import those directly to `pages/_app.js`
 body.ux-app.gasket-app {
     background-color: var(--ux-cao06b, white) !important;
 }
+
 body.ux-app.gasket-app .ux-app__content {
     background-color: var(--ux-cao06b, white) !important;
 }
+
 .ux-flyout {
-  z-index: 1000 !important;
+    z-index: 1000 !important;
 }
+
 .text-center {
     text-align: center !important;
     align-items: center !important;
@@ -179,16 +229,20 @@ body.ux-app.gasket-app .ux-app__content {
 .select-table {
     min-width: 350px !important;
 }
+
 .field-container {
     margin-bottom: 16px !important;
 }
+
 .summary-prompt-modal {
     width: 700px !important;
 }
+
 .restricted-height-overflow {
     max-height: 250px !important;
     overflow-y: auto !important;
 }
+
 .ux-flyout {
-  z-index: 1000 !important;
+    z-index: 1000 !important;
 }
