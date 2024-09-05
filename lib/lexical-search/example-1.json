@@ -1,0 +1,24 @@
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match_phrase": {
+            "customer_conversation": {
+              "query": "phrase to search",
+              "slop": 2
+            }
+          }
+        },
+        {
+          "match_phrase": {
+            "agent_conversation": {
+              "query": "another phrase",
+              "slop": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -25,10 +25,10 @@ const Head = (props) => {
           icon: 'checkbox-list',
           active: props?.route === 'status' ? true : false
         }, {
-          caption: 'Semantic Search',
+          caption: 'Lexical Search',
           'key': '3',
-          'href': '/semantic-search',
-          'eid': 'pep.prompt-ui.nav.semantic-search.click',
+          'href': '/lexical-search',
+          'eid': 'pep.prompt-ui.nav.lexical-search.click',
           'icon': 'search',
           'active': props?.route === 'search' ? true : false
         }

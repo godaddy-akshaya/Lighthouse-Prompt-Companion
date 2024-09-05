@@ -3,6 +3,7 @@ module.exports = {
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
   "groups": ['lighthouse-ui-devs'],
+  "opensearch": "https://opensearch.org/docs/latest/",
   // "sso": {
   //   "app": "lighthouse-ui",
   //   "root": "https://sso.dev-gdcorp.tools",
