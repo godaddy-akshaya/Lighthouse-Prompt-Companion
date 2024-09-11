@@ -4,7 +4,8 @@ import Card from '@ux/card';
 import Papa from 'papaparse';
 import text from '@ux/text';
 import Tag from '@ux/tag';
-import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
+// UXCORE TODO: MenuSeperator has been renamed to MenuSeparator. Make any other adjustments needed
+import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeparator } from '@ux/menu';
 import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
 import Upload from '@ux/icon/upload';
@@ -17,7 +18,6 @@ import FieldFrame from '@ux/field-frame';
 import TwoColumnLayout from '../layout/two-column-layout';
 import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
 import FilterFreeFormText from './filter-free-form-text';
-import { set } from 'lodash';
 import LoadedFilter from './loaded-filter';
 
 
@@ -127,88 +127,87 @@ const FilterMenu = ({ onChange, OnCancel }) => {
         setLoading(true);
         processFile(e.target.files[0]);
     });
-    return (
-        <>
-            {!open &&
-                <>
-                    <Lockup className='lh-container lh-start'>
-                        {loading && <Spinner size='sm' />}
-                        <Menu ref={filterMenuRef} id='filter-menu'>
-                            <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
-                            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
-                                <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
-                                <MenuSeperator />
-                                <MenuGroup label='Saved Lists'>
-                                    {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
-                                    {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
-                                </MenuGroup>
-                            </MenuList>
-                        </Menu>
+    return <>
+        {!open &&
+            <>
+                <Lockup className='lh-container lh-start'>
+                    {loading && <Spinner size='sm' />}
+                    <Menu ref={filterMenuRef} id='filter-menu'>
+                        <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
+                        <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
+                            <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
+                            // UXCORE TODO: MenuSeperator has been renamed to MenuSeparator. Make any other adjustments needed
+                            <MenuSeparator />
+                            <MenuGroup label='Saved Lists'>
+                                {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}
+                                {savedFilters.length === 0 && <MenuItem disabled>No saved filters</MenuItem>}
+                            </MenuGroup>
+                        </MenuList>
+                    </Menu>
+                </Lockup>
+                {rowCount &&
+                    <Lockup className='lh-container'>
+                        <LoadedFilter rowCount={rowCount} columnName='Loaded Interaction IDs' onClear={handleCancel} />
                     </Lockup>
-                    {rowCount &&
-                        <Lockup className='lh-container'>
-                            <LoadedFilter rowCount={rowCount} columnName='Loaded Interaction IDs' onClear={handleCancel} />
+                }
+            </>
+        }
+        {open &&
+            <>
+                <Lockup className='m-t-1'>
+                    <text.h3 text='Upload Interaction IDs' as='title' />
+                </Lockup>
+                <Card className='card-dark-background' id='upload' stretch={true}>
+                    {AlertMessage &&
+                        <Block>
+                            <Alert title={AlertMessage}
+                                id='critical-message'
+                                emphasis={AlertTag}
+                                actions={<Button design="inline" text="Close" onClick={() => setAlertMessage(null)} />} />
+                        </Block>}
+                    <Block>
+                        <Lockup>
+                            <Tag type='highlight'>Create New</Tag>
+                            <text.p as='paragraph' className='m-t-1' text='Please choose one of the options below to upload and save filter options. For file uploads, ensure that `interaction_id` is listed as a header. If you encounter any issues with saving or uploading, please use the provided template.' />
                         </Lockup>
-                    }
-                </>
-            }
-            {open &&
-                <>
-                    <Lockup className='m-t-1'>
-                        <text.h3 text='Upload Interaction IDs' as='title' />
-                    </Lockup>
-                    <Card className='card-dark-background' id='upload' stretch={true}>
-                        {AlertMessage &&
-                            <Block>
-                                <Alert title={AlertMessage}
-                                    id='critical-message'
-                                    emphasis={AlertTag}
-                                    actions={<Button design="inline" text="Close" onClick={() => setAlertMessage(null)} />} />
-                            </Block>}
-                        <Block>
-                            <Lockup>
-                                <Tag type='highlight'>Create New</Tag>
-                                <text.p as='paragraph' className='m-t-1' text='Please choose one of the options below to upload and save filter options. For file uploads, ensure that `interaction_id` is listed as a header. If you encounter any issues with saving or uploading, please use the provided template.' />
-                            </Lockup>
-                            {loading && <Spinner size='sm' />}
-                            {!fileData &&
-                                <>
-                                    <Block className='m-t-0'>
-                                        <Lockup>
-                                            <UploadTemplate />
-                                        </Lockup>
-                                    </Block>
+                        {loading && <Spinner size='sm' />}
+                        {!fileData &&
+                            <>
+                                <Block className='m-t-0'>
                                     <Lockup>
-                                        <TwoColumnLayout>
-                                            <Lockup>
-                                                <text.label as='label' text='Upload File Interaction IDs' />
-                                                <FieldFrame>
-                                                    <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
-                                                </FieldFrame>
-                                            </Lockup>
-                                            <Lockup>
-                                                <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
-                                            </Lockup>
-                                        </TwoColumnLayout>
+                                        <UploadTemplate />
                                     </Lockup>
-                                </>}
-                            {fileData &&
+                                </Block>
                                 <Lockup>
-                                    <text.label as='label' text={`Loaded Interaction IDs : ${rowCount} rows`} />
-                                    <SaveObjectForm hasBeenSaved={hasBeenSaved} onSave={handleSaveResults}></SaveObjectForm>
+                                    <TwoColumnLayout>
+                                        <Lockup>
+                                            <text.label as='label' text='Upload File Interaction IDs' />
+                                            <FieldFrame>
+                                                <input className='m-l-1 m-t-1 m-b-1' type="file" onChange={handleFileChange} />
+                                            </FieldFrame>
+                                        </Lockup>
+                                        <Lockup>
+                                            <FilterFreeFormText eventChange={handleFilterFreeForm} textValue={fileData?.toString() || null} />
+                                        </Lockup>
+                                    </TwoColumnLayout>
                                 </Lockup>
-                            }
-                        </Block>
-                        <Block>
-                            <SiblingSet gap='md'>
-                                <Button text='Close' size='small' design='secondary' onClick={handleOpen} />
-                                {fileData && <Button text='Reset/Clear' size='small' design='critical' onClick={handleCancel} />}
-                            </SiblingSet>
-                        </Block>
-                    </Card>
-                </>
-            }
-        </>
-    )
+                            </>}
+                        {fileData &&
+                            <Lockup>
+                                <text.label as='label' text={`Loaded Interaction IDs : ${rowCount} rows`} />
+                                <SaveObjectForm hasBeenSaved={hasBeenSaved} onSave={handleSaveResults}></SaveObjectForm>
+                            </Lockup>
+                        }
+                    </Block>
+                    <Block>
+                        <SiblingSet gap='md'>
+                            <Button text='Close' size='small' design='secondary' onClick={handleOpen} />
+                            {fileData && <Button text='Reset/Clear' size='small' design='critical' onClick={handleCancel} />}
+                        </SiblingSet>
+                    </Block>
+                </Card>
+            </>
+        }
+    </>;
 };
 export default FilterMenu;

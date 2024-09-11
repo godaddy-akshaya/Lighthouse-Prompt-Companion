@@ -1,169 +1,120 @@
 import React, { useEffect, useState } from 'react';
+import { useRef } from 'react';
 import Box from '@ux/box';
 import text from '@ux/text';
 import Head from '../components/head';
-import Card from '@ux/card';
-import SiblingSet from '@ux/sibling-set';
 import TextInput from '@ux/text-input';
-import SelectInput from '@ux/select-input';
 import Button from '@ux/button';
-import { CodeBlock, CopyBlock, Code, dracula } from 'react-code-blocks';
-import Table, { Thead, Tbody, Tfoot, Th, Td, Tr, SortableHeader } from '@ux/table';
 import '@ux/table/styles';
-import example from '../lib/lexical-search/example-2.json'
-import dynamic from 'next/dynamic';
-
-const QueryBoolEditor = dynamic(() => import('../components/query-bool-editor'), { ssr: false });
-
-const headerText = `In OpenSearch, you typically use the bool query to combine multiple 
+import SiblingSet from '@ux/sibling-set';
+import Checkmark from '@ux/icon/checkmark';
+import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
+import Wand from '@ux/icon/wand';
+import Refresh from '@ux/icon/refresh';
+import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
+import '@ux/menu/styles';
+// import example1 from '../lib/lexical-search/example-1.json';
+// import example2 from '../lib/lexical-search/example-2.json';
+import { BannerMessage } from '../components/banner-message';
+const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
 
-const otherText = `For matching phrases with a 
-specific distance between words, you use the match_phrase query with the slop parameter.
-must: All conditions must be true (AND logic).
-should: At least one of the conditions must be true (OR logic).
-must_not: None of the conditions should be true (NOT logic).`;
+
+const FlexTitleAndOptions = ({
+  onClear, onFormat
+}) => {
+  return (
+    <div className='lh-container lh-between'>
+      <text.label visualSize='sm' as='label' text='Query (json)' />
+      <SiblingSet className='push-right' gap='sm' size='sm'>
+        <Button size='sm' onClick={onClear} design='inline' text='Clear' icon={<Refresh />} />
+        <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
+      </SiblingSet>
+    </div>
+
+  )
+}
 
 const LexicalSearch = () => {
-  const [isClient, setIsClient] = useState(false);
-  const [criteria, setCriteria] = useState([]);
-  const [field, setField] = useState('');
-  const [clause, setClause] = useState('must');
-  const [type, setType] = useState('match');
-  const [queryType, setQueryType] = useState('match_phrase');
-  const [queryText, setQueryText] = useState('');
-  const [query, setQuery] = useState('');
-  useEffect(() => {
-    console.log(example);
-    setIsClient(true);
-  }, []);
-
-  const addCriteria = () => {
-    setCriteria([...criteria, { field, operator, type }]);
-    setField('');
-    setOperator('must');
-    setType('match');
+  const formRef = useRef(null);
+  const [formModel, setFormModel] = useState({
+    name: '',
+    query: '',
+    validated: false,
+    hasErrors: false,
+    errorMessage: ''
+  });
+  const [json, setJson] = useState('');
+  const [example, setExample] = useState([]);
+  const handleUseExample = (e) => {
+    console.log(e);
+    setJson(JSON.stringify(example[e], null, 6));
   };
-
-  const buildBoolQuery = () => {
-    const boolQuery = {
-      bool: {
-        must: [],
-        should: [],
-        must_not: []
-      }
-    };
-
-    criteria.forEach(({ field, operator, type }) => {
-      const query = { [type]: { [field]: '' } };
-      boolQuery.bool[operator].push(query);
-    });
-
-    return boolQuery;
+  const handleClear = () => {
+    setFormModel({ ...formModel, query: '' });
+  };
+  const handleFormat = () => {
+    try {
+      const formatted = JSON.stringify(JSON.parse(formModel.query), null, 6);
+      setFormModel({ ...formModel, query: formatted });
+    } catch (e) {
+      console.log('error parsing json');
+      setFormModel({ ...formModel, hasErrors: true });
+    }
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('submitting');
+    alert('Need Submit EndPoint ');
+  }
+  useEffect(() => {
+    //  setExample([example1, example2]);
+  }, []);
+  const handleValidate = (e) => {
+    console.log('do validation');
+    setFormModel({ ...formModel, validated: true });
+  };
+  const handlePasteQuery = (e) => {
+    const query = JSON.parse(e);
+    setFormModel({ ...formModel, query: query });
   };
 
   return (
     <>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
-      <Box gap='md' space={{ block: true, inline: true }} >
-        <text.h1 as='heading' text='Lexical Query' />
+      {/* <Box gap='md' orientation='horizontal'>
+        <Button icon={<Checkmark />} aria-label='Delete' />
+        <Button design='primary' icon={<Checkmark />} aria-label='Save' />
+        <Button design='secondary' icon={<Checkmark />} aria-label='Delete' />
+      </Box> */}
+      <Box>
+        <text.h1 as='heading' text={`Lexical Query`} />
         <text.p as='paragraph' text={headerText} />
-        <text.p as='paragraph' text={otherText} />
+      </Box>
+      <div className='lexical-query-page-layout'>
+        <div className='main-column' id='json-data' gap='lg'>
+          {formModel.hasErrors && <BannerMessage showMessage={true} message={form} userMessageType='error' />}
+          <form ref={formRef} onSubmit={handleSubmit} id='lexical-form'>
+            <Box blockPadding='md'>
+              <TextInput id='name' label='Name' value={formModel.name} onChange={(e) => setFormModel({ ...formModel, name: e })} />
+            </Box>
+            <Box stretch blockPadding='md'>
+              <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} />
+              <TextInput multiline size={15} visualSize='sm' id='json' onChange={(e) => setFormModel({ ...formModel, query: e })} value={formModel.query} />
+            </Box>
 
-        <Box orientation='horizontal' blockAlignChildren='start' >
-
-          <Card id='criteria-input'>
-            <Box gap='md' blockPadding='md'>
-              <SiblingSet stretch gap='sm' size='sm'>
-
-                <SelectInput
-                  visualSize='sm'
-                  id='clause'
-                  label='Clause'
-                  value={clause}
-                  onChange={(e) => setClause(e)}
-                >
-                  <option value='must'>must</option>
-                  <option value='should'>should</option>
-                  <option value='must_not'>must_not</option>
-                </SelectInput>
-                <SelectInput
-                  visualSize='sm'
-                  id='queryType'
-                  label='Query Type'
-                  value={queryType}
-                  onChange={(e) => setQueryType(e)}
-                >
-                  <option value='match_phrase'>match_phrase</option>
-                </SelectInput>
-                <SelectInput
-                  visualSize='sm'
-                  id='query'
-                  label='Query'
-                  value={query}
-                  onChange={(e) => setQuery(e)}
-                >
-                  <option value='customer_conversation'>customer_conversation</option>
-                  <option value='agent_conversation'>agent_conversation</option>
-                </SelectInput>
-                <TextInput style={{ 'minWidth': '250px', 'width': '100%' }} visualSize='sm' id='queryText' label='Text' value={queryText} onChange={(e) => setQueryText(e)} />
-                <Button id='add' design='inline' text='Add' onClick={addCriteria} />
+            <Box blockPadding='lg' blockAlignChildren='end'>
+              <SiblingSet gap='sm' size='sm'>
+                <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
+                <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
             </Box>
-          </Card>
-          <Box>
-            <Table className='example' density='sm'>
-              <Thead>
-                <Tr>
-                  <Th scope='col'>Person</Th>
-                  <Th scope='col'>Interest</Th>
-                  <Th scope='col'>UID</Th>
-                  <Th scope='col'>Age</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                <Tr>
-                  <Th scope='row'>Chris</Th>
-                  <Td>HTML tables</Td>
-                  <Td>12345</Td>
-                  <Td>33</Td>
-                </Tr>
-                <Tr>
-                  <Th scope='row'>Amanda</Th>
-                  <Td>React</Td>
-                  <Td>12345</Td>
-                  <Td>33</Td>
-                </Tr>
-                <Tr>
-                  <Th scope='row'>Sarah</Th>
-                  <Td>CSS</Td>
-                  <Td>12345</Td>
-                  <Td>33</Td>
-                </Tr>
-                <Tr>
-                  <Th scope='row'>Steve</Th>
-                  <Td>HTML buttons</Td>
-                  <Td>12345</Td>
-                  <Td>33</Td>
-                </Tr>
-              </Tbody>
-              <Tfoot>
-                <Tr>
-                  <Th scope='row' colSpan='3'>Average age</Th>
-                  <Td>33</Td>
-                </Tr>
-              </Tfoot>
-            </Table>
+          </form>
+        </div>
+        <div className='secondary-column'>
+        </div>
+      </div >
 
-          </Box>
-          <Box>
-            <Card id='code'>
-              <CodeBlock className='code-block-custom-styles' text={JSON.stringify(example, null, 2)} language='json' showLineNumbers={true} wrapLongLines={true} /></Card>
-            {/* <Card stretch id='query-bool-editor'>
-            {isClient && <QueryBoolEditor options={{ mode: 'code' }} value={buildBoolQuery()} />}
-          </Card> */}
-          </Box></Box>
-      </Box>
     </>
   );
 }

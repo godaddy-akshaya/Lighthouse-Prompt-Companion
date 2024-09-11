@@ -50,6 +50,14 @@ module.exports = {
     gdlh_save_interaction_ids: {
       "method": "POST",
       "url": "https://shmuxe5fik.execute-api.us-west-2.amazonaws.com/gddeploy"
-    }
+    },
+    "validate-lexical-query": {
+      "method": "POST",
+      "url": "https://4qwaataj57.execute-api.us-west-2.amazonaws.com/gddeploy."
+    },
+    "submit-lexical-query": {
+      "method": "POST",
+      "url": ""
+    },
   }
 }

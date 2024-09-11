@@ -58,6 +58,14 @@ module.exports = {
     gdlh_save_interaction_ids: {
       "method": "POST",
       "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "validate-lexical-query": {
+      "method": "POST",
+      "url": ""
+    },
+    "submit-lexical-query": {
+      "method": "POST",
+      "url": ""
     }
   }
 }

@@ -18,12 +18,10 @@ const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
     }
     const handleSave = (e) => {
         e.preventDefault();
-        console.log('Handling Save', e);
         if (saveAs === '') {
             setErrorMessage('Name is required');
             return;
         }
-
         onSave(saveAs)
     }
     return (
