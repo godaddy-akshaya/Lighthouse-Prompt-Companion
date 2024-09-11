@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRef } from 'react';
 import Box from '@ux/box';
 import text from '@ux/text';
@@ -13,10 +13,8 @@ import Wand from '@ux/icon/wand';
 import Tag from '@ux/tag';
 import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
-import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
-import '@ux/menu/styles';
-// import example1 from '../lib/lexical-search/example-1.json';
-// import example2 from '../lib/lexical-search/example-2.json';
+import Click from '@ux/icon/click';
+import example1 from '../lib/lexical-search/example-2.json';
 import { BannerMessage } from '../components/banner-message';
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
@@ -46,13 +44,14 @@ const CriteriaToolTip = ({ title, content }) => {
 }
 
 const FlexTitleAndOptions = ({
-  onClear, onFormat
+  onClear, onFormat, onExample
 }) => {
   return (
     <div className='lh-container lh-between'>
       <text.label visualSize='sm' as='label' text='Query (json)' />
       <SiblingSet className='push-right' gap='sm' size='sm'>
         <Button size='sm' onClick={onClear} design='inline' text='Clear' icon={<Refresh />} />
+        <Button size='sm' onClick={onExample} design='inline' text='Example' icon={<Click />} />
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
       </SiblingSet>
     </div>
@@ -70,11 +69,13 @@ const LexicalSearch = () => {
     hasErrors: false,
     errorMessage: ''
   });
-  const [json, setJson] = useState('');
-  const [example, setExample] = useState([]);
+
+
   const handleUseExample = (e) => {
-    console.log(e);
-    setJson(JSON.stringify(example[e], null, 6));
+    setFormModel({
+      ...formModel,
+      query: JSON.stringify(example1, null, 6)
+    });
   };
   const handleClear = () => {
     setFormModel({ ...formModel, query: '' });
@@ -93,11 +94,8 @@ const LexicalSearch = () => {
     alert('Need end point');
 
   }
-  useEffect(() => {
-    //  setExample([example1, example2]);
-  }, []);
+
   const handleValidate = (e) => {
-    console.log('do validation');
     validateLexicalQuery(formModel.query).then((response) => {
       console.log(response);
       setFormModel({ ...formModel, validated: true });
@@ -121,29 +119,24 @@ const LexicalSearch = () => {
   return (
     <>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
-      {/* <Box gap='md' orientation='horizontal'>
-        <Button icon={<Checkmark />} aria-label='Delete' />
-        <Button design='primary' icon={<Checkmark />} aria-label='Save' />
-        <Button design='secondary' icon={<Checkmark />} aria-label='Delete' />
-      </Box> */}
+
       <Box>
         <text.h1 as='heading' text={`Lexical Query`} />
         <text.p as='paragraph' text={headerText} />
       </Box>
       <div className='lexical-query-page-layout'>
         <div className='main-column' id='json-data' gap='lg'>
-          {formModel.hasErrors && <BannerMessage showMessage={true} message={form} userMessageType='error' />}
+          <BannerMessage showMessage={formModel.hasErrors} message={formModel.errorMessage} userMessageType='error' />
           <form ref={formRef} onSubmit={handleSubmit} id='lexical-form'>
             <Box blockPadding='md'>
               <TextInput id='name' label='Name' value={formModel.name} onChange={(e) => setFormModel({ ...formModel, name: e })} />
 
             </Box>
             <Box stretch blockPadding='md'>
-              <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} />
-              <TextInput helpMessage={formModel?.validated && <Tag emphasis='success'>Validated</Tag>}
+              <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
+              <TextInput helpMessage={formModel?.validated && <Tag emphasis='success'>Great Job, json looks great. </Tag>}
                 multiline size={15} visualSize='sm' id='json' onChange={handleQueryInput} value={formModel.query} />
             </Box>
-
             <Box blockPadding='lg' blockAlignChildren='end'>
               <SiblingSet gap='sm' size='sm'>
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />

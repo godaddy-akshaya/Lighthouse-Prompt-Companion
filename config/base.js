@@ -4,17 +4,6 @@ module.exports = {
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
   "groups": ['lighthouse-ui-devs'],
   "opensearch": "https://opensearch.org/docs/latest/",
-  // "sso": {
-  //   "app": "lighthouse-ui",
-  //   "root": "https://sso.dev-gdcorp.tools",
-  //   "groups": [],
-  //   "cookie": {
-  //     "domain": ".dev-gdcorp.tools",
-  //     "path": "/",
-  //     "secure": true,
-  //     "httpOnly": true
-  //   }
-  // },
   "api": {
     "table-listing": {
       "method": "GET",

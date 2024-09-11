@@ -61,11 +61,11 @@ module.exports = {
     },
     "validate-lexical-query": {
       "method": "POST",
-      "url": ""
+      "url": "https://localhost:8443"
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": ""
+      "url": "https://localhost:8443"
     }
   }
 }
