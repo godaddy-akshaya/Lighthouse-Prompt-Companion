@@ -10,6 +10,8 @@ import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
 import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
 import Wand from '@ux/icon/wand';
+import Tag from '@ux/tag';
+import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
 import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
 import '@ux/menu/styles';
@@ -19,6 +21,29 @@ import { BannerMessage } from '../components/banner-message';
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
 
+const CriteriaToolTip = ({ title, content }) => {
+  const [show, setShow] = useState(false);
+  const anchorRef = useRef(null);
+
+  const tooltip = (
+    <ToolTip anchorRef={anchorRef} onClose={() => setShow(false)} id='button-hint'>
+      <div>{content}</div>
+    </ToolTip>
+  );
+
+  return (
+    <div>
+      <Button
+        ref={anchorRef}
+        text={title}
+        design='inline'
+        onClick={() => setShow(!show)}
+        aria-describedby='button-hint'
+      />
+      {show && tooltip}
+    </div>
+  );
+}
 
 const FlexTitleAndOptions = ({
   onClear, onFormat
@@ -40,6 +65,7 @@ const LexicalSearch = () => {
   const [formModel, setFormModel] = useState({
     name: '',
     query: '',
+    queryPlaceholder: '{{"query": {"bool": {"must": [{"match": {"field": "value"}}]}}}}',
     validated: false,
     hasErrors: false,
     errorMessage: ''
@@ -64,17 +90,30 @@ const LexicalSearch = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('submitting');
-    alert('Need Submit EndPoint ');
+    alert('Need end point');
+
   }
   useEffect(() => {
     //  setExample([example1, example2]);
   }, []);
   const handleValidate = (e) => {
     console.log('do validation');
-    setFormModel({ ...formModel, validated: true });
+    validateLexicalQuery(formModel.query).then((response) => {
+      console.log(response);
+      setFormModel({ ...formModel, validated: true });
+    }).catch((error) => {
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
+    });
+
+  };
+  const handleQueryInput = (e) => {
+    setFormModel({
+      ...formModel, query: e, validated: false
+    });
+
   };
   const handlePasteQuery = (e) => {
+
     const query = JSON.parse(e);
     setFormModel({ ...formModel, query: query });
   };
@@ -97,10 +136,12 @@ const LexicalSearch = () => {
           <form ref={formRef} onSubmit={handleSubmit} id='lexical-form'>
             <Box blockPadding='md'>
               <TextInput id='name' label='Name' value={formModel.name} onChange={(e) => setFormModel({ ...formModel, name: e })} />
+
             </Box>
             <Box stretch blockPadding='md'>
               <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} />
-              <TextInput multiline size={15} visualSize='sm' id='json' onChange={(e) => setFormModel({ ...formModel, query: e })} value={formModel.query} />
+              <TextInput helpMessage={formModel?.validated && <Tag emphasis='success'>Validated</Tag>}
+                multiline size={15} visualSize='sm' id='json' onChange={handleQueryInput} value={formModel.query} />
             </Box>
 
             <Box blockPadding='lg' blockAlignChildren='end'>

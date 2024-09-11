@@ -64,7 +64,7 @@
     "@ux/table": "^2400.0.0",
     "@ux/table-legacy": "^2400.0.0",
     "@ux/tabs": "^2400.0.0",
-    "@ux/tag": "^2400.0.0",
+    "@ux/tag": "^2400.7.0",
     "@ux/text-input": "^2400.0.0",
     "@ux/tooltip": "^2400.6.0",
     "@ux/webpack-config": "^2400.0.0",

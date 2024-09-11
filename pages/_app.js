@@ -47,6 +47,7 @@ import '@ux/tooltip/styles';
 import '@ux/code/styles';
 import '@ux/tabs/styles';
 import '@ux/icon/refresh/index.css';
+import '@ux/tooltip/styles';
 import '@ux/icon/wand/index.css';
 import '@ux/icon/checkmark/index.css';
 import { withLocaleRequired } from '@gasket/react-intl';
