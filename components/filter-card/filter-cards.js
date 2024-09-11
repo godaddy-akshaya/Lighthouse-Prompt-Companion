@@ -3,7 +3,7 @@ import Card from '@ux/card';
 import Checkbox from '@ux/checkbox';
 import { Block } from '@ux/layout';
 import text from '@ux/text';
-import Collapsible from '@ux/collapsible-legacy';
+import Collapsible from '@ux/collapsible';
 import '@ux/tag/styles';
 import '@ux/collapsible/styles';
 import ItemFilterSearch from './item-filter-search';

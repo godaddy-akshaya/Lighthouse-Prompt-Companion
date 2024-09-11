@@ -1,18 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { useState } from 'react';
-import { debounce, get, has, set } from 'lodash';
+import { debounce } from 'lodash';
 import FilterCards from './filter-card/filter-cards';
 import Card from '@ux/card';
 import { Module, Block, Lockup } from '@ux/layout';
-import FieldFrame from '@ux/field-frame';
 import DateInput from '@ux/date-input';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
 import FilterMenu from './upload/filter-menu';
-import LoadedFilter from './upload/loaded-filter';
-import filterParamsMgmtService from '../lib/filter-params-mgmt-service';
-import MultiItemTextEntry from './multi-item-text-entry';
+
 
 // Object to hold the filter options
 const DefaultFilterModel = {

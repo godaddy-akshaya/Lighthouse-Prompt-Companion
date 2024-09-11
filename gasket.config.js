@@ -67,11 +67,6 @@ module.exports = {
     enabled: process.env.AUTO_TLS_ENABLED === 'true',
     expiryInDays: 3650
   },
-  // fluentd: {
-  //   host: 'localhost',
-  //   port: 24224,
-  //   timeout: 3
-  // },
   securityLogger: {
     aws: {
       accountId: process.env.AWS_ACCT_ID || '000',
