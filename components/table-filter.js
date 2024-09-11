@@ -150,11 +150,6 @@ const TableFilter = ({ filters, onSubmit }) => {
                     <Lockup>
                         <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
                     </Lockup>
-                    {/*
-
-                      Possible release when enabling multi-item search
-
-                     <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} /> */}
                 </Block>
                 <Block>
                     <div className='lh-filter-container'>
