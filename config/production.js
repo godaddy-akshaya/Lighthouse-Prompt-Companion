@@ -57,7 +57,7 @@ module.exports = {
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": "https://127.0.0.1"
+      "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
   }
 }
