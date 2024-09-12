@@ -15,7 +15,6 @@ import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
 import Click from '@ux/icon/click';
 import example1 from '../lib/lexical-search/example-2.json';
-import BoolDefs from '../lib/lexical-search/opensearch-bool-defs.json';
 import { BannerMessage } from '../components/banner-message';
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
@@ -59,17 +58,11 @@ const FlexTitleAndOptions = ({
 
   )
 }
-const HeaderText = () => {
-  return (
-    <>
-      <text.p as='paragraph' text={`In lexical search you typically use the bool query to combine multiple conditions using ${<CriteriaToolTip title="must" content="" />}, should, and must_not.`} />
-    </>
-  )
-}
+
 const LexicalSearch = () => {
   const formRef = useRef(null);
   const [formModel, setFormModel] = useState({
-    name: '',
+    query_name: '',
     query: '',
     queryPlaceholder: '{{"query": {"bool": {"must": [{"match": {"field": "value"}}]}}}}',
     validated: false,
@@ -98,7 +91,14 @@ const LexicalSearch = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Need end point');
+    if (!formModel.validated) return;
+    if (!formModel.query_name) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query Name is required' });
+    submitLexicalQuery(formModel).then((response) => {
+      console.log(response);
+      setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
+    }).catch((error) => {
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
+    });
   }
   const handleValidate = (e) => {
     e.preventDefault();
@@ -119,11 +119,6 @@ const LexicalSearch = () => {
   };
   const handleCloseError = () => {
     setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
-  }
-  const handlePasteQuery = (e) => {
-
-    const query = JSON.parse(e);
-    setFormModel({ ...formModel, query: query });
   };
   return (
     <>
@@ -138,7 +133,7 @@ const LexicalSearch = () => {
             actions={<Button design="inline" text="Action Link" handleCloseError={handleCloseError} />} userMessageType='error' />
           <form ref={formRef} onSubmit={handleSubmit} id='lexical-form'>
             <Box blockPadding='md'>
-              <TextInput id='name' label='Name' value={formModel.name} onChange={(e) => setFormModel({ ...formModel, name: e })} />
+              <TextInput id='name' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
             </Box>
             <Box stretch blockPadding='md'>
               <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
@@ -156,7 +151,6 @@ const LexicalSearch = () => {
         <div className='secondary-column'>
         </div>
       </div >
-
     </>
   );
 }
