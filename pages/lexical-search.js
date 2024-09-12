@@ -15,6 +15,7 @@ import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
 import Click from '@ux/icon/click';
 import example1 from '../lib/lexical-search/example-2.json';
+import BoolDefs from '../lib/lexical-search/opensearch-bool-defs.json';
 import { BannerMessage } from '../components/banner-message';
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
@@ -58,7 +59,13 @@ const FlexTitleAndOptions = ({
 
   )
 }
-
+const HeaderText = () => {
+  return (
+    <>
+      <text.p as='paragraph' text={`In lexical search you typically use the bool query to combine multiple conditions using ${<CriteriaToolTip title="must" content="" />}, should, and must_not.`} />
+    </>
+  )
+}
 const LexicalSearch = () => {
   const formRef = useRef(null);
   const [formModel, setFormModel] = useState({
@@ -83,22 +90,22 @@ const LexicalSearch = () => {
   const handleFormat = () => {
     try {
       const formatted = JSON.stringify(JSON.parse(formModel.query), null, 6);
-      setFormModel({ ...formModel, query: formatted });
+      setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '' });
     } catch (e) {
-      console.log('error parsing json');
-      setFormModel({ ...formModel, hasErrors: true });
+      console.log('error parsing json',);
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString() });
     }
   };
   const handleSubmit = (e) => {
     e.preventDefault();
     alert('Need end point');
-
   }
-
   const handleValidate = (e) => {
+    e.preventDefault();
+    if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     validateLexicalQuery(formModel.query).then((response) => {
       console.log(response);
-      setFormModel({ ...formModel, validated: true });
+      setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
     }).catch((error) => {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
     });
@@ -110,27 +117,28 @@ const LexicalSearch = () => {
     });
 
   };
+  const handleCloseError = () => {
+    setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
+  }
   const handlePasteQuery = (e) => {
 
     const query = JSON.parse(e);
     setFormModel({ ...formModel, query: query });
   };
-
   return (
     <>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
-
       <Box>
         <text.h1 as='heading' text={`Lexical Query`} />
         <text.p as='paragraph' text={headerText} />
       </Box>
       <div className='lexical-query-page-layout'>
         <div className='main-column' id='json-data' gap='lg'>
-          <BannerMessage showMessage={formModel.hasErrors} message={formModel.errorMessage} userMessageType='error' />
+          <BannerMessage showMessage={formModel.hasErrors} message={formModel.errorMessage}
+            actions={<Button design="inline" text="Action Link" handleCloseError={handleCloseError} />} userMessageType='error' />
           <form ref={formRef} onSubmit={handleSubmit} id='lexical-form'>
             <Box blockPadding='md'>
               <TextInput id='name' label='Name' value={formModel.name} onChange={(e) => setFormModel({ ...formModel, name: e })} />
-
             </Box>
             <Box stretch blockPadding='md'>
               <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
