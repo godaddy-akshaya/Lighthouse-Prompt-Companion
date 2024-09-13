@@ -55,11 +55,11 @@ module.exports = {
     },
     "validate-lexical-query": {
       "method": "POST",
-      "url": ""
+      "url": "https://4qwaataj57.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": ""
+      "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
   }
 }
