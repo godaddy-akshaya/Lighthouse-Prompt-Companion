@@ -78,7 +78,6 @@ const LexicalSearch = () => {
     submitLexicalQuery(formModel).then((response) => {
       console.log(response);
       setLoading(false);
-      setBanner({ show: true, message: 'Query submitted successfully', type: 'success' });
       setFormModel({ ...formModel, hasErrors: false, errorMessage: '', submitted: true });
     }).catch((error) => {
       setLoading(false);
