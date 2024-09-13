@@ -103,7 +103,6 @@ const LexicalSearch = () => {
       setFormModel({ ...formModel, hasErrors: false, errorMessage: '', submitted: true });
     }).catch((error) => {
       setLoading(false);
-      console.log
       setFormModel({ ...formModel, hasErrors: true, errorMessage: JSON.stringify(error), submitted: false });
     });
   }
