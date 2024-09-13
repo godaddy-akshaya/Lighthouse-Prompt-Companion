@@ -76,27 +76,43 @@ const LexicalSearch = () => {
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     submitLexicalQuery(formModel).then((response) => {
-      console.log(response);
-      setLoading(false);
-      setFormModel({ ...formModel, hasErrors: false, errorMessage: '', submitted: true });
+      if (response?.statusCode == 200 || response?.body === 'success' || response.ok) {
+        setLoading(false);
+        setFormModel({ ...formModel, submitted: true });
+      } else {
+        //handle the error
+        console.log(response);
+        setLoading(false);
+        handleError({ error: 'Issue with submission, please reach out to support' });
+      }
     }).catch((error) => {
       setLoading(false);
       setFormModel({ ...formModel, hasErrors: true, errorMessage: JSON.stringify(error), submitted: false });
     });
   }
-
+  const handleError = ({ error }) => {
+    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
+  }
   const handleValidate = (e) => {
     e.preventDefault();
     if (!formModel.query) return setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     validateLexicalQuery(formModel.query).then((response) => {
-      console.log(response);
-      setLoading(false);
-      setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
-      setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+      if (response?.statusCode == 200 || response?.body === 'success') {
+        setLoading(false);
+        setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
+        setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+      } else {
+        //handle the error
+        console.log(response);
+        setLoading(false);
+        handleError({ error: 'Issue with validation, please reach out to support' });
+      }
+
     }).catch((error) => {
-      console.log(error);
+
       setLoading(false);
       setBanner({ show: true, message: error?.message || 'Bad stuff occurred', errorType: 'error' });
       setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.message || 'Something bad happenend', validated: false });
@@ -121,42 +137,43 @@ const LexicalSearch = () => {
       {loading && <Box>
         <Spinner size='md' />
       </Box>}
-      {!loading &&
+      {formModel.submitted &&
+        <Box blockPadding='lg'>
+          <BannerMessage
+            showMessage={true}
+            message={`Query ${formModel.query_name} submitted successfully`}
+            handleCloseError={() => window.location.reload()}
+            userMessageType='success' />
+        </Box>
+      }
+      {!loading && !formModel.submitted &&
         <div className='lexical-query-page-layout'>
           <div className='main-column' id='json-data' gap='lg'>
             <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
               actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
-            {!formModel.submitted &&
-              <form onSubmit={handleSubmit} id='lexical-form'>
-                <Box blockPadding='md'>
-                  <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
-                </Box>
-                <Box stretch blockPadding='md'>
-                  <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
-                  <TextInput ref={textInputRef} rows={15} required resize helpMessage={formModel?.validated && <Tag emphasis='success'>Great Job, json looks great. </Tag>}
-                    multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
-                </Box>
-                <Box blockPadding='lg' blockAlignChildren='end'>
-                  <SiblingSet gap='sm' size='sm'>
-                    <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
-                    <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
-                  </SiblingSet>
-                </Box>
-              </form>
-            }
-            {formModel.submitted &&
-              <Box blockPadding='lg'>
-                <BannerMessage
-                  showMessage={true}
-                  message={`Query ${formModel.query_name} submitted successfully`}
-                  handleCloseError={() => window.location.reload()}
-                  userMessageType='success' />
+
+            <form onSubmit={handleSubmit} id='lexical-form'>
+              <Box blockPadding='md'>
+                <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
               </Box>
-            }
+              <Box stretch blockPadding='md'>
+                <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
+                <TextInput ref={textInputRef} rows={15} required resize
+                  multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
+              </Box>
+              <Box blockPadding='lg' blockAlignChildren='end'>
+                <SiblingSet gap='sm' size='sm'>
+                  <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
+                  <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+                </SiblingSet>
+              </Box>
+            </form>
+
+
           </div>
           <div className='secondary-column'>
           </div>
-        </div >
+        </div>
       }
     </>
   );
