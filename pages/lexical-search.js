@@ -76,7 +76,7 @@ const LexicalSearch = () => {
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     submitLexicalQuery(formModel).then((response) => {
-      if (response?.statusCode == 200 || response?.body === 'success' || response.ok) {
+      if (response?.statusCode) {
         setLoading(false);
         setFormModel({ ...formModel, submitted: true });
       } else {
@@ -100,7 +100,7 @@ const LexicalSearch = () => {
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     validateLexicalQuery(formModel.query).then((response) => {
-      if (response?.statusCode == 200 || response?.body === 'success') {
+      if (response?.statusCode) {
         setLoading(false);
         setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
         setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
