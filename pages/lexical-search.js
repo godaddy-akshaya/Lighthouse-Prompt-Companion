@@ -61,6 +61,11 @@ const LexicalSearch = () => {
   const handleClear = () => {
     setFormModel({ ...formModel, query: '' });
   };
+  const handleError = ({ error }) => {
+    setLoading(false);
+    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
+  }
   const handleFormat = () => {
     try {
       const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
@@ -76,12 +81,15 @@ const LexicalSearch = () => {
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     submitLexicalQuery(formModel).then((response) => {
-      if (response?.statusCode) {
-        setLoading(false);
-        setFormModel({ ...formModel, submitted: true });
-      } else {
-        //handle the error
-        console.log(response);
+      try {
+        if (response?.statusCode === 200) {
+          setLoading(false);
+          setFormModel({ ...formModel, submitted: true });
+        } else if (response?.statusCode === 400) {
+          handleError({ error: 'Issue with submission, please reach out to support' });
+        }
+      } catch (e) {
+        console.log(e);
         setLoading(false);
         handleError({ error: 'Issue with submission, please reach out to support' });
       }
@@ -90,32 +98,35 @@ const LexicalSearch = () => {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: JSON.stringify(error), submitted: false });
     });
   }
-  const handleError = ({ error }) => {
-    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
-    setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
-  }
+
   const handleValidate = (e) => {
     e.preventDefault();
     if (!formModel.query) return setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     validateLexicalQuery(formModel.query).then((response) => {
-      if (response?.statusCode) {
-        setLoading(false);
-        setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
-        setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
-      } else {
-        //handle the error
-        console.log(response);
-        setLoading(false);
+      try {
+        if (response?.statusCode) {
+          setLoading(false);
+          if (response?.statusCode === 400) {
+            setBanner({ show: true, message: 'Query is invalid', errorType: 'error' });
+            setFormModel({ ...formModel, validated: false, hasErrors: true, errorMessage: '' });
+          } else {
+            setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
+            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+          }
+        } else {
+          //handle the error
+          console.log(response);
+          handleError({ error: 'Issue with validation, please reach out to support' });
+        }
+      } catch (e) {
+        console.log(e);
         handleError({ error: 'Issue with validation, please reach out to support' });
       }
-
     }).catch((error) => {
-
-      setLoading(false);
-      setBanner({ show: true, message: error?.message || 'Bad stuff occurred', errorType: 'error' });
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.message || 'Something bad happenend', validated: false });
+      console.log(error);
+      handleError({ error: 'Issue with validation, please reach out to support' });
     });
   };
   const handleQueryInput = (e) => {
