@@ -1,7 +1,5 @@
 const isCI = process.env.CI === true;
 const env = require('./config/.env');
-const logPrefix = 'config:gasket';
-const { transports } = require('winston');
 
 
 const localHttpsConfig = {

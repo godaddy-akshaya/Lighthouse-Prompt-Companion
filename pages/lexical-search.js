@@ -8,19 +8,17 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, NetworkError } from '../lib/api';
 import Wand from '@ux/icon/wand';
-import Tag from '@ux/tag';
-import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
 import Click from '@ux/icon/click';
 import example1 from '../lib/lexical-search/example-2.json';
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
+
+
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
-
-
 
 const FlexTitleAndOptions = ({
   onClear, onFormat, onExample
@@ -37,7 +35,6 @@ const FlexTitleAndOptions = ({
 
   )
 }
-
 const LexicalSearch = () => {
   const textInputRef = useRef();
   const [loading, setLoading] = useState(false);
@@ -51,6 +48,14 @@ const LexicalSearch = () => {
     errorMessage: '',
     submitted: false
   });
+  const handleValidation = () => {
+    if (!formModel.query) {
+      setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+      return false;
+    }
+    return true;
+  };
   const handleUseExample = (e) => {
     e.preventDefault();
     setFormModel({
@@ -64,7 +69,7 @@ const LexicalSearch = () => {
   const handleError = ({ error }) => {
     setLoading(false);
     setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
-    setFormModel({ ...formModel, hasErrors: true, errorMessage: error });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
   }
   const handleFormat = () => {
     try {
@@ -77,58 +82,46 @@ const LexicalSearch = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formModel.validated) return;
-    if (!formModel.query_name) return setFormModel({ ...formModel, hasErrors: true, message: 'Query Name is required' });
-    if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+    if (!handleValidation()) return;
     setLoading(true);
-    submitLexicalQuery(formModel).then((response) => {
-      try {
-        if (response?.statusCode === 200) {
-          setLoading(false);
-          setFormModel({ ...formModel, submitted: true });
-        } else if (response?.statusCode === 400) {
-          handleError({ error: 'Issue with submission, please reach out to support' });
-        }
-      } catch (e) {
-        console.log(e);
+    submitLexicalQuery(formModel)
+      .then((response) => {
         setLoading(false);
-        handleError({ error: 'Issue with submission, please reach out to support' });
-      }
-    }).catch((error) => {
-      setLoading(false);
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: JSON.stringify(error), submitted: false });
-    });
+        try {
+          if (response.toString().includes('Error')) {
+            handleError({ error: response });
+          } else {
+            setFormModel({ ...formModel, submitted: true });
+          }
+        } catch (e) {
+          handleError({ error: 'Issue with validation, please reach out to support' });
+        }
+      }).catch((error) => {
+        handleError({ 'error': error?.toString() || 'Need to research this one!' });
+      });
   }
 
   const handleValidate = (e) => {
     e.preventDefault();
-    if (!formModel.query) return setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
-    if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+    if (!handleValidation()) return;
     setLoading(true);
-    validateLexicalQuery(formModel.query).then((response) => {
-      console.log(response);
-      try {
-        if (response?.statusCode) {
-          setLoading(false);
-          if (response?.statusCode === 400) {
-            setBanner({ show: true, message: 'Query is invalid', errorType: 'error' });
-            setFormModel({ ...formModel, validated: false, hasErrors: true, errorMessage: '' });
+    validateLexicalQuery(formModel.query)
+      .then((response) => {
+        console.log('here is the response', response.toString());
+        setLoading(false);
+        try {
+          if (response.toString().includes('Error')) {
+            handleError({ error: response });
           } else {
-            setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
-            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+            setFormModel({ ...formModel, validated: true });
           }
-        } else {
-          //handle the error
-          console.log(response);
+        } catch (e) {
           handleError({ error: 'Issue with validation, please reach out to support' });
         }
-      } catch (e) {
-        console.log(e);
-        handleError({ error: 'Issue with validation, please reach out to support' });
-      }
-    }).catch((error) => {
-      console.log(error);
-      handleError({ error: 'Issue with validation, please reach out to support' });
-    });
+      }).catch((error) => {
+        handleError({ 'error': error?.toString() || 'Need to research this one!' });
+      });
+
   };
   const handleQueryInput = (e) => {
     setFormModel({
@@ -180,8 +173,6 @@ const LexicalSearch = () => {
                 </SiblingSet>
               </Box>
             </form>
-
-
           </div>
           <div className='secondary-column'>
           </div>
