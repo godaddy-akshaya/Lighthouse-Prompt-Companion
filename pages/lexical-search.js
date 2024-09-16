@@ -67,9 +67,8 @@ const LexicalSearch = () => {
     setFormModel({ ...formModel, query: '' });
   };
   const handleError = ({ error }) => {
-    setLoading(false);
-    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
-    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
+    // setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
+    // setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
   }
   const handleFormat = () => {
     try {
@@ -87,6 +86,7 @@ const LexicalSearch = () => {
     submitLexicalQuery(formModel)
       .then((response) => {
         setLoading(false);
+        console.log(response);
         try {
           if (response.toString().includes('Error')) {
             handleError({ error: response });
