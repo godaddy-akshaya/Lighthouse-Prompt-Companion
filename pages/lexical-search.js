@@ -105,6 +105,7 @@ const LexicalSearch = () => {
     if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
     setLoading(true);
     validateLexicalQuery(formModel.query).then((response) => {
+      console.log(response);
       try {
         if (response?.statusCode) {
           setLoading(false);
