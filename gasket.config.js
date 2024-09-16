@@ -20,18 +20,31 @@ const localHttpsConfig = {
 // The api configuration and metat data is stored in the config object
 // Each request will go through the proxy and the proxy will use the api configuration to make the request
 const getLastElementInUrl = (url) => {
-  const parts = url.split('/');
-  let last = parts.pop();
-  // remove any query parameters
-  if (last.includes('?')) {
-    last = last.split('?')[0];
+  try {
+    const parts = url.split('/');
+    let last = parts.pop();
+    // remove any query parameters
+    if (last.includes('?')) {
+      last = last.split('?')[0];
+    }
+    return last;
+  } catch (error) {
+    console.log('error in getLastElementInUrl', error);
+    return '';
   }
-  return last;
+
 }
 const getUrlForProxy = (req) => {
-  const id = getLastElementInUrl(req.url);
-  const { url } = req.config?.api[id] || '';
-  return url;
+  try {
+    const id = getLastElementInUrl(req.url);
+
+    const { url } = req.config?.api[id] || '';
+    return url;
+  } catch (error) {
+    console.log('error in getUrlForProxy', error);
+    return '';
+  }
+
 }
 module.exports = {
   env,

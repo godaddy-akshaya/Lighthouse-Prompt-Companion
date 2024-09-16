@@ -42,7 +42,7 @@ const LexicalSearch = () => {
   const [formModel, setFormModel] = useState({
     query_name: '',
     query: '',
-    queryPlaceholder: '{{"query": {"bool": {"must": [{"match": {"field": "value"}}]}}}}',
+    queryPlaceholder: '',
     validated: false,
     hasErrors: false,
     errorMessage: '',
@@ -67,8 +67,8 @@ const LexicalSearch = () => {
     setFormModel({ ...formModel, query: '' });
   };
   const handleError = ({ error }) => {
-    // setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
-    // setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
+    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
   }
   const handleFormat = () => {
     try {
@@ -89,7 +89,7 @@ const LexicalSearch = () => {
         console.log(response);
         try {
           if (response.toString().includes('Error')) {
-            handleError({ error: response });
+            handleError({ error: response.toString() });
           } else {
             setFormModel({ ...formModel, submitted: true });
           }
