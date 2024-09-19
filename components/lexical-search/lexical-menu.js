@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Menu, MenuButton, MenuList, MenuItem, MenuSeparator } from '@ux/menu';
 import Box from '@ux/box';
 import Modal from '@ux/modal';
 import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
 import Tag from '@ux/tag';
+import { getAllLexicalQueries } from '../../lib/api';
 import example from '../../lib/lexical-search/example-1';
 import text from '@ux/text';
 import Hamburger from '@ux/icon/hamburger';
@@ -42,7 +43,12 @@ const LexicalMenu = ({ onAction }) => {
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
     }
   }
+  useEffect(() => {
+    getAllLexicalQueries().then((data) => {
+      console.log(data);
 
+    });
+  }, []);
   const myAction = value => alert(`Item Selected ${value}`);
 
   return (
