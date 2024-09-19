@@ -94,7 +94,6 @@ const ItemFilterSearch = ({ items, onSubmit, OnCancel }) => {
                         </Lockup>
                     }
                 </>}
-
             <List
                 height={200} // Adjust the height as needed
                 itemCount={filteredItems.length}

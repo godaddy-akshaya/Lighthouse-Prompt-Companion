@@ -30,7 +30,7 @@ const getLastElementInUrl = (url) => {
     return last;
   } catch (error) {
     console.log('error in getLastElementInUrl', error);
-    return '';
+    return 'error';
   }
 
 }

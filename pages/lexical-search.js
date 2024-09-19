@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRef } from 'react';
+import { withLocaleRequired } from '@gasket/react-intl';
 import Box from '@ux/box';
 import text from '@ux/text';
 import Head from '../components/head';
@@ -8,27 +9,27 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery, NetworkError } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import Click from '@ux/icon/click';
-import example1 from '../lib/lexical-search/example-2.json';
+
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
+import LexicalMenu from '../components/lexical-search/lexical-menu';
 
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
 
 const FlexTitleAndOptions = ({
-  onClear, onFormat, onExample
+  onClear, onFormat
 }) => {
   return (
     <div className='lh-container lh-between'>
-      <text.label visualSize='sm' as='label' text='Query (json)' />
-      <SiblingSet className='push-right' gap='sm' size='sm'>
+      <text.label as='label' text='Query (json)' />
+      <SiblingSet className='push-right' gap='sm'>
         <Button size='sm' onClick={onClear} design='inline' text='Clear' icon={<Refresh />} />
-        <Button size='sm' onClick={onExample} design='inline' text='Example' icon={<Click />} />
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
       </SiblingSet>
     </div>
@@ -37,7 +38,8 @@ const FlexTitleAndOptions = ({
 }
 const LexicalSearch = () => {
   const textInputRef = useRef();
-  const [loading, setLoading] = useState(false);
+  const [example, setExample] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [formModel, setFormModel] = useState({
     query_name: '',
@@ -56,12 +58,11 @@ const LexicalSearch = () => {
     }
     return true;
   };
-  const handleUseExample = (e) => {
-    e.preventDefault();
-    setFormModel({
-      ...formModel,
-      query: JSON.stringify(example1, null, 4)
-    });
+  const handleMenuAction = (e) => {
+    if (e.type === 'example') {
+      setFormModel({ ...formModel, query: e.data, query_name: 'Example Query' });
+    }
+    console.log('menu action', e);
   };
   const handleClear = () => {
     setFormModel({ ...formModel, query: '' });
@@ -128,20 +129,16 @@ const LexicalSearch = () => {
       ...formModel, query: e, validated: false
     });
   };
+  useEffect(() => {
+    setLoading(false);
+  }, []);
   const handleCloseError = (e) => {
-    e.preventDefault();
+
     setBanner({ show: false, message: '', errorType: 'error' });
   };
   return (
-    <>
-      <Head title='Lexical Search' description='Lexical Search' route='search' />
-      <Box>
-        <text.h1 as='heading' text={`Lexical Search`} />
-        <text.p as='paragraph' text={headerText} />
-      </Box>
-      {loading && <Box>
-        <Spinner size='md' />
-      </Box>}
+    <div className='container'>
+
       {formModel.submitted &&
         <Box blockPadding='lg'>
           <BannerMessage
@@ -151,35 +148,46 @@ const LexicalSearch = () => {
             userMessageType='success' />
         </Box>
       }
-      {!loading && !formModel.submitted &&
-        <div className='lexical-query-page-layout'>
-          <div className='main-column' id='json-data' gap='lg'>
-            <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
-              actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
 
-            <form onSubmit={handleSubmit} id='lexical-form'>
-              <Box blockPadding='md'>
-                <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
-              </Box>
-              <Box stretch blockPadding='md'>
-                <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
-                <TextInput ref={textInputRef} rows={15} required resize
-                  multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
-              </Box>
-              <Box blockPadding='lg' blockAlignChildren='end'>
-                <SiblingSet gap='sm' size='sm'>
-                  <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
-                  <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
-                </SiblingSet>
-              </Box>
-            </form>
-          </div>
-          <div className='secondary-column'>
-          </div>
+      <Head title='Lexical Search' description='Lexical Search' route='search' />
+      <text.h1 as='heading' text={`Lexical Search`} />
+      <text.p as='paragraph' text={headerText} />
+      {loading &&
+        <Box>
+          <Spinner size='md' />
+        </Box>}
+
+
+      {!loading && !formModel.submitted &&
+
+        <div className='main-column' id='json-data' gap='lg'>
+          <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
+            actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
+
+          <form onSubmit={handleSubmit} id='lexical-form'>
+            <Box displayType='box' inlineAlignSelf='end' orientation='horizontal' blockPadding='sm' stretch>
+              <LexicalMenu onAction={handleMenuAction} />
+            </Box>
+            <Box blockPadding='md'>
+
+              <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
+            </Box>
+            <Box stretch blockPadding='md'>
+              <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} />
+              <TextInput ref={textInputRef} rows={15} required resize
+                multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
+            </Box>
+            <Box blockPadding='lg' blockAlignChildren='end'>
+              <SiblingSet gap='sm'>
+                <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
+                <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+              </SiblingSet>
+            </Box>
+          </form>
         </div>
+
       }
-    </>
+    </div>
   );
 }
-
-export default LexicalSearch;
+export default withLocaleRequired('/locales', { initialProps: true })(LexicalSearch);

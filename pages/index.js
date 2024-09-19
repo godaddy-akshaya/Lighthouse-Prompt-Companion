@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Lockup, Block } from '@ux/layout';
 import { withLocaleRequired } from '@gasket/react-intl';
 import PropTypes from 'prop-types';
