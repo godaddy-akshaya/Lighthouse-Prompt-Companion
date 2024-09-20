@@ -8,14 +8,30 @@ import Tag from '@ux/tag';
 import { getAllLexicalQueries } from '../../lib/api';
 import example from '../../lib/lexical-search/example-1';
 import text from '@ux/text';
+import exampleResponse from '../../lib/lexical-search/example-response.json';
+import FolderOpen from '@ux/icon/folder-open';
 import Hamburger from '@ux/icon/hamburger';
 
+function ensureJSONString(obj) {
+  if (typeof obj === 'string') {
+    try {
+      JSON.parse(obj);
+      return obj; // It's already a JSON string
+    } catch (e) {
+      // It's a string but not a valid JSON string, so we stringify it
+      return JSON.stringify(obj);
+    }
+  } else {
+    // It's not a string, so we stringify it
+    return JSON.stringify(obj);
+  }
+}
 
 const OpenModal = ({ show, onClose, children }) => {
   return (
     <>
       {show &&
-        <Modal onClose={onClose} title='Open Query'>
+        <Modal onClose={onClose} title='Select Query'>
           <Box>
             {children}
           </Box>
@@ -26,56 +42,69 @@ const OpenModal = ({ show, onClose, children }) => {
 
 const LexicalMenu = ({ onAction }) => {
   const lexicalMenuRef = React.createRef();
+  const [lexicalQueries, setLexicalQueries] = useState([]);
   const [modal, setModal] = useState({
     show: false,
     action: '',
     title: ''
   });
-  const openOptions = ['joe', 'moe', 'larry'];
+  const handleLexicalSelect = (query) => {
+    setModal({ ...modal, show: false });
+    onAction({ type: 'load', data: query });
+  }
   const handleSelect = (value) => {
     console.log(value);
-    if (value === 'Open') {
+    if (value === 'open') {
       setModal({ ...modal, show: true, action: 'open', title: 'Open Query' });
     }
     if (value === 'example') {
-      console.log(example);
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
     }
   }
   useEffect(() => {
-    getAllLexicalQueries().then((data) => {
-      console.log(data);
-
+    console.log(exampleResponse);
+    const queries = exampleResponse?.map((item, index) => {
+      return { id: index, query: ensureJSONString(item.query), query_name: item.query_name }
     });
+
+    getAllLexicalQueries().then((response) => {
+      console.log(response.error);
+
+      if (response?.error) {
+        return [];
+      }
+      q = response?.map((query, index) => {
+        return { id: index, query: query.query, query_name: query.query_name };
+      });
+    });
+    setLexicalQueries(queries);
   }, []);
-  const myAction = value => alert(`Item Selected ${value}`);
-
   return (
-
-    <Box displayType='box' blockAlignChildren='end' orientation='horizontal'>
-      <OpenModal show={modal.show} onClose={() => setModal({ ...modal, show: false })}>
-        <Box>
-          <text.label as='label' text={modal.title} />
+    <Box displayType='box' orientation='horizontal' inlineAlignChildren='end'>
+      <Box blockAlignChildren='end' >
+        <Menu ref={lexicalMenuRef} id='lexical-menu'>
+          <MenuButton icon={<Hamburger />} size='sm' text='' />
+          <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
+            <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
+            <MenuSeparator />
+            <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
+          </MenuList>
+        </Menu>
+      </Box>
+      {modal.show && <OpenModal show={modal.show} onClose={() => setModal({ ...modal, show: false })}>
+        <Box stretch>
           <SiblingSet orientation='vertical' gap='sm'>
-            {openOptions.map((option, index) => (
-              <Button size='sm' key={index} text={option} onClick={() => myAction(option)} />
-            ))
-            }
+            {lexicalQueries.map((query, index) => {
+              return (
+                <Button key={index} size='sm' onClick={() => handleLexicalSelect(query)} design='inline' text={query.query_name} />
+              )
+            })}
           </SiblingSet>
         </Box>
       </OpenModal>
-      <Menu ref={lexicalMenuRef} id='lexical-menu'>
-        <MenuButton icon={<Hamburger />} design='secondary' size='sm' text='' />
-        <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
-          <MenuItem valueText={'open'} onSelect={handleSelect}>Open</MenuItem>
-          <MenuSeparator />
-          <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
-        </MenuList>
-      </Menu>
+      }
     </Box>
-
   );
-
 }
 
 

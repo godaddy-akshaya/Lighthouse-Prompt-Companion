@@ -38,7 +38,6 @@ const FlexTitleAndOptions = ({
 }
 const LexicalSearch = () => {
   const textInputRef = useRef();
-  const [example, setExample] = useState(null);
   const [loading, setLoading] = useState(true);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [formModel, setFormModel] = useState({
@@ -60,9 +59,12 @@ const LexicalSearch = () => {
   };
   const handleMenuAction = (e) => {
     if (e.type === 'example') {
-      setFormModel({ ...formModel, query: e.data, query_name: 'Example Query' });
+      setFormModel({ ...formModel, query: e.data, query_name: 'Example Query', validated: false });
     }
-    console.log('menu action', e);
+    if (e.type === 'load') {
+      setFormModel({ ...formModel, query_name: e.data.query_name, query: e.data.query, validated: false });
+      handleFormat(e.data);
+    }
   };
   const handleClear = () => {
     setFormModel({ ...formModel, query: '' });
@@ -71,10 +73,15 @@ const LexicalSearch = () => {
     setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
     setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
   }
-  const handleFormat = () => {
+  const handleFormat = (query) => {
     try {
-      const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
-      setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '' });
+      if (query?.query) {
+        const formatted = JSON.stringify(JSON.parse(query.query), null, 4);
+        setFormModel({ ...formModel, query: formatted, query_name: query.query_name, hasErrors: false, errorMessage: '' });
+      } else {
+        const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
+        setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '' });
+      }
     } catch (e) {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString() });
     }
@@ -84,6 +91,9 @@ const LexicalSearch = () => {
     if (!formModel.validated) return;
     if (!handleValidation()) return;
     setLoading(true);
+    setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
+    setBanner({ ...banner, show: false, message: '', errorType: 'error' });
+
     submitLexicalQuery(formModel)
       .then((response) => {
         setLoading(false);
@@ -106,23 +116,21 @@ const LexicalSearch = () => {
     e.preventDefault();
     if (!handleValidation()) return;
     setLoading(true);
-    validateLexicalQuery(formModel.query)
-      .then((response) => {
-        console.log('here is the response', response.toString());
-        setLoading(false);
-        try {
+    setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
+    setBanner({ ...banner, show: false, message: '', errorType: 'error' });
+    try {
+      validateLexicalQuery(formModel.query)
+        .then((response) => {
+          setLoading(false);
           if (response.toString().includes('Error')) {
             handleError({ error: response });
           } else {
-            setFormModel({ ...formModel, validated: true });
+            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
           }
-        } catch (e) {
-          handleError({ error: 'Issue with validation, please reach out to support' });
-        }
-      }).catch((error) => {
-        handleError({ 'error': error?.toString() || 'Need to research this one!' });
-      });
-
+        });
+    } catch (error) {
+      handleError({ 'error': error?.toString() || 'Need to research this one!' });
+    };
   };
   const handleQueryInput = (e) => {
     setFormModel({
@@ -133,17 +141,15 @@ const LexicalSearch = () => {
     setLoading(false);
   }, []);
   const handleCloseError = (e) => {
-
     setBanner({ show: false, message: '', errorType: 'error' });
   };
   return (
     <div className='container'>
-
       {formModel.submitted &&
         <Box blockPadding='lg'>
           <BannerMessage
             showMessage={true}
-            message={`Query ${formModel.query_name} submitted successfully`}
+            message={`${formModel.query_name} submitted successfully`}
             handleCloseError={() => window.location.reload()}
             userMessageType='success' />
         </Box>
@@ -152,24 +158,19 @@ const LexicalSearch = () => {
       <Head title='Lexical Search' description='Lexical Search' route='search' />
       <text.h1 as='heading' text={`Lexical Search`} />
       <text.p as='paragraph' text={headerText} />
+      <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
+        actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
       {loading &&
         <Box>
           <Spinner size='md' />
         </Box>}
-
-
       {!loading && !formModel.submitted &&
-
-        <div className='main-column' id='json-data' gap='lg'>
-          <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
-            actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
-
+        <>
           <form onSubmit={handleSubmit} id='lexical-form'>
             <Box displayType='box' inlineAlignSelf='end' orientation='horizontal' blockPadding='sm' stretch>
               <LexicalMenu onAction={handleMenuAction} />
             </Box>
             <Box blockPadding='md'>
-
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
             </Box>
             <Box stretch blockPadding='md'>
@@ -184,8 +185,7 @@ const LexicalSearch = () => {
               </SiblingSet>
             </Box>
           </form>
-        </div>
-
+        </>
       }
     </div>
   );
