@@ -25,17 +25,14 @@ function ensureJSONString(obj) {
   }
 }
 
-const OpenModal = ({ show, onClose, children }) => {
+const OpenModal = ({ onClose, children }) => {
   return (
-    <>
-      {show &&
-        <Modal onClose={onClose} title='Select Query'>
-          <Box>
-            {children}
-          </Box>
-        </Modal>
-      }
-    </>)
+    <Modal onClose={onClose} title='Select Query'>
+      <Box>
+        {children}
+      </Box>
+    </Modal>
+  )
 }
 
 const LexicalMenu = ({ onAction }) => {
@@ -51,7 +48,7 @@ const LexicalMenu = ({ onAction }) => {
     onAction({ type: 'load', data: query });
   }
   const handleSelect = (value) => {
-    console.log(value);
+
     if (value === 'open') {
       setModal({ ...modal, show: true, action: 'open', title: 'Open Query' });
     }
@@ -62,9 +59,6 @@ const LexicalMenu = ({ onAction }) => {
   useEffect(() => {
     getAllLexicalQueries().then((response) => {
       console.log(response);
-      if (response?.error) {
-        console.log(response.error);
-      }
       try {
         const q = response?.map((query, index) => {
           return { id: index, query: ensureJSONString(query.query), query_name: query.query_name };
@@ -88,7 +82,7 @@ const LexicalMenu = ({ onAction }) => {
           </MenuList>
         </Menu>
       </Box>
-      {modal.show && <OpenModal show={modal.show} onClose={() => setModal({ ...modal, show: false })}>
+      {modal.show && <OpenModal onClose={() => setModal({ ...modal, show: false })}>
         <Box stretch>
           {lexicalQueries.length === 0 && <Tag empahsis='neutral' text='No queries found' />}
           <SiblingSet orientation='vertical' gap='sm'>

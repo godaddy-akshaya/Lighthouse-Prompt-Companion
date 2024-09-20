@@ -12,8 +12,6 @@ import Checkmark from '@ux/icon/checkmark';
 import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
-import Click from '@ux/icon/click';
-
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
@@ -97,7 +95,6 @@ const LexicalSearch = () => {
     submitLexicalQuery(formModel)
       .then((response) => {
         setLoading(false);
-        console.log(response);
         try {
           if (response.toString().includes('Error')) {
             handleError({ error: response.toString() });
