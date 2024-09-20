@@ -63,5 +63,10 @@ module.exports = {
       "method": "POST",
       "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
+    "delete-lexical-query": {
+      "method": "POST",
+      "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
+    }
   }
 }
+

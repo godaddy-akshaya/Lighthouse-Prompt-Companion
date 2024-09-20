@@ -77,6 +77,12 @@ module.exports = {
         "action": "get_all"
       }
     },
-
+    "delete-lexical-query": {
+      "method": "POST",
+      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "body": {
+        "action": "delete_query"
+      }
+    },
   }
 }
