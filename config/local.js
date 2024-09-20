@@ -65,7 +65,18 @@ module.exports = {
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "body": {
+        "action": "insert"
+      }
     },
+    "get-all-lexical-query": {
+      "method": "POST",
+      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "body": {
+        "action": "get_all"
+      }
+    },
+
   }
 }

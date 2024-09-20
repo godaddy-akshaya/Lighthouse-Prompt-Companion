@@ -30,7 +30,6 @@ const LexicalMenu = ({ onAction }) => {
     show: false,
     action: '',
     title: ''
-
   });
   const openOptions = ['joe', 'moe', 'larry'];
   const handleSelect = (value) => {
