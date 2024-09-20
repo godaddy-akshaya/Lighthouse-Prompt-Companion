@@ -7,10 +7,8 @@ import Button from '@ux/button';
 import Tag from '@ux/tag';
 import { getAllLexicalQueries } from '../../lib/api';
 import example from '../../lib/lexical-search/example-1';
-import text from '@ux/text';
-import exampleResponse from '../../lib/lexical-search/example-response.json';
-import FolderOpen from '@ux/icon/folder-open';
 import Hamburger from '@ux/icon/hamburger';
+
 
 function ensureJSONString(obj) {
   if (typeof obj === 'string') {
@@ -62,22 +60,21 @@ const LexicalMenu = ({ onAction }) => {
     }
   }
   useEffect(() => {
-    console.log(exampleResponse);
-    const queries = exampleResponse?.map((item, index) => {
-      return { id: index, query: ensureJSONString(item.query), query_name: item.query_name }
-    });
-
     getAllLexicalQueries().then((response) => {
-      console.log(response.error);
-
+      console.log(response);
       if (response?.error) {
-        return [];
+        console.log(response.error);
       }
-      q = response?.map((query, index) => {
-        return { id: index, query: query.query, query_name: query.query_name };
-      });
+      try {
+        const q = response?.map((query, index) => {
+          return { id: index, query: ensureJSONString(query.query), query_name: query.query_name };
+        });
+        console.log(q);
+        setLexicalQueries(q);
+      } catch (e) {
+        setLexicalQueries([]);
+      }
     });
-    setLexicalQueries(queries);
   }, []);
   return (
     <Box displayType='box' orientation='horizontal' inlineAlignChildren='end'>
@@ -93,7 +90,9 @@ const LexicalMenu = ({ onAction }) => {
       </Box>
       {modal.show && <OpenModal show={modal.show} onClose={() => setModal({ ...modal, show: false })}>
         <Box stretch>
+          {lexicalQueries.length === 0 && <Tag empahsis='neutral' text='No queries found' />}
           <SiblingSet orientation='vertical' gap='sm'>
+
             {lexicalQueries.map((query, index) => {
               return (
                 <Button key={index} size='sm' onClick={() => handleLexicalSelect(query)} design='inline' text={query.query_name} />

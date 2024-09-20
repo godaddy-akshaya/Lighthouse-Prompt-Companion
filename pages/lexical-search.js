@@ -126,6 +126,7 @@ const LexicalSearch = () => {
             handleError({ error: response });
           } else {
             setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+            setBanner({ ...banner, show: true, message: 'Query is valid', errorType: 'success' });
           }
         });
     } catch (error) {
