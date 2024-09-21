@@ -65,7 +65,6 @@ module.exports = {
     "get-all-lexical-query": {
       "method": "POST",
       "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
-
     },
     "delete-lexical-query": {
       "method": "POST",

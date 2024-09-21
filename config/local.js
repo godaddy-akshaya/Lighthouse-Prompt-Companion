@@ -72,17 +72,11 @@ module.exports = {
     },
     "get-all-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy",
-      "body": {
-        "action": "get_all"
-      }
+      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
     "delete-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy",
-      "body": {
-        "action": "delete_query"
-      }
+      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
     },
   }
 }

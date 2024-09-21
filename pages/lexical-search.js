@@ -118,10 +118,11 @@ const LexicalSearch = () => {
     try {
       validateLexicalQuery(formModel.query)
         .then((response) => {
-          setLoading(false);
+
           if (response.toString().includes('Error')) {
             handleError({ error: response });
           } else {
+            setLoading(false);
             setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
             setBanner({ ...banner, show: true, message: 'Query is valid', errorType: 'success' });
           }
