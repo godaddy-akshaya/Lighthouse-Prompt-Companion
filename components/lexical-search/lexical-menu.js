@@ -61,11 +61,11 @@ const LexicalMenu = ({ onAction }) => {
 
       console.log(response?.length || 'na');
       try {
-        let data = response?.map((query) => {
-          console.log(query);
+        let data = response?.map((d) => {
+          console.log(d);
           return {
-            query_name: query.query_name,
-            query: ensureJSONString(query.query)
+            query_name: d.query_name,
+            query: d.query
           }
         }) || [];
         setLexicalQueries(data);
