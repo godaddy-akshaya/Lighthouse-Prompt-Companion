@@ -58,7 +58,7 @@ const LexicalMenu = ({ onAction }) => {
   }
   useEffect(() => {
     getAllLexicalQueries().then((response) => {
-      console.log(response);
+
       try {
         const q = response?.map((query, index) => {
           return { id: index, query: ensureJSONString(query.query), query_name: query.query_name };
