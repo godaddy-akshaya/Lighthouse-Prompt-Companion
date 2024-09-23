@@ -39,6 +39,7 @@ const getUrlForProxy = (req) => {
     const id = getLastElementInUrl(req.url);
 
     const { url } = req.config?.api[id] || '';
+    console.log('url', url, id);
     return url;
   } catch (error) {
     console.log('error in getUrlForProxy', error);

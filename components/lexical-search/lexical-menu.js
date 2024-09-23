@@ -60,43 +60,46 @@ const LexicalMenu = ({ onAction }) => {
     getAllLexicalQueries().then((response) => {
 
       try {
-        const q = response?.map((query, index) => {
-          return { id: index, query: ensureJSONString(query.query), query_name: query.query_name };
-        });
-        console.log(q);
-        setLexicalQueries(q);
+        let data = response?.map((query) => {
+          console.log(query);
+          return {
+            query_name: query.query_name,
+            query: ensureJSONString(query.query)
+          }
+        }) || [];
+        setLexicalQueries(data);
       } catch (e) {
         setLexicalQueries([]);
       }
     });
   }, []);
   return (
-    <Box displayType='box' orientation='horizontal' inlineAlignChildren='end'>
-      <Box blockAlignChildren='end' >
-        <Menu ref={lexicalMenuRef} id='lexical-menu'>
-          <MenuButton icon={<Hamburger />} size='sm' text='' />
-          <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
-            <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
-            <MenuSeparator />
-            <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
-          </MenuList>
-        </Menu>
-      </Box>
+    <>
       {modal.show && <OpenModal onClose={() => setModal({ ...modal, show: false })}>
-        <Box stretch>
-          {lexicalQueries.length === 0 && <Tag empahsis='neutral' text='No queries found' />}
-          <SiblingSet orientation='vertical' gap='sm'>
+        {lexicalQueries.length === 0 && <Tag empahsis='neutral' text='No queries found' />}
+        <SiblingSet orientation='vertical' gap='sm'>
 
-            {lexicalQueries.map((query, index) => {
-              return (
-                <Button key={index} size='sm' onClick={() => handleLexicalSelect(query)} design='inline' text={query.query_name} />
-              )
-            })}
-          </SiblingSet>
-        </Box>
+          {lexicalQueries.map((query, index) => {
+            return (
+              <Button key={index} size='sm' onClick={() => handleLexicalSelect(query)} design='inline' text={query.query_name} />
+            )
+          })}
+        </SiblingSet>
       </OpenModal>
       }
-    </Box>
+
+      <Box displayType='box' orientation='horizontal' inlineAlignChildren='end'>
+        <Box blockAlignChildren='end' >
+          <Menu ref={lexicalMenuRef} id='lexical-menu'>
+            <MenuButton icon={<Hamburger />} size='sm' text='' />
+            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>            <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
+              <MenuSeparator />
+              <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+      </Box>
+    </>
   );
 }
 
