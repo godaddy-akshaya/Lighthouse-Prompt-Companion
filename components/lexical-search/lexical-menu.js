@@ -58,7 +58,8 @@ const LexicalMenu = ({ onAction }) => {
   }
   useEffect(() => {
     getAllLexicalQueries().then((response) => {
-
+      console.log(response?.json());
+      console.log(response?.length || 'na');
       try {
         let data = response?.map((query) => {
           console.log(query);
@@ -92,7 +93,8 @@ const LexicalMenu = ({ onAction }) => {
         <Box blockAlignChildren='end' >
           <Menu ref={lexicalMenuRef} id='lexical-menu'>
             <MenuButton icon={<Hamburger />} size='sm' text='' />
-            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>            <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
+            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
+              <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
               <MenuSeparator />
               <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
             </MenuList>

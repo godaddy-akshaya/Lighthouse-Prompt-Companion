@@ -31,7 +31,6 @@ const FlexTitleAndOptions = ({
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
       </SiblingSet>
     </div>
-
   )
 }
 const LexicalSearch = () => {
