@@ -58,7 +58,7 @@ const LexicalMenu = ({ onAction }) => {
   }
   useEffect(() => {
     getAllLexicalQueries().then((response) => {
-      console.log(response?.json());
+
       console.log(response?.length || 'na');
       try {
         let data = response?.map((query) => {

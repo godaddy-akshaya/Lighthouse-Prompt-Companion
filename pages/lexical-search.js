@@ -9,7 +9,7 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
@@ -36,6 +36,7 @@ const FlexTitleAndOptions = ({
 const LexicalSearch = () => {
   const textInputRef = useRef();
   const [loading, setLoading] = useState(true);
+  const [queryList, setQueryList] = useState([]);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [formModel, setFormModel] = useState({
     query_name: '',
@@ -137,6 +138,10 @@ const LexicalSearch = () => {
   };
   useEffect(() => {
     setLoading(false);
+    getAllLexicalQueries().then((data) => {
+      console.log(data);
+      setQueryList(data);
+    });
   }, []);
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
