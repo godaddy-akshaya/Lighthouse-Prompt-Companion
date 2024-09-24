@@ -35,8 +35,7 @@ const FlexTitleAndOptions = ({
 }
 const LexicalSearch = () => {
   const textInputRef = useRef();
-  const [loading, setLoading] = useState(fasle);
-  const [queryList, setQueryList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [formModel, setFormModel] = useState({
     query_name: '',
