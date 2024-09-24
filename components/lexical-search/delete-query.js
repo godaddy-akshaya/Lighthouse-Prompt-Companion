@@ -14,7 +14,7 @@ function DeleteQuery({ queryId, onDelete }) {
   }
 
   return (<>
-    {queryId && <Button size='sm' onClick={handleDelete} text={`Delete Query: ${queryId}`} design='inline' />}
+    {queryId && <Button size='sm' onClick={handleDelete} text={`Delete Query: ${queryId}`} design='critical' />}
   </>
   )
 }

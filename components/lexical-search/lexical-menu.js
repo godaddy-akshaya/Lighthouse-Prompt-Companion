@@ -37,12 +37,12 @@ const LexicalMenu = ({ onAction, lexicalQueries }) => {
   return (
     <>
       {modal.show && <ConfirmModal onClose={() => setModal({ show: false })} onConfirm={modal.action} title={modal.title} />}
-      <Menu ref={lexicalMenuRef} id='lexical-menu'>
+      <Menu id='lexical-menu'>
         <MenuButton icon={<Hamburger />} size='sm' text='' />
         <MenuList >
           <MenuGroup label='Open Saved Query'>
-            {lexicalQueries.length === 0 && <MenuItem valueText='no-queries' >No queries found</MenuItem>}
-            {lexicalQueries.map((item, index) => {
+            {!lexicalQueries && <MenuItem valueText='no-queries' >No queries found</MenuItem>}
+            {lexicalQueries && lexicalQueries.map((item, index) => {
               return (
                 <MenuItem key={index} valueText={item} onSelect={handleLexicalSelect}>{item.query_name}
                 </MenuItem>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
-import { withLocaleRequired } from '@gasket/react-intl';
 import Box from '@ux/box';
 import text from '@ux/text';
 import Head from '../components/head';
@@ -159,7 +158,7 @@ const LexicalSearch = () => {
         setLexicalQueries([]);
       }
     });
-  }, []);
+  }, [lexicalQueries]);
 
   return (
     <div className='container'>
@@ -196,14 +195,16 @@ const LexicalSearch = () => {
               <TextInput ref={textInputRef} rows={15} required resize
                 multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
             </Box>
-            <Box stretch blockPadding='lg' orientation='horizontal' inlineAlignChildren='spaceBetween'>
+            <Box stretch blockPadding='lg'>
               <SiblingSet gap='sm' stretch>
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
-              <SiblingSet gap='sm' stretch>
-                <DeleteQuery queryId={formModel.query_name} onDelete={handleDelete} />
-              </SiblingSet>
+              <Box gap='lg' blockPadding='md'>
+                <SiblingSet gap='sm' stretch>
+                  <DeleteQuery queryId={formModel.query_name} onDelete={handleDelete} />
+                </SiblingSet>
+              </Box>
             </Box>
           </form>
         </>
@@ -211,4 +212,4 @@ const LexicalSearch = () => {
     </div>
   );
 }
-export default withLocaleRequired('/locales', { initialProps: true })(LexicalSearch);
+export default LexicalSearch; 
