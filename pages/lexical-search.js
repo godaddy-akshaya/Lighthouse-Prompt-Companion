@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRef } from 'react';
 import { withLocaleRequired } from '@gasket/react-intl';
 import Box from '@ux/box';
@@ -35,7 +35,7 @@ const FlexTitleAndOptions = ({
 }
 const LexicalSearch = () => {
   const textInputRef = useRef();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(fasle);
   const [queryList, setQueryList] = useState([]);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [formModel, setFormModel] = useState({

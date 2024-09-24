@@ -46,6 +46,7 @@ import '@ux/icon/save/index.css';
 import '@ux/tooltip/styles';
 import '@ux/code/styles';
 import '@ux/icon/refresh/index.css';
+import '@ux/spinner/styles';
 import '@ux/icon/click/index.css';
 import '@ux/tooltip/styles';
 import '@ux/icon/wand/index.css';
