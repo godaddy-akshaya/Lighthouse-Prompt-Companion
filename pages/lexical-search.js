@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
 import { withLocaleRequired } from '@gasket/react-intl';
 import Box from '@ux/box';
@@ -9,11 +9,12 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
+import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 
 
@@ -37,6 +38,7 @@ const LexicalSearch = () => {
   const textInputRef = useRef();
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
+  const [lexicalQueries, setLexicalQueries] = useState([]);
   const [formModel, setFormModel] = useState({
     query_name: '',
     query: '',
@@ -44,7 +46,8 @@ const LexicalSearch = () => {
     validated: false,
     hasErrors: false,
     errorMessage: '',
-    submitted: false
+    submitted: false,
+    formMessage: ''
   });
   const handleValidation = () => {
     if (!formModel.query) {
@@ -52,9 +55,15 @@ const LexicalSearch = () => {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
       return false;
     }
+    if (!formModel.query_name) {
+      setBanner({ ...banner, show: true, message: 'Name is required', errorType: 'error' });
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Name is required' });
+      return false;
+    }
     return true;
   };
   const handleMenuAction = (e) => {
+    console.log(e);
     if (e.type === 'example') {
       setFormModel({ ...formModel, query: e.data, query_name: 'Example Query', validated: false });
     }
@@ -68,19 +77,15 @@ const LexicalSearch = () => {
   };
   const handleError = ({ error }) => {
     setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
-    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString() });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString(), formMessage: '' });
   }
-  const handleFormat = (query) => {
+  const handleFormat = () => {
     try {
-      if (query?.query) {
-        const formatted = JSON.stringify(JSON.parse(query.query), null, 4);
-        setFormModel({ ...formModel, query: formatted, query_name: query.query_name, hasErrors: false, errorMessage: '' });
-      } else {
-        const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
-        setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '' });
-      }
-    } catch (e) {
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString() });
+      const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
+      setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '', formMessage: 'Query formatted' });
+    }
+    catch (e) {
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString(), formMessage: '' });
     }
   };
   const handleSubmit = (e) => {
@@ -111,11 +116,11 @@ const LexicalSearch = () => {
       validateLexicalQuery(formModel.query)
         .then((response) => {
           setLoading(false);
-          if (response.toString().includes('Error')) {
-            handleError({ error: response });
-          } else {
-            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
+          try {
+            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '', formMessage: 'Query is valid' });
             setBanner({ ...banner, show: true, message: 'Query is valid', errorType: 'success' });
+          } catch (error) {
+            handleError({ error: response });
           }
         });
     } catch (error) {
@@ -131,6 +136,31 @@ const LexicalSearch = () => {
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
   };
+
+  const handleDelete = (e) => {
+    let lex = [...lexicalQueries];
+    let index = lex.findIndex((d) => d.query_name === formModel.query_name);
+    lex.splice(index, 1);
+    setLexicalQueries(lex);
+    setFormModel({ ...formModel, query: '', query_name: '', validated: false, submitted: false });
+
+  }
+  useEffect(() => {
+    getAllLexicalQueries().then((queries) => {
+      try {
+        let data = queries?.map((d) => {
+          return {
+            query_name: d.query_name,
+            query: ensureJSONString(d.query)
+          }
+        }) || [];
+        setLexicalQueries(data);
+      } catch (e) {
+        setLexicalQueries([]);
+      }
+    });
+  }, []);
+
   return (
     <div className='container'>
       {formModel.submitted &&
@@ -156,7 +186,7 @@ const LexicalSearch = () => {
         <>
           <form onSubmit={handleSubmit} id='lexical-form'>
             <Box>
-              <LexicalMenu onAction={handleMenuAction} />
+              <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />
             </Box>
             <Box blockPadding='md'>
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
@@ -164,12 +194,15 @@ const LexicalSearch = () => {
             <Box stretch blockPadding='md'>
               <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
               <TextInput ref={textInputRef} rows={15} required resize
-                multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
+                multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
             </Box>
-            <Box blockPadding='lg' blockAlignChildren='end'>
-              <SiblingSet gap='sm'>
+            <Box stretch blockPadding='lg' orientation='horizontal' inlineAlignChildren='spaceBetween'>
+              <SiblingSet gap='sm' stretch>
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+              </SiblingSet>
+              <SiblingSet gap='sm' stretch>
+                <DeleteQuery queryId={formModel.query_name} onDelete={handleDelete} />
               </SiblingSet>
             </Box>
           </form>

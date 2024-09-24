@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, } from 'react';
 import { Menu, MenuButton, MenuList, MenuItem, MenuSeparator, MenuGroup } from '@ux/menu';
-
-import { getAllLexicalQueries } from '../../lib/api';
 import example from '../../lib/lexical-search/example-1';
 import Hamburger from '@ux/icon/hamburger';
 
@@ -21,11 +19,7 @@ function ensureJSONString(obj) {
   }
 }
 
-
-
-const LexicalMenu = ({ onAction }) => {
-  const lexicalMenuRef = React.createRef();
-  const [lexicalQueries, setLexicalQueries] = useState([]);
+const LexicalMenu = ({ onAction, lexicalQueries }) => {
   const [modal, setModal] = useState({
     show: false,
     action: '',
@@ -39,21 +33,7 @@ const LexicalMenu = ({ onAction }) => {
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
     }
   }
-  useEffect(() => {
-    getAllLexicalQueries().then((queries) => {
-      try {
-        let data = queries?.map((d) => {
-          return {
-            query_name: d.query_name,
-            query: ensureJSONString(d.query)
-          }
-        }) || [];
-        setLexicalQueries(data);
-      } catch (e) {
-        setLexicalQueries([]);
-      }
-    });
-  }, []);
+
   return (
     <>
       {modal.show && <ConfirmModal onClose={() => setModal({ show: false })} onConfirm={modal.action} title={modal.title} />}
