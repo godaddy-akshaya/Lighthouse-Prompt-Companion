@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import Spinner from '@ux/spinner';
 import { Block, Lockup, Module } from '@ux/layout';
 import Head from '../../components/head';
-import TextInput from '@ux/text-input';
 import text from '@ux/text';
 
 import '@ux/card/styles';

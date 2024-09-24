@@ -1,18 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { useState } from 'react';
-import { debounce, get, has, set } from 'lodash';
+import { debounce } from 'lodash';
 import FilterCards from './filter-card/filter-cards';
 import Card from '@ux/card';
 import { Module, Block, Lockup } from '@ux/layout';
-import FieldFrame from '@ux/field-frame';
 import DateInput from '@ux/date-input';
 import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
 import FilterMenu from './upload/filter-menu';
-import LoadedFilter from './upload/loaded-filter';
-import filterParamsMgmtService from '../lib/filter-params-mgmt-service';
-import MultiItemTextEntry from './multi-item-text-entry';
+
 
 // Object to hold the filter options
 const DefaultFilterModel = {
@@ -129,50 +126,43 @@ const TableFilter = ({ filters, onSubmit }) => {
         }
         setFilterOptions(_filters);
     }
-    return (
-        <>  <text.h3 as='title' text='Available Filters' />
-            <Card id='table-params-card' stretch={true}>
-                <Module ref={formRef}>
-                    <Block>
-                        <Lockup>
-                            <div className='lh-container lh-between'>
-                                <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
-                                    page={page}
-                                    onPaginate={setPage}
-                                    value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-                                <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
-                            </div>
-                            {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
-                        </Lockup>
-                    </Block>
-                    <Block>
-                        <Lockup>
-                            <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} onCancel={handleCancelFilterLoad} />
-                        </Lockup>
-                    </Block>
-                    <Block onFocus={handleOnFocus}>
-                        <Lockup>
-                            <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
-                        </Lockup>
-                        {/*
-
-                          Possible release when enabling multi-item search
-
-                         <MultiItemTextEntry items={lexicalSearchItems} label='Lexical Search' onAddItem={handleAddSearchItem} onRemoveItem={handleRemoveSearchItem} /> */}
-                    </Block>
-                    <Block>
-                        <div className='lh-filter-container'>
-                            {
-                                filterOptions?.map((field, index) =>
-                                    <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
-                                )
-                            }
+    return <>  <text.h3 as='title' text='Available Filters' />
+        <Card id='table-params-card' stretch={true}>
+            <Module ref={formRef}>
+                <Block>
+                    <Lockup>
+                        <div className='lh-container lh-between'>
+                            <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })}
+                                page={page}
+                                onPaginate={setPage}
+                                value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                            <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
                         </div>
-                    </Block>
-                    <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
-                </Module>
-            </Card>       </>
-    )
+                        {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
+                    </Lockup>
+                </Block>
+                <Block>
+                    <Lockup>
+                        <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} onCancel={handleCancelFilterLoad} />
+                    </Lockup>
+                </Block>
+                <Block onFocus={handleOnFocus}>
+                    <Lockup>
+                        <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+                    </Lockup>
+                </Block>
+                <Block>
+                    <div className='lh-filter-container'>
+                        {
+                            filterOptions?.map((field, index) =>
+                                <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
+                            )
+                        }
+                    </div>
+                </Block>
+                <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
+            </Module>
+        </Card>       </>;
 }
 
 

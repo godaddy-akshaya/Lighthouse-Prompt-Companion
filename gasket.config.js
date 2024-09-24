@@ -1,7 +1,5 @@
 const isCI = process.env.CI === true;
 const env = require('./config/.env');
-const logPrefix = 'config:gasket';
-const { transports } = require('winston');
 
 
 const localHttpsConfig = {
@@ -13,27 +11,38 @@ const localHttpsConfig = {
     cert: [
       'local.c3.int.dev-gdcorp.tools.crt'
     ]
-  },
-  winston: {
-    level: 'warning',
   }
 };
 // The last element is the name of the api endpoint
 // The api configuration and metat data is stored in the config object
 // Each request will go through the proxy and the proxy will use the api configuration to make the request
 const getLastElementInUrl = (url) => {
-  const parts = url.split('/');
-  let last = parts.pop();
-  // remove any query parameters
-  if (last.includes('?')) {
-    last = last.split('?')[0];
+  try {
+    const parts = url.split('/');
+    let last = parts.pop();
+    // remove any query parameters
+    if (last.includes('?')) {
+      last = last.split('?')[0];
+    }
+    return last;
+  } catch (error) {
+    console.log('error in getLastElementInUrl', error);
+    return 'error';
   }
-  return last;
+
 }
 const getUrlForProxy = (req) => {
-  const id = getLastElementInUrl(req.url);
-  const { url } = req.config?.api[id] || '';
-  return url;
+  try {
+    const id = getLastElementInUrl(req.url);
+
+    const { url } = req.config?.api[id] || '';
+    console.log('url', url, id);
+    return url;
+  } catch (error) {
+    console.log('error in getUrlForProxy', error);
+    return '';
+  }
+
 }
 module.exports = {
   env,
@@ -67,11 +76,6 @@ module.exports = {
     enabled: process.env.AUTO_TLS_ENABLED === 'true',
     expiryInDays: 3650
   },
-  // fluentd: {
-  //   host: 'localhost',
-  //   port: 24224,
-  //   timeout: 3
-  // },
   securityLogger: {
     aws: {
       accountId: process.env.AWS_ACCT_ID || '000',

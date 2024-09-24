@@ -3,17 +3,7 @@ module.exports = {
   "region": "us-west-2",
   "root": "https://lighthouse.c3.int.dev-gdcorp.tools",
   "groups": ['lighthouse-ui-devs'],
-  // "sso": {
-  //   "app": "lighthouse-ui",
-  //   "root": "https://sso.dev-gdcorp.tools",
-  //   "groups": [],
-  //   "cookie": {
-  //     "domain": ".dev-gdcorp.tools",
-  //     "path": "/",
-  //     "secure": true,
-  //     "httpOnly": true
-  //   }
-  // },
+  "opensearch": "https://opensearch.org/docs/latest/",
   "api": {
     "table-listing": {
       "method": "GET",
@@ -55,14 +45,31 @@ module.exports = {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
     },
-    gdlh_get_interaction_ids: {
+    "gdlh_get_interaction_ids": {
       "method": "GET",
       "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
     },
-    gdlh_save_interaction_ids: {
+    "gdlh_save_interaction_ids": {
       "method": "POST",
       "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
-    }
+    },
+    "validate-lexical-query": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "submit-lexical-query": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "get-all-lexical-queries": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "delete-lexical-query": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
   }
 }
+
 

@@ -18,12 +18,10 @@ const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
     }
     const handleSave = (e) => {
         e.preventDefault();
-        console.log('Handling Save', e);
         if (saveAs === '') {
             setErrorMessage('Name is required');
             return;
         }
-
         onSave(saveAs)
     }
     return (
@@ -32,7 +30,6 @@ const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
             {!hasBeenSaved &&
                 <>
                     <Checkbox id='save-filter' name='save-filter' checked={toSave} onChange={handleCheckbox} label='Save this upload?' />
-
                     {toSave &&
                         <Block orienatation='vertical'>
                             <Lockup>

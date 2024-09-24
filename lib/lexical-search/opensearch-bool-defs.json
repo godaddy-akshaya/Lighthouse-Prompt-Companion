@@ -1,0 +1,32 @@
+{ 
+  "clause": {
+  "must": "Logical and operator. The results must match all queries in this clause.",
+  "should": "Logical or operator. The results should match at least one query in this clause.Logical or operator. The results must match at least one of the queries. Matching more should clauses increases the document’s relevance score. You can set the minimum number of queries that must match using the minimum_should_match parameter. If a query contains a must or filter clause, the default minimum_should_match value is 0. Otherwise, the default minimum_should_match value is 1.",
+  "must_not": "Logical not operator. All matches are excluded from the results.",
+  "filter": "Logical and operator. The results must match all queries in this clause. However, unlike must, the score of the query is ignored. Filter clauses are used to filter documents based on a condition. They are executed in filter context, meaning that scoring is ignored and the query behaves like a filter. The result of the filter query is a simple yes/no answer to the question, Does this document match this query?"
+},
+"query": {
+  "match_phrase": "Use the match_phrase query to match documents that contain an exact phrase in a specified order. You can add flexibility to phrase matching by providing the slop parameter."
+},
+  "match_phrase": {
+    "customer_conversation": {
+      "query": "",
+      "slop": 0
+    },
+    "agent_conversation": {
+      "query": "",
+      "slop": 0
+    }
+  },
+  "filter": {
+    "term": {
+      "interaction_type": ""
+    },
+    "range": {
+      "interaction_date": {
+        "gte": "",
+        "lte": ""
+      }
+    }
+  }
+}

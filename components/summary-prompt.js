@@ -6,8 +6,6 @@ import { Block, Lockup } from '@ux/layout';
 import { getGuid } from '../lib/utils';
 import TextInput from '@ux/text-input';
 import SelectInput from '@ux/select-input';
-import '@ux/menu/styles';
-import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 import Add from '@ux/icon/add';
 
 export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, eventOpen, eventCancel }) {
