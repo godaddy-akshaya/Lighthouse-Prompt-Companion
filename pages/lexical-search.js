@@ -21,11 +21,11 @@ const headerText = `In lexical search you typically use the bool query to combin
 conditions using must, should, and must_not.`;
 
 const FlexTitleAndOptions = ({
-  onClear, onFormat
+  onClear, onFormat, label
 }) => {
   return (
     <div className='lh-container lh-between'>
-      <text.label as='label' text='Query (json)' />
+      <text.label as='label' text={label} />
       <SiblingSet className='push-right' gap='sm'>
         <Button size='sm' onClick={onClear} design='inline' text='Clear' icon={<Refresh />} />
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
@@ -167,14 +167,14 @@ const LexicalSearch = () => {
       {!loading && !formModel.submitted &&
         <>
           <form onSubmit={handleSubmit} id='lexical-form'>
-            <Box displayType='box' inlineAlignSelf='end' orientation='horizontal' blockPadding='sm' stretch>
+            <Box>
               <LexicalMenu onAction={handleMenuAction} />
             </Box>
             <Box blockPadding='md'>
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
             </Box>
             <Box stretch blockPadding='md'>
-              <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} />
+              <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
               <TextInput ref={textInputRef} rows={15} required resize
                 multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
             </Box>

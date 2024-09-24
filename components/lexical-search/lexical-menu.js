@@ -1,10 +1,6 @@
-import React, { use, useEffect, useState } from 'react';
-import { Menu, MenuButton, MenuList, MenuItem, MenuSeparator } from '@ux/menu';
-import Box from '@ux/box';
-import Modal from '@ux/modal';
-import SiblingSet from '@ux/sibling-set';
-import Button from '@ux/button';
-import Tag from '@ux/tag';
+import React, { useEffect, useState } from 'react';
+import { Menu, MenuButton, MenuList, MenuItem, MenuSeparator, MenuGroup } from '@ux/menu';
+
 import { getAllLexicalQueries } from '../../lib/api';
 import example from '../../lib/lexical-search/example-1';
 import Hamburger from '@ux/icon/hamburger';
@@ -25,15 +21,7 @@ function ensureJSONString(obj) {
   }
 }
 
-const OpenModal = ({ onClose, children }) => {
-  return (
-    <Modal onClose={onClose} title='Select Query'>
-      <Box>
-        {children}
-      </Box>
-    </Modal>
-  )
-}
+
 
 const LexicalMenu = ({ onAction }) => {
   const lexicalMenuRef = React.createRef();
@@ -44,63 +32,47 @@ const LexicalMenu = ({ onAction }) => {
     title: ''
   });
   const handleLexicalSelect = (query) => {
-    setModal({ ...modal, show: false });
     onAction({ type: 'load', data: query });
   }
   const handleSelect = (value) => {
-
-    if (value === 'open') {
-      setModal({ ...modal, show: true, action: 'open', title: 'Open Query' });
-    }
     if (value === 'example') {
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
     }
   }
   useEffect(() => {
-    getAllLexicalQueries().then((response) => {
-      console.log(response);
+    getAllLexicalQueries().then((queries) => {
       try {
-        let data = response?.map((d) => {
-          console.log(d);
+        let data = queries?.map((d) => {
           return {
             query_name: d.query_name,
-            query: d.query
+            query: ensureJSONString(d.query)
           }
         }) || [];
         setLexicalQueries(data);
       } catch (e) {
         setLexicalQueries([]);
-
       }
     });
   }, []);
   return (
     <>
-      {modal.show && <OpenModal onClose={() => setModal({ ...modal, show: false })}>
-        {lexicalQueries.length === 0 && <Tag empahsis='neutral' text='No queries found' />}
-        <SiblingSet orientation='vertical' gap='sm'>
-
-          {lexicalQueries.map((query, index) => {
-            return (
-              <Button key={index} size='sm' onClick={() => handleLexicalSelect(query)} design='inline' text={query.query_name} />
-            )
-          })}
-        </SiblingSet>
-      </OpenModal>
-      }
-
-      <Box displayType='box' orientation='horizontal' inlineAlignChildren='end'>
-        <Box blockAlignChildren='end' >
-          <Menu ref={lexicalMenuRef} id='lexical-menu'>
-            <MenuButton icon={<Hamburger />} size='sm' text='' />
-            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
-              <MenuItem valueText={'open'} onSelect={handleSelect}>Open Query </MenuItem>
-              <MenuSeparator />
-              <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
-      </Box>
+      {modal.show && <ConfirmModal onClose={() => setModal({ show: false })} onConfirm={modal.action} title={modal.title} />}
+      <Menu ref={lexicalMenuRef} id='lexical-menu'>
+        <MenuButton icon={<Hamburger />} size='sm' text='' />
+        <MenuList >
+          <MenuGroup label='Open Saved Query'>
+            {lexicalQueries.length === 0 && <MenuItem valueText='no-queries' >No queries found</MenuItem>}
+            {lexicalQueries.map((item, index) => {
+              return (
+                <MenuItem key={index} valueText={item} onSelect={handleLexicalSelect}>{item.query_name}
+                </MenuItem>
+              )
+            })}
+          </MenuGroup>
+          <MenuSeparator />
+          <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
+        </MenuList>
+      </Menu>
     </>
   );
 }

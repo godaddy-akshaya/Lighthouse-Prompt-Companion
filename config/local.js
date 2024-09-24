@@ -61,19 +61,19 @@ module.exports = {
     },
     "validate-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
     "get-all-lexical-queries": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
     "delete-lexical-query": {
       "method": "POST",
-      "url": "https://pc60rtk30g.execute-api.us-west-2.amazonaws.com/gddeploy"
-    },
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    }
   }
 }
