@@ -45,21 +45,29 @@ module.exports = {
       "method": "POST",
       "url": "https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev"
     },
-    gdlh_get_interaction_ids: {
+    "gdlh_get_interaction_ids": {
       "method": "GET",
       "url": "https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev"
     },
-    gdlh_save_interaction_ids: {
+    "gdlh_save_interaction_ids": {
       "method": "POST",
       "url": "https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev"
     },
     "validate-lexical-query": {
       "method": "POST",
-      "url": "https://4qwaataj57.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
     "submit-lexical-query": {
       "method": "POST",
-      "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "get-all-lexical-queries": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "delete-lexical-query": {
+      "method": "POST",
+      "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
   }
 }

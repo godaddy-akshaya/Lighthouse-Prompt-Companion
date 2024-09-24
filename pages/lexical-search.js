@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRef } from 'react';
 import Box from '@ux/box';
 import text from '@ux/text';
@@ -8,160 +8,229 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries } from '../lib/api';
 import Wand from '@ux/icon/wand';
-import Tag from '@ux/tag';
-import ToolTip from '@ux/tooltip';
 import Refresh from '@ux/icon/refresh';
-import Click from '@ux/icon/click';
-import example1 from '../lib/lexical-search/example-2.json';
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
+import DeleteQuery from '../components/lexical-search/delete-query';
+import LexicalMenu from '../components/lexical-search/lexical-menu';
+
+
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
 
-
-
 const FlexTitleAndOptions = ({
-  onClear, onFormat, onExample
+  onClear, onFormat, label
 }) => {
   return (
     <div className='lh-container lh-between'>
-      <text.label visualSize='sm' as='label' text='Query (json)' />
-      <SiblingSet className='push-right' gap='sm' size='sm'>
+      <text.label as='label' text={label} />
+      <SiblingSet className='push-right' gap='sm'>
         <Button size='sm' onClick={onClear} design='inline' text='Clear' icon={<Refresh />} />
-        <Button size='sm' onClick={onExample} design='inline' text='Example' icon={<Click />} />
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
       </SiblingSet>
     </div>
-
   )
 }
-
-const LexicalSearch = () => {
+const LexicalSearch = ({ initialQueries }) => {
   const textInputRef = useRef();
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
+  const [lexicalQueries, setLexicalQueries] = useState(initialQueries);
   const [formModel, setFormModel] = useState({
     query_name: '',
     query: '',
-    queryPlaceholder: '{{"query": {"bool": {"must": [{"match": {"field": "value"}}]}}}}',
+    queryPlaceholder: '',
     validated: false,
     hasErrors: false,
     errorMessage: '',
-    submitted: false
+    submitted: false,
+    formMessage: '',
+    isEdit: false,
+    status: ''
   });
-  const handleUseExample = (e) => {
-    e.preventDefault();
-    setFormModel({
-      ...formModel,
-      query: JSON.stringify(example1, null, 4)
+
+  useEffect(() => {
+    getAllLexicalQueries().then((queries) => {
+      console.log('queries', queries);
+      try {
+        let data = queries?.map((d) => {
+          return {
+            query_name: d.query_name,
+            query: d.query
+          }
+        }) || [];
+        setLexicalQueries(data);
+      } catch (e) {
+        setLexicalQueries([]);
+      }
     });
+  }, []);
+
+  const handleValidation = () => {
+    if (!formModel.query) {
+      setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+      return false;
+    }
+    if (!formModel.query_name) {
+      setBanner({ ...banner, show: true, message: 'Name is required', errorType: 'error' });
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Name is required' });
+      return false;
+    }
+    return true;
+  };
+  const handleMenuAction = (e) => {
+    console.log(e);
+    if (e.type === 'example') {
+      setFormModel({ ...formModel, query: e.data, isEdit: false, query_name: 'Example Query', validated: false });
+    } else {
+      setFormModel({ ...formModel, isEdit: true, query_name: e.data.query_name, query: e.data.query, validated: false });
+
+    }
   };
   const handleClear = () => {
     setFormModel({ ...formModel, query: '' });
   };
-  const handleFormat = () => {
+  const handleError = ({ error }) => {
+    setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
+    setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString(), formMessage: '' });
+  }
+  const handleFormat = (queryModel) => {
     try {
       const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
-      setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '' });
-    } catch (e) {
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString() });
+      setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '', formMessage: 'Query formatted' });
+    }
+    catch (e) {
+      setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString(), formMessage: '' });
     }
   };
   const handleSubmit = (e) => {
-    e.preventDefault();
     if (!formModel.validated) return;
-    if (!formModel.query_name) return setFormModel({ ...formModel, hasErrors: true, message: 'Query Name is required' });
-    if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+    if (!handleValidation()) return;
     setLoading(true);
-    submitLexicalQuery(formModel).then((response) => {
-      console.log(response);
-      setLoading(false);
-      setBanner({ show: true, message: 'Query submitted successfully', type: 'success' });
-      setFormModel({ ...formModel, hasErrors: false, errorMessage: '', submitted: true });
-    }).catch((error) => {
-      setLoading(false);
-
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: JSON.stringify(error), submitted: false });
-    });
+    submitLexicalQuery(formModel)
+      .then((response) => {
+        setLoading(false);
+        try {
+          if (response.toString().includes('Error')) {
+            handleError({ error: response.toString() });
+          } else {
+            setBanner({ ...banner, show: false, message: '', errorType: 'success' });
+            setFormModel({ ...formModel, submitted: true, status: 'Saved' });
+          }
+        } catch (e) {
+          handleError({ error: 'Issue with validation, please reach out to support' });
+        }
+      }).catch((error) => {
+        handleError({ 'error': error?.toString() || 'Need to research this one!' });
+      });
   }
 
   const handleValidate = (e) => {
-    e.preventDefault();
-    if (!formModel.query) return setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
-    if (!formModel.query) return setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
+    if (!handleValidation()) return;
     setLoading(true);
-    validateLexicalQuery(formModel.query).then((response) => {
-      console.log(response);
-      setLoading(false);
-      setBanner({ show: true, message: 'Query is valid', errorType: 'success' });
-      setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
-    }).catch((error) => {
-      console.log(error);
-      setLoading(false);
-      setBanner({ show: true, message: error?.message || 'Bad stuff occurred', errorType: 'error' });
-      setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.message || 'Something bad happenend', validated: false });
-    });
+    try {
+      validateLexicalQuery(formModel.query)
+        .then((response) => {
+          setLoading(false);
+          try {
+            setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '', formMessage: 'Query is valid' });
+            setBanner({ ...banner, show: true, message: 'Query is valid', errorType: 'success' });
+            setTimeout(() => {
+              setBanner({ ...banner, show: false, message: '', errorType: 'error' });
+            }, 3000);
+          } catch (error) {
+            handleError({ error: response });
+          }
+        });
+    } catch (error) {
+      handleError({ 'error': error?.toString() || 'Need to research this one!' });
+    };
   };
   const handleQueryInput = (e) => {
     setFormModel({
       ...formModel, query: e, validated: false
     });
   };
+
   const handleCloseError = (e) => {
-    e.preventDefault();
     setBanner({ show: false, message: '', errorType: 'error' });
   };
+
+  const handleDelete = (e) => {
+    let lex = [...lexicalQueries];
+    let index = lex.findIndex((d) => d.query_name === formModel.query_name);
+    lex.splice(index, 1);
+    setLexicalQueries(lex);
+    setFormModel({ ...formModel, query: '', query_name: '', validated: false, submitted: false, isEdit: false });
+    setBanner({ ...banner, show: true, message: 'Query deleted', errorType: 'success' });
+    setTimeout(() => {
+      setBanner({ ...banner, show: false, message: '', errorType: 'error' });
+    }, 3000);
+  }
+
+
   return (
-    <>
+    <div className='container'>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
-      <Box>
-        <text.h1 as='heading' text={`Lexical Search`} />
-        <text.p as='paragraph' text={headerText} />
-      </Box>
-      {loading && <Box>
-        <Spinner size='md' />
-      </Box>}
-      {!loading &&
-        <div className='lexical-query-page-layout'>
-          <div className='main-column' id='json-data' gap='lg'>
-            <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
-              actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
-            {!formModel.submitted &&
-              <form onSubmit={handleSubmit} id='lexical-form'>
-                <Box blockPadding='md'>
-                  <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e })} />
-                </Box>
-                <Box stretch blockPadding='md'>
-                  <FlexTitleAndOptions onClear={handleClear} onFormat={handleFormat} onExample={handleUseExample} />
-                  <TextInput ref={textInputRef} rows={15} required resize helpMessage={formModel?.validated && <Tag emphasis='success'>Great Job, json looks great. </Tag>}
-                    multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} onChange={handleQueryInput} value={formModel.query} />
-                </Box>
-                <Box blockPadding='lg' blockAlignChildren='end'>
-                  <SiblingSet gap='sm' size='sm'>
-                    <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
-                    <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+      <text.h1 as='heading' text={`Lexical Search`} />
+      <text.p as='paragraph' text={headerText} />
+      <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
+        actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
+      {formModel.submitted &&
+        <Box blockPadding='lg'>
+          <BannerMessage
+            showMessage={true}
+            message={`${formModel.query_name} ${formModel.status} `}
+            handleCloseError={() => window.location.reload()}
+            userMessageType='success' />
+        </Box>
+      }
+      {loading &&
+        <Box>
+          <Spinner size='md' />
+        </Box>}
+      {!loading && !formModel.submitted &&
+        <>
+          <form onSubmit={handleSubmit} id='lexical-form'>
+            {lexicalQueries && <Box className='lh-container lh-end'>
+              <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />
+            </Box>
+            }
+
+            <Box blockPadding='md'>
+              <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
+            </Box>
+            <Box stretch blockPadding='md'>
+              <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
+              <TextInput ref={textInputRef} rows={15} required resize
+                multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
+            </Box>
+            <Box stretch blockPadding='lg'>
+              <SiblingSet gap='sm' stretch>
+                <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
+                <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+              </SiblingSet>
+              {formModel.isEdit &&
+                <Box gap='lg' blockPadding='md'>
+                  <SiblingSet gap='sm' stretch>
+                    <DeleteQuery queryId={formModel.query_name} onDelete={handleDelete} />
                   </SiblingSet>
                 </Box>
-              </form>
-            }
-            {formModel.submitted &&
-              <Box blockPadding='lg'>
-                <BannerMessage
-                  showMessage={true}
-                  message={`Query ${formModel.query_name} submitted successfully`}
-                  handleCloseError={() => window.location.reload()}
-                  userMessageType='success' />
-              </Box>
-            }
-          </div>
-          <div className='secondary-column'>
-          </div>
-        </div >
+              }
+            </Box>
+          </form>
+        </>
       }
-    </>
+    </div>
   );
 }
 
+
+
+
 export default LexicalSearch;
+
+
