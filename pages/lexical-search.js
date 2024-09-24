@@ -85,13 +85,9 @@ const LexicalSearch = () => {
     }
   };
   const handleSubmit = (e) => {
-    e.preventDefault();
     if (!formModel.validated) return;
     if (!handleValidation()) return;
     setLoading(true);
-    setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
-    setBanner({ ...banner, show: false, message: '', errorType: 'error' });
-
     submitLexicalQuery(formModel)
       .then((response) => {
         setLoading(false);
@@ -110,19 +106,15 @@ const LexicalSearch = () => {
   }
 
   const handleValidate = (e) => {
-    e.preventDefault();
     if (!handleValidation()) return;
     setLoading(true);
-    setFormModel({ ...formModel, hasErrors: false, errorMessage: '' });
-    setBanner({ ...banner, show: false, message: '', errorType: 'error' });
     try {
       validateLexicalQuery(formModel.query)
         .then((response) => {
-
+          setLoading(false);
           if (response.toString().includes('Error')) {
             handleError({ error: response });
           } else {
-            setLoading(false);
             setFormModel({ ...formModel, validated: true, hasErrors: false, errorMessage: '' });
             setBanner({ ...banner, show: true, message: 'Query is valid', errorType: 'success' });
           }
@@ -136,10 +128,7 @@ const LexicalSearch = () => {
       ...formModel, query: e, validated: false
     });
   };
-  useEffect(() => {
-    setLoading(false);
 
-  }, []);
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
   };
