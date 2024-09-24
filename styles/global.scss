@@ -1,3 +1,6 @@
+@import '@ux/icon/hamburger/index.css';
+@import '@ux/icon/folder-open/index.css';
+
 /*
 Use this file to define your global styles.
 
@@ -73,13 +76,6 @@ it is recommended to import those directly to `pages/_app.js`
 
 .lh-table-full-view-with-scroll {
 
-    // thead { 
-    //     display: block !important; 
-    //     position: sticky !important; 
-    //     top: 0 !important; 
-    //     background-color: white !important; 
-    //     table-layout: auto !important;
-    // }
     tbody thead {
         display: block !important;
         max-height: 100vh !important;
@@ -97,7 +93,7 @@ it is recommended to import those directly to `pages/_app.js`
 }
 
 .lh-filter-card {
-    margin-bottom: 16px !important;
+    margin-bottom: 8px !important;
 
     .lh-title {
         margin-bottom: 0px !important;

@@ -1,4 +1,4 @@
-import React, { use, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Block, Lockup } from '@ux/layout';
 import Card from '@ux/card';
 import Papa from 'papaparse';
@@ -136,7 +136,6 @@ const FilterMenu = ({ onChange, OnCancel }) => {
                         <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
                         <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
                             <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
-                            // UXCORE TODO: MenuSeperator has been renamed to MenuSeparator. Make any other adjustments needed
                             <MenuSeparator />
                             <MenuGroup label='Saved Lists'>
                                 {savedFilters.map((filter) => <MenuItem onSelect={handleLoadFilter} key={filter}>{filter}</MenuItem>)}

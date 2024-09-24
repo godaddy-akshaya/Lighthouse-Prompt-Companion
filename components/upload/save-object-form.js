@@ -30,7 +30,6 @@ const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
             {!hasBeenSaved &&
                 <>
                     <Checkbox id='save-filter' name='save-filter' checked={toSave} onChange={handleCheckbox} label='Save this upload?' />
-
                     {toSave &&
                         <Block orienatation='vertical'>
                             <Lockup>

@@ -1,5 +1,5 @@
 # Golden container - only the best
-FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.18
+FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.19
 
 ARG NPM_AUTH_TOKEN
 ARG NODE_ENV

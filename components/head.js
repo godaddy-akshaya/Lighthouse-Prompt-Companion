@@ -24,7 +24,8 @@ const Head = (props) => {
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
           active: props?.route === 'status' ? true : false
-        }, {
+        },
+        {
           caption: 'Lexical Search',
           'key': '3',
           'href': '/lexical-search',
@@ -50,6 +51,5 @@ Head.propTypes = {
   description: PropTypes.string,
   route: PropTypes.string
 };
-
 
 export default Head;
