@@ -11,9 +11,6 @@ const localHttpsConfig = {
     cert: [
       'local.c3.int.dev-gdcorp.tools.crt'
     ]
-  },
-  winston: {
-    level: 'warning',
   }
 };
 // The last element is the name of the api endpoint
