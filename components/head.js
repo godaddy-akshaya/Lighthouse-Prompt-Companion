@@ -24,6 +24,14 @@ const Head = (props) => {
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
           active: props?.route === 'status' ? true : false
+        },
+        {
+          caption: 'Lexical Search',
+          'key': '3',
+          'href': '/lexical-search',
+          'eid': 'pep.prompt-ui.nav.lexical-search.click',
+          'icon': 'search',
+          'active': props?.route === 'search' ? true : false
         }
       ]);
     });
@@ -42,12 +50,6 @@ Head.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
   route: PropTypes.string
-};
-
-Head.defaultProps = {
-  title: 'Godaddy Lighthouse',
-  description: 'Godaddy Lighthouse',
-  route: ''
 };
 
 export default Head;

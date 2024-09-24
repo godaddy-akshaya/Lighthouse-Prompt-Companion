@@ -15,22 +15,14 @@ import '@ux/icon/wand/index.css';
 import '@ux/icon/play/index.css';
 import '@ux/icon/help/index.css';
 import '@ux/checkbox/styles';
-import Table from '@ux/table';
 import Modal from '@ux/modal';
 import '@ux/modal/styles';
 import '@ux/table/styles';
-import Search from '@ux/search';
 import session from '../lib/session';
 import Copy from '@ux/icon/copy';
 import { getStatus, cancelJob } from '../lib/api';
 import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
-import Tooltip from '@ux/tooltip';
-
-const tooltipContent = (
-    <h1>h</h1>
-)
-
 const copyButton = (text) => {
     copyToClipBoard(text);
 }
@@ -111,18 +103,20 @@ export const RunStatusPage = ({ authDetails }) => {
                     <Lockup >
                         <text.h3 text={'Run Status'} as='heading' />
                     </Lockup>
-                    <Lockup></Lockup>
-                    {/* <Search
+                    <Lockup>
+                        {/* <Search
                         id='my-search'
                         style={{ 'width': '25%' }}
                         placeholder='Search for Run ID....'
                     /> */}
+                    </Lockup>
+
                 </div>
                 <Card stretch={true} id='results' title='Results'>
                     <Module>
                         {tableLoading && <text.p text='Loading...' />}
                         {!tableLoading &&
-                            <Table
+                            <table
                                 className='table table-hover'
                                 sortable={true}>
                                 <thead>
@@ -155,7 +149,7 @@ export const RunStatusPage = ({ authDetails }) => {
                                         </tr>
                                     )) || null}
                                 </tbody>
-                            </Table>
+                            </table>
                         }
                     </Module>
                 </Card>

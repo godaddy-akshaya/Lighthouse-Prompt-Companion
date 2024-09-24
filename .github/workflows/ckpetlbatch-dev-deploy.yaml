@@ -1,16 +1,12 @@
-name: Lighthouse UI Build-Deploy
+name: Dev Deploy ckpetlbatch
 
 on:
-  push:
-    branches: [dev]
-  pull_request:
-    branches: [dev]
   workflow_dispatch:
 jobs:
   build_publish_promote:
     runs-on:
       labels: self-hosted
-      group: 7416-therandomdrunner
+      group: 6429-hadoopmigratione
 
     steps:
       - name: Checkout Repository
@@ -27,31 +23,39 @@ jobs:
 
       - name: Golden Container Registry Login
         run: |
-          aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.6.1-alpine-3.18 -u AWS --password-stdin
-        env:
-          NPM_AUTH_TOKEN: /Katana/Secrets/therandomd/lighthouse-ui/_katana/NPM_AUTH_TOKEN
+          aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
       - name: Build Container
         run: |
-          docker build -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} .
-
+          docker build --build-arg NPM_AUTH_TOKEN=${{secrets.NPM_TOKEN}} --build-arg THE_ENV=development -t ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }} .
+      - name: Set up build vars for metadata
+        run: |
+          echo "BUILT_SHORT_SHA=$(git rev-parse HEAD | cut -c1-8)" | tee -a $GITHUB_ENV
+          echo "BUILT_BRANCH=$(git branch --show-current)" | tee -a $GITHUB_ENV
+          echo "BUILT_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" | tee -a $GITHUB_ENV
       - id: katana-publish
         name: Publish Katana Artifact
         uses: gdcorp-actions/katana-publish-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: ${{ steps.katana-app.outputs.namespace }}
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
           image_name: ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }}
           artifact_kind: ecs
           artifact_options_json: |
             {
-              "ports": [8080,8443]
+              "ports": [8080,8443],
+              "healthcheckPath": "/healthcheck",
+              "environmentVariables": [
+                { "name": "BUILT_SHORT_SHA", "value": "${{ env.BUILT_SHORT_SHA }}" },
+                { "name": "BUILT_BRANCH", "value": "${{ env.BUILT_BRANCH }}" },
+                { "name": "BUILT_AT", "value": "${{ env.BUILT_AT }}" } 
+              ]
             }
       - name: Promote to dev-private Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
-          namespace: ${{ steps.katana-app.outputs.namespace }}
+          namespace: ckpetlbatch
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private
+          environment: dev-private-1
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
