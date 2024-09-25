@@ -8,13 +8,14 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
 import Spinner from '@ux/spinner';
 import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
+import ConfirmModal from '../components/confirm-modal';
 
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
@@ -38,6 +39,11 @@ const LexicalSearch = ({ initialQueries }) => {
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [lexicalQueries, setLexicalQueries] = useState(initialQueries);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    message: '',
+    queryId: ''
+  });
   const [formModel, setFormModel] = useState({
     query_name: '',
     query: '',
@@ -153,30 +159,34 @@ const LexicalSearch = ({ initialQueries }) => {
     setFormModel({
       ...formModel, query: e, validated: false
     });
-  };
-
+  }
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
   };
 
-  const handleDelete = (e) => {
-    let lex = [...lexicalQueries];
-    let index = lex.findIndex((d) => d.query_name === formModel.query_name);
-    lex.splice(index, 1);
-    setLexicalQueries(lex);
-    setFormModel({ ...formModel, query: '', query_name: '', validated: false, submitted: false, isEdit: false });
-    setBanner({ ...banner, show: true, message: 'Query deleted', errorType: 'success' });
-    setTimeout(() => {
-      setBanner({ ...banner, show: false, message: '', errorType: 'error' });
-    }, 3000);
+  const handleDelete = () => {
+    const { queryId } = confirmModal;
+    deleteLexicalQuery(queryId).then((data) => {
+      if (data) {
+        let lex = [...lexicalQueries];
+        let index = lex.findIndex((d) => d.query_name === formModel.query_name);
+        lex.splice(index, 1);
+        setLexicalQueries(lex);
+        setConfirmModal({ ...confirmModal, show: false, queryId: '' });
+        setFormModel({ ...formModel, query: '', query_name: '', validated: false, submitted: false, isEdit: false });
+        setBanner({ ...banner, show: true, message: 'Query deleted', errorType: 'success' });
+        setTimeout(() => {
+          setBanner({ ...banner, show: false, message: '', errorType: 'error' });
+        }, 2000);
+      }
+    });
   }
-
-
   return (
     <div className='container'>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
       <text.h1 as='heading' text={`Lexical Search`} />
       <text.p as='paragraph' text={headerText} />
+      {confirmModal.show && <ConfirmModal onConfirm={handleDelete} message='Are you sure' onCancel={() => setConfirmModal({ ...confirmModal, show: false })} title='Delete Query' />}
       <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
         actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
       {formModel.submitted &&
@@ -199,7 +209,6 @@ const LexicalSearch = ({ initialQueries }) => {
               <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />
             </Box>
             }
-
             <Box blockPadding='md'>
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
             </Box>
@@ -208,18 +217,20 @@ const LexicalSearch = ({ initialQueries }) => {
               <TextInput ref={textInputRef} rows={15} required resize
                 multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
             </Box>
-            <Box stretch blockPadding='lg'>
-              <SiblingSet gap='sm' stretch>
+            <Box className='lh-container lh-between' stretch >
+
+              <SiblingSet stretch gap='sm' >
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
-              {formModel.isEdit &&
-                <Box gap='lg' blockPadding='md'>
-                  <SiblingSet gap='sm' stretch>
-                    <DeleteQuery queryId={formModel.query_name} onDelete={handleDelete} />
-                  </SiblingSet>
-                </Box>
-              }
+
+
+              <Box stretch style={{ 'textAlign': 'right' }}>
+                {formModel.isEdit &&
+                  <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
+                }
+              </Box>
+
             </Box>
           </form>
         </>
