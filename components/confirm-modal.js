@@ -1,20 +1,21 @@
 import React from 'react';
 import Modal from '@ux/modal';
-import Box from '@ux/box';
+import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
-import Card from '@ux/card';
+import Box from '@ux/box';
+import text from '@ux/text';
 
-
-function ConfirmModal({ onClose, onConfirm, title, children }) {
+const ConfirmModal = ({ title, message, onConfirm, onCancel }) => {
   return (
-    <Modal onClose={onClose} title={title}>
-      <Card id='confirm-modal' space={{ block: 'lg', inline: 'lg' }}>
-        <Box blockPadding='lg' gap='lg'>
-          {children}
-          <Button size='sm' onClick={onConfirm}>Confirm</Button>
-          <Button size='sm' onClick={onCancel} text='Cancel' />
-        </Box>
-      </Card>
+    <Modal onClose={onCancel} title={title}>
+      <text.label as='label' text={message} />
+      <Box id='confirm-modal' space={{ block: 'lg', inline: 'lg' }}>
+
+        <SiblingSet gap='md'>
+          <Button size='sm' onClick={onConfirm} text='Yes' />
+          <Button size='sm' onClick={onCancel} text='No' />
+        </SiblingSet>
+      </Box>
     </Modal>
   )
 }
