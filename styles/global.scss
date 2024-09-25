@@ -22,19 +22,6 @@ it is recommended to import those directly to `pages/_app.js`
     line-height: normal;
 }
 
-.lexical-query-page-layout {
-    display: grid !important;
-    grid-auto-columns: 2fr 1fr !important;
-
-    .main-column {
-        grid-column: 1 / 2 !important;
-    }
-
-    .secondary-column {
-        grid-column: 2 / 3 !important;
-    }
-}
-
 .lexical-query-element {
     padding-bottom: 5px !important;
 }
