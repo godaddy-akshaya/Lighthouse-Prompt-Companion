@@ -49,10 +49,16 @@ COPY --chown=worker ./manifest.xml /app/manifest.xml
 COPY --chown=worker ./docker-start.sh /app/docker-start.sh
 COPY --chown=worker ./start-me-first.js /app/start-me-first.js
 
+<<<<<<< HEAD
+
+RUN gasket build --env development
+ENV NODE_ENV=development
+=======
 # Build the application
 RUN echo "Building the application"
 RUN echo "THE_ENV: $THE_ENV"
 RUN if [ "$THE_ENV" = "development" ] ; then npm run build:dev ; else npm run build ; fi
+>>>>>>> 7e30b89c03455fba82db6a66eaab4a88aa9e798e
 
 #CMD ["/bin/sh", "/app/docker-start.sh $THE_ENV"]
 CMD ["npm", "run", "start"]

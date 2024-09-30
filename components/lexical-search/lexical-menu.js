@@ -20,9 +20,9 @@ const LexicalMenu = ({ onAction, queries }) => {
       <Menu id='lexical-menu'>
         <MenuButton icon={<Hamburger />} size='sm' text='Lexical Menu' />
         <MenuList >
-          <MenuGroup label='Open Saved Query'>
+          <MenuGroup className='open-save-menu-group' label='Open Saved Query'>
             {!queries && <MenuItem valueText='no-queries' >No queries found</MenuItem>}
-            {queries?.map((item, index) => {
+            {queries?.sort((a, b) => a.query_name?.localeCompare(b.query_name)).map((item, index) => {
               return (
                 <MenuItem key={index} valueText={item} onSelect={handleLexicalSelect}>{item.query_name}
                 </MenuItem>
