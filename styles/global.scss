@@ -179,6 +179,12 @@ it is recommended to import those directly to `pages/_app.js`
     margin: 16px;
 }
 
+// Menu styles
+.open-save-menu-group {
+    max-height: 300px !important;
+    overflow-y: auto;
+}
+
 .grey-card {
     background-color: var(--ux-1vw9arb, #D4DBE0) !important;
 }

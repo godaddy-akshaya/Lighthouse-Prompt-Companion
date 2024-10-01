@@ -7,7 +7,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  extends: ['eslint:recommended', 'godaddy', 'plugin:prettier/recommended'],
+  extends: ['eslint:recommended', 'godaddy'],
   rules: {
     camelcase: 'off',
     'import/no-unresolved': [2, { commonjs: true }],
