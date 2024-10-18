@@ -69,7 +69,12 @@ module.exports = {
       "method": "POST",
       "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
     },
+    "dynamic-model-list": {
+      "method": "GET",
+      "url": "https://2yw3f4076j.execute-api.us-west-2.amazonaws.com/default/get_gdlh_model_list"
+    }
   }
 }
+
 
 
