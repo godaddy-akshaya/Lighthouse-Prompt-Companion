@@ -21,8 +21,8 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [prompt, setPrompt] = useState('');
   const [evaluationPrompt, setEvaluationPrompt] = useState('');
   const [includeEval, setIncludeEval] = useState(false);
-  const [promptModel, setPromptModel] = useState('claude-instant-v1');
-  const [evaluationModel, setEvaluationModel] = useState('claude-instant-v1');
+  const [promptModel, setPromptModel] = useState(modelList[0]?.model || '');
+  const [evaluationModel, setEvaluationModel] = useState(modelList[0]?.model || '');
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
   function insertAction(e) {
@@ -95,9 +95,11 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         </Block>
         <Block>
           <Lockup>
-            <SelectInput onChange={handleModelChange} id='model' name='model' label='Model'>
+            <SelectInput onChange={handleModelChange} defaultValue={promptModel} id='model' name='model' label='Model'>
               {modelList.map((item, index) => {
-                return <option key={`f${index}`} value={item.model}>{item.model_name}</option>
+                return <option key={`fn${index}`} value={item.model}>
+                  {item.model_name}  ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
+                </option>
               })}
 
             </SelectInput>
@@ -130,9 +132,11 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
               {includeEval ?
                 <div className="eval m-t-1">
                   <text.label as='label' text='Evaluation Parameters' />
-                  <SelectInput onChange={handleEvalModelChange} id='model-select-eval' className='m-t-1' name='model-select-eval' label='Model'>
+                  <SelectInput onChange={handleEvalModelChange} id='model-select-eval' defaultValue={evaluationModel} className='m-t-1' name='model-select-eval' label='Model'>
                     {modelList.map((item, index) => {
-                      return <option key={`f${index}`} value={item.model}>{item.model_name}</option>
+                      return <option key={`fn${index}`} value={item.model}>
+                        {item.model_name} - ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
+                      </option>
                     })}
 
                   </SelectInput>
