@@ -2,6 +2,11 @@ name: UX Dev Private Build and Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev-private-ssg'
 jobs:
   build_publish_promote:
     runs-on:
@@ -84,5 +89,5 @@ jobs:
           jwt: ${{ steps.katana-auth.outputs.jwt }}
           namespace: ${{ steps.katana-app.outputs.namespace }}
           app: ${{ steps.katana-app.outputs.app }}
-          environment: dev-private-ssg
+          environment: ${{ github.event.inputs.environment }}
           artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
