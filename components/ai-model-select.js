@@ -24,9 +24,9 @@ const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
 
   return (
     <>
-      <SelectInput onChange={handleModelChange} helpMessage={`input rate: ${selectedValue.input_token_rate} /
+      <SelectInput onChange={handleModelChange} helpMessage={selectedValue ? `input rate: ${selectedValue.input_token_rate} /
       output rate: ${selectedValue.output_token_rate} /
-      max tokens ${selectedValue?.max_tokens}`}
+      max tokens ${selectedValue?.max_tokens}` : ''}
         defaultValue={defaultValue} id='model' name='model' label='Model'>
         <option value=''>Select Model</option>
         {modelList.map((item, index) => {
