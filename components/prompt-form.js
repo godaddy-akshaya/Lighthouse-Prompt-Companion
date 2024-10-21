@@ -125,7 +125,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
               {includeEval ?
                 <div className="eval m-t-1">
                   <text.label as='label' text='Evaluation Parameters' />
-                  <AiModelSelect id='model-select-eval' name='model-select-eval' label='Model' modelList={modelList} onChange={handleEvalModelChange} defaultValue={evaluationModel} />
+                  <AiModelSelect id='model-select-eval' className='m-b-1' name='model-select-eval' label='Model' modelList={modelList} onChange={handleEvalModelChange} defaultValue={evaluationModel} />
                   <Menu id='my-menu-for-eval' className='m-t-1'>
                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
                     <MenuList className='lh-menu' design='primary'>
