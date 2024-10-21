@@ -8,38 +8,33 @@ const AiModelMenuItem = ({ item, index }) => {
   return (
     <>
       <text.label as='label' text={item.model_name} /><br />
-      <text.span as='caption' text={`Input Token Rate ${item.input_token_rate != null ? (item.input_token_rate * 1).toFixed(4) : '-'}`} /> <br />
-      <text.span as='caption' text={`Output Token Rate ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}`} /> <br />
-      <text.span as='caption' text={`Max Tokens ${item.max_tokens}`} />
+
     </>
   )
 }
 
-const AiModelSelect = ({ modelList, onChange, defaultValue = 'Model' }) => {
+const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
   const [selectedValue, setSelectedValue] = React.useState(defaultValue);
 
   const handleModelChange = (e) => {
-    setSelectedValue(e);
-    onChange(e.model);
+    const _model = JSON.parse(e);
+    setSelectedValue(JSON.parse(e));
+    onChange(_model.model);
   }
 
   return (
     <>
-      <Menu id='my-menu' label='hi' onSelect={handleModelChange}>
-        <MenuButton buttonAs='select' design='secondary' text={selectedValue && <AiModelMenuItem item={selectedValue} index={0} /> || 'Model'} />
-        <MenuList>
-          {modelList.map((item, index) =>
-            <MenuItem key={`fnm${index}`} valueText={item} onSelect={handleModelChange}><AiModelMenuItem key={`fn${index}`} item={item} index={index} /></MenuItem>
-          )}
-        </MenuList>
-      </Menu>
-      {/* <SelectInput onChange={handleModelChange} defaultValue={defaultValue} id='model' name='model' label='Model'>
+      <SelectInput onChange={handleModelChange} helpMessage={`input rate: ${selectedValue.input_token_rate} /
+      output rate: ${selectedValue.output_token_rate} /
+      max tokens ${selectedValue?.max_tokens}`}
+        defaultValue={defaultValue} id='model' name='model' label='Model'>
+        <option value=''>Select Model</option>
         {modelList.map((item, index) => {
-          return <option key={`fn${index}`} value={item.model}>
-            {item.model_name} - ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
+          return <option key={`fn${index}`} value={JSON.stringify(item)}>
+            {item.model_name}
           </option>
         })}
-      </SelectInput> */}
+      </SelectInput>
     </>
 
   );

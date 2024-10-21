@@ -149,6 +149,7 @@ const PromptBuilder = ({ authDetails }) => {
           <Spinner />
         </div>
       }
+      {modelList?.length > 0 && <PromptForm onSubmit={handleOnSubmit} numOfTransactions={54} modelList={modelList} />}
       {showTableSelect && <TableSelect />}
       {
         !isLoading && !showTableSelect && <>
