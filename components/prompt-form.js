@@ -6,7 +6,7 @@ import text from '@ux/text';
 import Card from '@ux/card';
 import Box from '@ux/box';
 import Button from '@ux/button';
-import SelectInput from '@ux/select-input';
+import AiModelSelect from './ai-model-select';
 import Checkbox from '@ux/checkbox';
 import Tag from '@ux/tag';
 import Add from '@ux/icon/add';
@@ -21,8 +21,8 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [prompt, setPrompt] = useState('');
   const [evaluationPrompt, setEvaluationPrompt] = useState('');
   const [includeEval, setIncludeEval] = useState(false);
-  const [promptModel, setPromptModel] = useState(modelList[0]?.model || '');
-  const [evaluationModel, setEvaluationModel] = useState(modelList[0]?.model || '');
+  const [promptModel, setPromptModel] = useState(null);
+  const [evaluationModel, setEvaluationModel] = useState('');
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
   function insertAction(e) {
@@ -95,14 +95,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         </Block>
         <Block>
           <Lockup>
-            <SelectInput onChange={handleModelChange} defaultValue={promptModel} id='model' name='model' label='Model'>
-              {modelList.map((item, index) => {
-                return <option key={`fn${index}`} value={item.model}>
-                  {item.model_name}  ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
-                </option>
-              })}
-
-            </SelectInput>
+            <AiModelSelect id='model' name='model' label='Model' modelList={modelList} onChange={handleModelChange} defaultValue={promptModel} selectedValue={promptModel} />
           </Lockup>
           <Lockup>
             <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
@@ -132,15 +125,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
               {includeEval ?
                 <div className="eval m-t-1">
                   <text.label as='label' text='Evaluation Parameters' />
-                  <SelectInput onChange={handleEvalModelChange} id='model-select-eval' defaultValue={evaluationModel} className='m-t-1' name='model-select-eval' label='Model'>
-                    {modelList.map((item, index) => {
-                      return <option key={`fn${index}`} value={item.model}>
-                        {item.model_name} - ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
-                      </option>
-                    })}
-
-                  </SelectInput>
-
+                  <AiModelSelect id='model-select-eval' name='model-select-eval' label='Model' modelList={modelList} onChange={handleEvalModelChange} defaultValue={evaluationModel} />
                   <Menu id='my-menu-for-eval' className='m-t-1'>
                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
                     <MenuList className='lh-menu' design='primary'>

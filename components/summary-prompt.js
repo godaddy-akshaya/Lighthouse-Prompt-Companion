@@ -5,8 +5,8 @@ import Modal from '@ux/modal';
 import { Block, Lockup } from '@ux/layout';
 import { getGuid } from '../lib/utils';
 import TextInput from '@ux/text-input';
-import SelectInput from '@ux/select-input';
 import Add from '@ux/icon/add';
+import AiModelSelect from './ai-model-select';
 
 export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, eventOpen, eventCancel, modelList = [] }) {
   const [prompt, setPrompt] = useState('');
@@ -75,18 +75,10 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
       <Block>
         {modelList.length > 0 &&
-          <SelectInput defaultValue={model} onChange={(e) => { setModel(e) }} id='model' name='model' label='Model'>
-            {modelList.map((item, index) => {
-              return <option key={`fn${index}`} value={item.model}>
-                {item.model_name} - ${item.output_token_rate != null ? (item.output_token_rate * 1).toFixed(4) : '-'}
-              </option>
-            })}
-          </SelectInput>
+          <AiModelSelect modelList={modelList} onChange={setModel} defaultValue={model} id='model' name='model' />
         }
         <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun.toString()} defaultValue={count?.toString()} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-
         <Button text='Insert' icon={<Add />} design='secondary' value='concatenation_of_responses' onClick={insertAction} />
-
         <TextInput aria-required required={true} id='summary-prompt-input' errorMessage={promptErrorMessage} label='Prompt' className='m-t-1' name='prompt' onChange={handlePrompt} value={prompt} multiline size={10} />
       </Block>
     </Modal>
@@ -96,6 +88,5 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
       <Button onClick={() => { eventOpen(true) }} text='Create Summary Prompt' icon={<CreateForm />} />
       {isModalOpen && modal}
     </>
-
   )
 };

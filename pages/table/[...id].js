@@ -30,7 +30,7 @@ const PromptBuilder = ({ authDetails }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
   const [numOfTransactions, setNumOfTransactions] = useState();
-  const [modelList, setModelList] = useState([]);
+  const [modelList, setModelList] = useState(null);
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [showTableSelect, setShowTableSelect] = useState(false);
   const [isPromptVisible, setIsPromptVisible] = useState(false);
@@ -149,7 +149,7 @@ const PromptBuilder = ({ authDetails }) => {
           <Spinner />
         </div>
       }
-
+      {modelList && <PromptForm onSubmit={handleOnSubmit} numOfTransactions={400} modelList={modelList} />}
       {showTableSelect && <TableSelect />}
       {
         !isLoading && !showTableSelect && <>
@@ -195,15 +195,11 @@ const PromptBuilder = ({ authDetails }) => {
                 }
 
               </Block>
-
             </TwoColumnLayout>
-
-
           </Block>
         </>
       }
     </>
   );
 }
-
 export default PromptBuilder;
