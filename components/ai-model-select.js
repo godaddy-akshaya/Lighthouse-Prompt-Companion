@@ -1,17 +1,7 @@
 import React from 'react';
 import SelectInput from '@ux/select-input';
-import { Menu, MenuButton, MenuList, MenuItem, MenuGroup, MenuSeperator } from '@ux/menu';
 import text from '@ux/text';
 import '@ux/menu/styles';
-
-const AiModelMenuItem = ({ item, index }) => {
-  return (
-    <>
-      <text.label as='label' text={item.model_name} /><br />
-
-    </>
-  )
-}
 
 const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
   const [selectedValue, setSelectedValue] = React.useState(defaultValue);
@@ -24,8 +14,8 @@ const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
 
   return (
     <>
-      <SelectInput onChange={handleModelChange} helpMessage={selectedValue ? `input rate: ${selectedValue.input_token_rate} /
-      output rate: ${selectedValue.output_token_rate} /
+      <SelectInput onChange={handleModelChange} helpMessage={selectedValue ?
+        `input rate: ${selectedValue.input_token_rate} / output rate: ${selectedValue.output_token_rate} /
       max tokens ${selectedValue?.max_tokens}` : ''}
         defaultValue={defaultValue} id='model' name='model' label='Model'>
         <option value=''>Select Model</option>
@@ -39,5 +29,4 @@ const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
 
   );
 }
-
 export default AiModelSelect;
