@@ -7,136 +7,139 @@ import { getResultsByRunId } from '../../lib/api';
 import Table from '@ux/table-legacy';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
-import { Module, Block } from '@ux/layout';
 import text from '@ux/text';
-import Alert from '@ux/alert';
 import SiblingSet from '@ux/sibling-set';
 import SummaryPrompt from '../../components/summary-prompt';
-import { submitSummaryPromptJob } from '../../lib/api';
+import { submitSummaryPromptJob, getModelList } from '../../lib/api';
 import Button from '@ux/button';
 import DownloadButton from '../../components/download-button';
 import { BannerMessage } from '../../components/banner-message';
 
-
 const ViewPage = ({ authDetails }) => {
-    if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
-    const [tableLoading, setTableLoading] = useState(true);
-    const router = useRouter();
-    const [data, setData] = useState({ headers: [], dataSet: [] });
-    const [isSummaryPromptOpen, setIsSummaryPromptOpen] = useState(false);
-    const [showUserMessage, setShowUserMessage] = useState(false);
-    const [userMessage, setUserMessage] = useState('');
-    const [userMessageType, setUserMessageType] = useState('info');
-    const [routeParams, setRouteParams] = useState({ run_id: '0' });
+  if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
+  const [tableLoading, setTableLoading] = useState(true);
+  const router = useRouter();
+  const [data, setData] = useState({ headers: [], dataSet: [] });
+  const [isSummaryPromptOpen, setIsSummaryPromptOpen] = useState(false);
+  const [showUserMessage, setShowUserMessage] = useState(false);
+  const [userMessage, setUserMessage] = useState('');
+  const [userMessageType, setUserMessageType] = useState('info');
+  const [routeParams, setRouteParams] = useState({ run_id: '0' });
+  const [modelList, setModelList] = useState([]);
 
 
-    const handleCancelSummaryPrompt = () => {
-        setIsSummaryPromptOpen(false);
-    }
-    const handleSubmitSummaryPrompt = (formData) => {
-        submitSummaryPromptJob(formData).then((data) => {
-            setIsSummaryPromptOpen(false);
-            if (data?.error) {
-                setUserMessage(data.error);
-                setUserMessageType('error');
-                setShowUserMessage(true);
-                return;
-            } else {
-                setUserMessage('Summary Prompt Job Submitted Successfully');
-                setUserMessageType('success');
-                setShowUserMessage(true);
-            }
+  const handleCancelSummaryPrompt = () => {
+    setIsSummaryPromptOpen(false);
+  }
+  const handleSubmitSummaryPrompt = (formData) => {
+    submitSummaryPromptJob(formData).then((data) => {
+      setIsSummaryPromptOpen(false);
+      if (data?.error) {
+        setUserMessage(data.error);
+        setUserMessageType('error');
+        setShowUserMessage(true);
+        return;
+      } else {
+        setUserMessage('Summary Prompt Job Submitted Successfully');
+        setUserMessageType('success');
+        setShowUserMessage(true);
+      }
+    });
+  };
+  function convertToTitleCase(text) {
+    return text
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  const handleCloseError = () => {
+    setShowUserMessage(false);
+  }
+  useEffect(() => {
+    if (router.isReady) {
+      console.log(router.query?.id[0] || '0');
+      setRouteParams({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
+      setTableLoading(true);
+      getResultsByRunId(router.query?.id[0] || 0).then((data) => {
+        let headers = data?.shift();
+        headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
+        let dataSet = data.map((value, index) => {
+          let obj = {};
+          headers?.forEach((header, index) => {
+            obj[header] = value?.Data[index]?.VarCharValue;
+          });
+          return obj;
         });
-    };
-    function convertToTitleCase(text) {
-        return text
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+        setData({ headers, dataSet });
+        getModelList().then((data) => setModelList(data));
+        setTableLoading(false);
+      })
     }
-    const handleCloseError = () => {
-        setShowUserMessage(false);
-    }
-    useEffect(() => {
-        if (router.isReady) {
-            console.log(router.query?.id[0] || '0');
-            setRouteParams({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
-            setTableLoading(true);
-            getResultsByRunId(router.query?.id[0] || 0).then((data) => {
-                let headers = data?.shift();
-                headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
-                let dataSet = data.map((value, index) => {
-                    let obj = {};
-                    headers?.forEach((header, index) => {
-                        obj[header] = value?.Data[index]?.VarCharValue;
-                    });
-                    return obj;
-                });
-                setData({ headers, dataSet });
-                setTableLoading(false);
-            })
-        }
 
-    }, [router.isReady, router.query]);
+  }, [router.isReady, router.query]);
 
-    return (
-        <>
-            <Head title='GoDaddy Lighthouse - Results' route='status' />
-            {showUserMessage &&
-                <BannerMessage showMessage={showUserMessage} message={userMessage} userMessageType={userMessageType} handleCloseError={handleCloseError} />
-            }
-            <text.h3 text='Results' as='heading' />
-            <div className='lh-container lh-b'>
-                <div>
-                    <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
-                </div>
-                <div>
-                    {!tableLoading > 0 &&
-                        <SiblingSet gap={'sm'}>
-                            <SummaryPrompt runId={routeParams.run_id} count={data?.dataSet?.length || 0} isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)} eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt} />
-                            <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
+  return (
+    <>
+      <Head title='GoDaddy Lighthouse - Results' route='status' />
+      {showUserMessage &&
+        <BannerMessage showMessage={showUserMessage} message={userMessage} userMessageType={userMessageType} handleCloseError={handleCloseError} />
+      }
+      <text.h3 text='Results' as='heading' />
+      <div className='lh-container lh-b'>
+        <div>
+          <text.span text={`Run Id: ${routeParams.run_id}`} as='caption' />
+        </div>
+        <div>
+          {!tableLoading > 0 &&
+            <SiblingSet gap={'sm'}>
+              <SummaryPrompt runId={routeParams.run_id} count={data?.dataSet?.length || 0}
+                isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)}
+                eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt}
+                modelList={modelList}
+              />
+              <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
 
-                            <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
-                        </SiblingSet>
-                    }
-                </div>
-            </div>
-            <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-                <Table className='table table-hover lh-table-full-view-with-scroll' order={data?.headers.map(col => col)}>
-                    <thead>
-                        <tr>
-                            {data.headers.map((column, index) => (
-                                <th key={index} column={column}>{convertToTitleCase(column)}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data?.dataSet && <>
-                            {!tableLoading && data.dataSet?.map((item, dataIndex) => (
-                                <tr key={`c-${dataIndex}`}>
-                                    {data.headers.map((column, index) => (
-                                        <td key={index} column={column}>{item[column]}</td>
-                                    ))}
-                                </tr>
-                            ))} </>}
-                    </tbody>
-                </Table>
-                <div className='lh-container lh-center'>
-                    <div className='text-center'>
-                        {data?.dataSet?.length === 0 && !tableLoading && <text.p text='No records found' />}
-                        {data?.dataSet?.length > 0 && <div>{data.length}</div>}
-                        {tableLoading && <>
-                            <Spinner />
-                            <text.p text='Please be patient while we retrieve your results.' />
-                        </>}
-                    </div>
-                </div>
+              <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
+            </SiblingSet>
+          }
+        </div>
+      </div>
+      <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+        <Table className='table table-hover lh-table-full-view-with-scroll' order={data?.headers.map(col => col)}>
+          <thead>
+            <tr>
+              {data.headers.map((column, index) => (
+                <th key={index} column={column}>{convertToTitleCase(column)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data?.dataSet && <>
+              {!tableLoading && data.dataSet?.map((item, dataIndex) => (
+                <tr key={`c-${dataIndex}`}>
+                  {data.headers.map((column, index) => (
+                    <td key={index} column={column}>{item[column]}</td>
+                  ))}
+                </tr>
+              ))} </>}
+          </tbody>
+        </Table>
+        <div className='lh-container lh-center'>
+          <div className='text-center'>
+            {data?.dataSet?.length === 0 && !tableLoading && <text.p text='No records found' />}
+            {data?.dataSet?.length > 0 && <div>{data.length}</div>}
+            {tableLoading && <>
+              <Spinner size='md' />
+              <text.p text='Please be patient while we retrieve your results.' />
+            </>}
+          </div>
+        </div>
 
-            </Card>
-        </>
-    )
+      </Card>
+    </>
+  )
 };
 ViewPage.propTypes = {
-    authDetails: PropTypes.object
+  authDetails: PropTypes.object
 };
 export default ViewPage;

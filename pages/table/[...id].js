@@ -5,10 +5,8 @@ import Spinner from '@ux/spinner';
 import { Block, Lockup } from '@ux/layout';
 import Head from '../../components/head';
 import text from '@ux/text';
-
 import '@ux/card/styles';
 import Button from '@ux/button';
-
 import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
@@ -30,7 +28,7 @@ const PromptBuilder = ({ authDetails }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
   const [numOfTransactions, setNumOfTransactions] = useState();
-  const [modelList, setModelList] = useState([]);
+  const [modelList, setModelList] = useState(null);
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [showTableSelect, setShowTableSelect] = useState(false);
   const [isPromptVisible, setIsPromptVisible] = useState(false);
@@ -129,8 +127,7 @@ const PromptBuilder = ({ authDetails }) => {
       getModelList().then(data => {
         console.log(data);
         setModelList(data);
-
-      })
+      }).catch(error => handleError(error));
     }
   }, []);
   return (
@@ -146,7 +143,7 @@ const PromptBuilder = ({ authDetails }) => {
       }
       {isLoading &&
         <div className='text-center'>
-          <Spinner />
+          <Spinner size='md' />
         </div>
       }
       {showTableSelect && <TableSelect />}
@@ -170,7 +167,7 @@ const PromptBuilder = ({ authDetails }) => {
                           <Block as='stack' className='text-center' orientation='vertical'>
                             <text.label as='label' text='Getting number of transcripts based on your selections' />
                             <br />
-                            <Spinner />
+                            <Spinner size='md' />
                           </Block>
                         </MessageOverlay>
                       </Card>
@@ -186,7 +183,7 @@ const PromptBuilder = ({ authDetails }) => {
                       </>
                       }
                       {modelList && numOfTransactions > 0 &&
-                        <PromptForm onSubmit={handleOnSubmit} numOfTransactions={400} modelList={modelList} />
+                        <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} modelList={modelList} />
                       }
                     </>}
 
@@ -194,15 +191,11 @@ const PromptBuilder = ({ authDetails }) => {
                 }
 
               </Block>
-
             </TwoColumnLayout>
-
-
           </Block>
         </>
       }
     </>
   );
 }
-
 export default PromptBuilder;
