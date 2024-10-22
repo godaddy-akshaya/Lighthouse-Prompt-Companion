@@ -66,6 +66,10 @@ module.exports = {
     "delete-lexical-query": {
       "method": "POST",
       "url": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
+    "dynamic-model-list": {
+      "method": "GET",
+      "url": "https://r1edo1uwvc.execute-api.us-west-2.amazonaws.com/gddeploy"
     }
   }
 }
