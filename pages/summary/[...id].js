@@ -73,7 +73,7 @@ const SummaryPage = ({ authDetails }) => {
       <Card id='view-summary-card' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
         {tableLoading &&
           <div className='lh-container lh-center'>
-            <Spinner />
+            <Spinner size='md' />
           </div>}
 
         <Table className='table table-hover lh-table-full-view-with-scroll'>

@@ -5,10 +5,8 @@ import Spinner from '@ux/spinner';
 import { Block, Lockup } from '@ux/layout';
 import Head from '../../components/head';
 import text from '@ux/text';
-
 import '@ux/card/styles';
 import Button from '@ux/button';
-
 import '@ux/select/styles';
 import '@ux/icon/add/index.css';
 import '@ux/checkbox/styles';
@@ -129,8 +127,7 @@ const PromptBuilder = ({ authDetails }) => {
       getModelList().then(data => {
         console.log(data);
         setModelList(data);
-
-      })
+      }).catch(error => handleError(error));
     }
   }, []);
   return (
@@ -144,12 +141,14 @@ const PromptBuilder = ({ authDetails }) => {
             actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
         </Block>
       }
+      {modelList?.length > 0 &&
+        <PromptForm onSubmit={handleOnSubmit} numOfTransactions={50} modelList={modelList} />
+      }
       {isLoading &&
         <div className='text-center'>
-          <Spinner />
+          <Spinner size='md' />
         </div>
       }
-
       {showTableSelect && <TableSelect />}
       {
         !isLoading && !showTableSelect && <>
@@ -171,7 +170,7 @@ const PromptBuilder = ({ authDetails }) => {
                           <Block as='stack' className='text-center' orientation='vertical'>
                             <text.label as='label' text='Getting number of transcripts based on your selections' />
                             <br />
-                            <Spinner />
+                            <Spinner size='md' />
                           </Block>
                         </MessageOverlay>
                       </Card>

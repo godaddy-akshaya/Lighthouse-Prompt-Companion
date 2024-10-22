@@ -129,7 +129,7 @@ const ViewPage = ({ authDetails }) => {
             {data?.dataSet?.length === 0 && !tableLoading && <text.p text='No records found' />}
             {data?.dataSet?.length > 0 && <div>{data.length}</div>}
             {tableLoading && <>
-              <Spinner />
+              <Spinner size='md' />
               <text.p text='Please be patient while we retrieve your results.' />
             </>}
           </div>
