@@ -141,9 +141,6 @@ const PromptBuilder = ({ authDetails }) => {
             actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
         </Block>
       }
-      {modelList?.length > 0 &&
-        <PromptForm onSubmit={handleOnSubmit} numOfTransactions={50} modelList={modelList} />
-      }
       {isLoading &&
         <div className='text-center'>
           <Spinner size='md' />
