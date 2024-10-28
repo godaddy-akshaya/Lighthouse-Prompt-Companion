@@ -13,6 +13,9 @@ const LexicalMenu = ({ onAction, queries }) => {
     if (value === 'example') {
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
     }
+    if (value === 'new') {
+      onAction({ type: 'new', data: '' });
+    }
   }
   return (
     <>
@@ -30,6 +33,7 @@ const LexicalMenu = ({ onAction, queries }) => {
             })}
           </MenuGroup>
           <MenuSeparator />
+          <MenuItem valueText={'new'} onSelect={handleSelect}>New Query</MenuItem>
           <MenuItem valueText={'example'} onSelect={handleSelect}>Use Example</MenuItem>
         </MenuList>
       </Menu>

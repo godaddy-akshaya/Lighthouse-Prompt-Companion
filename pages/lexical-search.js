@@ -48,6 +48,7 @@ const LexicalSearch = ({ initialQueries }) => {
     query_name: '',
     query: '',
     queryPlaceholder: '',
+    description: '',
     validated: false,
     hasErrors: false,
     errorMessage: '',
@@ -59,12 +60,12 @@ const LexicalSearch = ({ initialQueries }) => {
 
   useEffect(() => {
     getAllLexicalQueries().then((queries) => {
-      console.log('queries', queries);
       try {
         let data = queries?.map((d) => {
           return {
             query_name: d.query_name,
-            query: d.query
+            query: d.query,
+            description: d.description
           }
         }) || [];
         setLexicalQueries(data);
@@ -90,9 +91,11 @@ const LexicalSearch = ({ initialQueries }) => {
   const handleMenuAction = (e) => {
     console.log(e);
     if (e.type === 'example') {
-      setFormModel({ ...formModel, query: e.data, isEdit: false, query_name: 'Example Query', validated: false });
+      setFormModel({ ...formModel, query: e.data, isEdit: false, query_name: 'Example Query', description: 'This is an example query', validated: false });
+    } else if (e.type === 'new') {
+      setFormModel({ ...formModel, query: '', isEdit: false, query_name: '', description: '', validated: false });
     } else {
-      setFormModel({ ...formModel, isEdit: true, query_name: e.data.query_name, query: e.data.query, validated: false });
+      setFormModel({ ...formModel, isEdit: true, query_name: e.data.query_name, query: e.data.query, description: e.data?.description || null, validated: false });
 
     }
   };
@@ -173,7 +176,7 @@ const LexicalSearch = ({ initialQueries }) => {
         lex.splice(index, 1);
         setLexicalQueries(lex);
         setConfirmModal({ ...confirmModal, show: false, queryId: '' });
-        setFormModel({ ...formModel, query: '', query_name: '', validated: false, submitted: false, isEdit: false });
+        setFormModel({ ...formModel, query: '', query_name: '', description: '', validated: false, submitted: false, isEdit: false });
         setBanner({ ...banner, show: true, message: 'Query deleted', errorType: 'success' });
         setTimeout(() => {
           setBanner({ ...banner, show: false, message: '', errorType: 'error' });
@@ -212,10 +215,15 @@ const LexicalSearch = ({ initialQueries }) => {
             <Box blockPadding='md'>
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
             </Box>
+            <Box blockPadding='md'>
+              <TextInput id='description' label='Description' value={formModel.description} onChange={(e) => setFormModel({ ...formModel, description: e })} />
+
+            </Box>
             <Box stretch blockPadding='md'>
               <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
               <TextInput ref={textInputRef} rows={15} required resize
                 multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
+
             </Box>
             <Box className='lh-container lh-between' stretch >
 
