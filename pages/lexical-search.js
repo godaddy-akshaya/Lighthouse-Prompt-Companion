@@ -216,7 +216,7 @@ const LexicalSearch = ({ initialQueries }) => {
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
             </Box>
             <Box blockPadding='md'>
-              <TextInput id='description' label='Description' value={formModel.description} onChange={(e) => setFormModel({ ...formModel, description: e })} />
+              <TextInput id='description' multiline rows={2} resize label='Description' value={formModel.description} onChange={(e) => setFormModel({ ...formModel, description: e })} />
 
             </Box>
             <Box stretch blockPadding='md'>
