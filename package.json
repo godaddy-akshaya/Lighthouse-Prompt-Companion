@@ -37,6 +37,7 @@
     "@godaddy/gasket-plugin-security-auth-logging": "^0.5.1",
     "@godaddy/gasket-plugin-security-logger": "^0.8.0",
     "@godaddy/gasket-preset-webapp": "^2.32.4",
+    "@godaddy/quickcert": "^1.0.1",
     "@godaddy/security-logger": "^1.9.0",
     "@size-limit/preset-big-lib": "^7.0.5",
     "@ux/alert": "^2400.8.0",

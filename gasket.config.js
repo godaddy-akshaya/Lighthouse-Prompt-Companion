@@ -3,15 +3,9 @@ const env = require('./config/.env');
 
 
 const localHttpsConfig = {
-  hostname: 'local.c3.int.dev-gdcorp.tools',
+  hostname: 'local.gasket.dev-godaddy.com',
   http: false,
-  https: {
-    root: 'certs',
-    key: 'local.c3.int.dev-gdcorp.tools.key',
-    cert: [
-      'local.c3.int.dev-gdcorp.tools.crt'
-    ]
-  }
+  https:8443
 };
 // The last element is the name of the api endpoint
 // The api configuration and metat data is stored in the config object
