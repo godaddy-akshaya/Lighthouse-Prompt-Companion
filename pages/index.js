@@ -10,7 +10,7 @@ import Logo from '../components/logo';
 import session from '../lib/session';
 import TableSelect from '../components/table-select';
 import TwoColumnLayout from '../components/layout/two-column-layout';
-
+const urlToView = `https://aws.amazon.com/blogs/machine-learning/how-godaddy-built-lighthouse-an-interaction-analytics-solution-to-generate-insights-on-support-interactions-using-amazon-bedrock/`
 export const IndexPage = ({ authDetails }) => {
 
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
@@ -45,7 +45,4 @@ IndexPage.propTypes = {
   authDetails: PropTypes.object,
   tables: PropTypes.array
 };
-
-
-
 export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);
