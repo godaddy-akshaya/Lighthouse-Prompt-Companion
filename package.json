@@ -21,7 +21,7 @@
     "@gasket/assets": "^6.39.0",
     "@gasket/cli": "^6.43.0",
     "@gasket/fetch": "^6.39.0",
-    "@gasket/log": "^6.39.0",
+    "@gasket/log": "^6.46.8",
     "@gasket/nextjs": "^6.43.0",
     "@gasket/plugin-elastic-apm": "^6.47.0",
     "@gasket/plugin-express": "^6.44.0",
