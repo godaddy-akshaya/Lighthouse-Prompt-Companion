@@ -44,7 +44,8 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     let formData = {
       parent_run_id: runId,
       new_run_id: await getGuid(),
-      model: model,
+      provider: model.provider,
+      model: model.model_name,
       prompt: prompt,
       count: numToRun.toString(),
     }

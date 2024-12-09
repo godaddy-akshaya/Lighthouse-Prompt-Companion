@@ -235,6 +235,11 @@ const LexicalSearch = ({ initialQueries }) => {
                 multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
 
             </Box>
+            <Box gap='md' blockPadding='md' stretch>
+              <StatCard title='Hits' value={806948} subtitle='Total Hits' />
+              <StatCard title='' value={625678} subtitle='Messaging Hits' />
+              <StatCard title='Speech Hits' value={181270} subtitle=' Hits' />
+            </Box>
             <Box className='lh-container lh-between' stretch >
 
               <SiblingSet stretch gap='sm' >
@@ -247,12 +252,6 @@ const LexicalSearch = ({ initialQueries }) => {
                   <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
                 }
               </Box>
-              {lexicalHits && <Box gap='md' blockPadding='md' stretch>
-                <StatCard title='Hits' value={''} subtitle='Total Hits' />
-                <StatCard title='Messaging Hits' value={''} subtitle='Total Hits' />
-                <StatCard title='Speech Hits' value={''} subtitle='Total Hits' />
-              </Box>}
-
             </Box>
           </form>
         </>
