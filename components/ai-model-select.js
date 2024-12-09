@@ -9,7 +9,8 @@ const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
   const handleModelChange = (e) => {
     const _model = JSON.parse(e);
     setSelectedValue(JSON.parse(e));
-    onChange(_model.model);
+    console.log(_model);
+    onChange(_model);
   }
 
   return (

@@ -64,6 +64,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
     return passed;
   }
   function handleModelChange(e) {
+    console.log(e);
     setPromptModel(e);
   }
   function handleEvalModelChange(e) {
