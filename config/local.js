@@ -2,18 +2,6 @@ module.exports = {
   "env": "local",
   "region": "us-west-2",
   "root": "https://local.c3.int.dev-gdcorp.tools:8443",
-
-  // "sso": {
-  //   "app": "lighthouse-ui",
-  //   "root": "https://sso.dev-gdcorp.tools",
-  //   "groups": ['lighthouse-ui-devs'],
-  //   "cookie": {
-  //     "domain": ".dev-gdcorp.tools",
-  //     "path": "/",
-  //     "secure": true,
-  //     "httpOnly": true
-  //   }
-  // },
   "api": {
     "table-listing": {
       "method": "GET",
@@ -74,6 +62,10 @@ module.exports = {
     "delete-lexical-query": {
       "method": "POST",
       "url": "https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev"
+    },
+    "get-lexical-query-hits": {
+      "method": "POST",
+      "url": "https://fo4s1ll5eg.execute-api.us-west-2.amazonaws.com/gddeploy"
     }
   }
 }

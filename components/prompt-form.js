@@ -29,9 +29,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
     let text = prompt + ` [${e}]`;
     setPrompt(text);
   }
-  function handleModelChange(e) {
-    console.log(e);
-  }
+
   function insertActionEval(e) {
     let text = evaluationPrompt + ` [${e}]`;
     setEvaluationPrompt(text);

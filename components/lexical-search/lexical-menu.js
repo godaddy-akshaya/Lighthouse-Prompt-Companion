@@ -21,7 +21,7 @@ const LexicalMenu = ({ onAction, queries }) => {
     <>
 
       <Menu id='lexical-menu'>
-        <MenuButton icon={<Hamburger />} size='sm' text='Lexical Menu' />
+        <MenuButton icon={<Hamburger />} size='sm' text='Lexical Menu' design='secondary' />
         <MenuList >
           <MenuGroup className='open-save-menu-group' label='Open Saved Query'>
             {!queries && <MenuItem valueText='no-queries' >No queries found</MenuItem>}
