@@ -70,6 +70,10 @@ module.exports = {
     "dynamic-model-list": {
       "method": "GET",
       "url": "https://r1edo1uwvc.execute-api.us-west-2.amazonaws.com/gddeploy"
+    },
+    "get-lexical-query-hits": {
+      "method": "POST",
+      "url": "https://fo4s1ll5eg.execute-api.us-west-2.amazonaws.com/gddeploy"
     }
   }
 }

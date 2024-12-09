@@ -8,7 +8,7 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/api';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
@@ -16,6 +16,7 @@ import Spinner from '@ux/spinner';
 import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
+import StatCard from '../components/stat-card';
 
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
@@ -36,6 +37,7 @@ const FlexTitleAndOptions = ({
 }
 const LexicalSearch = ({ initialQueries }) => {
   const textInputRef = useRef();
+  const [lexicalHits, setLexicalHits] = useState(null);
   const [loading, setLoading] = useState(false);
   const [banner, setBanner] = useState({ show: false, message: '', errorType: 'error' });
   const [lexicalQueries, setLexicalQueries] = useState(initialQueries);
@@ -136,7 +138,15 @@ const LexicalSearch = ({ initialQueries }) => {
         handleError({ 'error': error?.toString() || 'Need to research this one!' });
       });
   }
+  const handleCheckHits = (e) => {
+    if (!handleValidation()) return;
+    setLoading(true);
+    try {
 
+    } catch (error) {
+      handleError({ error: error?.toString() || 'Need to research this one!' });
+    };
+  };
   const handleValidate = (e) => {
     if (!handleValidation()) return;
     setLoading(true);
@@ -208,10 +218,10 @@ const LexicalSearch = ({ initialQueries }) => {
       {!loading && !formModel.submitted &&
         <>
           <form onSubmit={handleSubmit} id='lexical-form'>
-            {lexicalQueries && <Box className='lh-container lh-end'>
-              <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />
+            <Box className='lh-container lh-end'>
+              {lexicalQueries && <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />}
+              {!lexicalQueries && <Spinner size='sm' />}
             </Box>
-            }
             <Box blockPadding='md'>
               <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
             </Box>
@@ -228,16 +238,20 @@ const LexicalSearch = ({ initialQueries }) => {
             <Box className='lh-container lh-between' stretch >
 
               <SiblingSet stretch gap='sm' >
+                <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Query Hits' />
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
-
-
               <Box stretch style={{ 'textAlign': 'right' }}>
                 {formModel.isEdit &&
                   <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
                 }
               </Box>
+              {lexicalHits && <Box gap='md' blockPadding='md' stretch>
+                <StatCard title='Hits' value={''} subtitle='Total Hits' />
+                <StatCard title='Messaging Hits' value={''} subtitle='Total Hits' />
+                <StatCard title='Speech Hits' value={''} subtitle='Total Hits' />
+              </Box>}
 
             </Box>
           </form>
