@@ -40,6 +40,7 @@ const PromptBuilder = ({ authDetails }) => {
     model: '',
     evaluation_model: '',
     evaluation_prompt: '',
+    evaluation_provider: '',
     filterOptions: [],
     extras: []
   });
@@ -62,8 +63,8 @@ const PromptBuilder = ({ authDetails }) => {
         prompt: formValues.prompt,
         evaluation: formValues.includeEval,
         model: formValues.promptModel,
-        evaluation_model: formValues.evaluationModel || '',
-        evaluation_prompt: formValues.evaluationPrompt || '',
+        evaluation_model: formValues.evaluationModel || null,
+        evaluation_prompt: formValues.evaluationPrompt || null,
       }
       submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(data => {
         router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });

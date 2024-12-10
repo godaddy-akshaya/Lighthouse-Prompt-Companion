@@ -138,11 +138,11 @@ const LexicalSearch = ({ initialQueries }) => {
         handleError({ 'error': error?.toString() || 'Need to research this one!' });
       });
   }
-  const handleCheckHits = (e) => {
+  const handleCheckHits = async (e) => {
     if (!handleValidation()) return;
     setLoading(true);
     try {
-
+      const res = await getLexicalQueryHits(formModel.query);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };

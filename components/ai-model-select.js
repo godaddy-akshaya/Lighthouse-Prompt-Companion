@@ -6,6 +6,18 @@ import '@ux/menu/styles';
 const AiModelSelect = ({ modelList, onChange, defaultValue = '' }) => {
   const [selectedValue, setSelectedValue] = React.useState(defaultValue);
 
+  /* 
+    ai_model_item: {
+      model: ''
+      model_name: '',
+      provider: '',
+      input_token_rate: '',
+      output_token_rate: '',
+      max_tokens: '',
+    }
+  
+  */
+
   const handleModelChange = (e) => {
     const _model = JSON.parse(e);
     setSelectedValue(JSON.parse(e));

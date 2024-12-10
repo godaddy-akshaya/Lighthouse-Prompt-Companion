@@ -22,7 +22,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [evaluationPrompt, setEvaluationPrompt] = useState('');
   const [includeEval, setIncludeEval] = useState(false);
   const [promptModel, setPromptModel] = useState(null);
-  const [evaluationModel, setEvaluationModel] = useState('');
+  const [evaluationModel, setEvaluationModel] = useState(modelList?.length > 0 ? modelList[0] : null);
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
   function insertAction(e) {
@@ -64,7 +64,6 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
     return passed;
   }
   function handleModelChange(e) {
-    console.log(e);
     setPromptModel(e);
   }
   function handleEvalModelChange(e) {
@@ -94,7 +93,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         </Block>
         <Block>
           <Lockup>
-            <AiModelSelect id='model' name='model' label='Model' modelList={modelList} onChange={handleModelChange} defaultValue={promptModel} selectedValue={promptModel} />
+            <AiModelSelect id='aiModel' name='aiModel' label='AI Model' modelList={modelList} onChange={handleModelChange} defaultValue={promptModel} selectedValue={promptModel} />
           </Lockup>
           <Lockup>
             <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
