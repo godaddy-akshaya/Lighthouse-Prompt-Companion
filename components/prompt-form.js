@@ -55,13 +55,22 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
         passed = false;
       }
+      if (!evaluationModel) {
+        passed = false;
+        setEvalPromptErrorMessage('Evaluation Prompt must have model selected');
+      }
     }
     // Check if they try to increase the number of transactions to run by more the limit
     if (numOfTransactionsToRun > LIMIT_OF_TRANSACTIONS) {
       setNumOfErrorMessage(`Number of transactions to run cannot exceed ${LIMIT_OF_TRANSACTIONS}`);
       passed = false;
     }
+    if (promptModel) {
+      passed = false;
+      setPromptErrorMessage('Prompt must have model selected');
+    }
     return passed;
+
   }
   function handleModelChange(e) {
     setPromptModel(e);

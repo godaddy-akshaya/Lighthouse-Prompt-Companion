@@ -142,8 +142,9 @@ const LexicalSearch = ({ initialQueries }) => {
     if (!handleValidation()) return;
     setLoading(true);
     try {
-      const res = await getLexicalQueryHits(formModel.query);
-      console.log(res);
+      const data = await getLexicalQueryHits(formModel.query);
+      setLexicalHits(data);
+      setLoading(false);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };
@@ -240,7 +241,7 @@ const LexicalSearch = ({ initialQueries }) => {
             <Box className='lh-container lh-between' stretch >
 
               <SiblingSet stretch gap='sm' >
-                {/* <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Query Hits' /> */}
+                {/* <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Run the Numbers' /> */}
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
@@ -252,11 +253,16 @@ const LexicalSearch = ({ initialQueries }) => {
             </Box>
             <Box>
               {lexicalHits &&
-                <Box gap='md' blockPadding='md' stretch>
-                  <StatCard title='Hits' value={806948} subtitle='Total Hits' />
-                  <StatCard title='' value={625678} subtitle='Messaging Hits' />
-                  <StatCard title='Speech Hits' value={181270} subtitle=' Hits' />
+                <Box>
+                  {lexicalHits.map((hit, index) => {
+                    return (
+                      <StatCard key={index} />
+                    )
+                  })
+                  }
                 </Box>
+
+
               }
             </Box>
           </form>
@@ -265,6 +271,7 @@ const LexicalSearch = ({ initialQueries }) => {
     </div>
   );
 }
+
 
 
 
