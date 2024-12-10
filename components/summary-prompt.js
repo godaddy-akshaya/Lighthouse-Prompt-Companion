@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '@ux/button';
 import CreateForm from '@ux/icon/create-form';
 import Modal from '@ux/modal';
-import { Block, Lockup } from '@ux/layout';
+import { Block } from '@ux/layout';
 import { getGuid } from '../lib/utils';
 import TextInput from '@ux/text-input';
 import Add from '@ux/icon/add';
@@ -12,7 +12,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
   const [prompt, setPrompt] = useState('');
   const [numOfErrorMessage, setNumOfErrorMessage] = useState();
   const [promptErrorMessage, setPromptErrorMessage] = useState();
-  const [model, setModel] = useState(modelList[0]?.model || 'claude-instant-v1');
+  const [aiModel, setAiModel] = useState(modelList?.length > 0 ? modelList[0] : null);
   const [numToRun, setNumToRun] = useState(count);
 
   function handlePrompt(e) {
@@ -42,10 +42,11 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
       return;
     }
     let formData = {
+      ...aiModel,
       parent_run_id: runId,
       new_run_id: await getGuid(),
-      provider: model.provider,
-      model: model.model_name,
+      provider: aiModel.provider,
+      model: aiModel.model,
       prompt: prompt,
       count: numToRun.toString(),
     }
@@ -76,7 +77,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
       <Block>
         {modelList.length > 0 &&
-          <AiModelSelect modelList={modelList} onChange={setModel} defaultValue={model} id='model' name='model' />
+          <AiModelSelect modelList={modelList} onChange={setAiModel} defaultValue={aiModel} id='ai-model' name='ai-model' />
         }
         <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun.toString()} defaultValue={count?.toString()} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
         <Button text='Insert' icon={<Add />} design='secondary' value='concatenation_of_responses' onClick={insertAction} />
