@@ -16,7 +16,9 @@ import Spinner from '@ux/spinner';
 import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
-import StatCard from '../components/stat-card';
+import StatTag from '../components/stat-tag';
+
+
 
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
@@ -91,7 +93,7 @@ const LexicalSearch = ({ initialQueries }) => {
     return true;
   };
   const handleMenuAction = (e) => {
-    console.log(e);
+
     if (e.type === 'example') {
       setFormModel({ ...formModel, query: e.data, isEdit: false, query_name: 'Example Query', description: 'This is an example query', validated: false });
     } else if (e.type === 'new') {
@@ -143,11 +145,12 @@ const LexicalSearch = ({ initialQueries }) => {
     setLoading(true);
     try {
       const data = await getLexicalQueryHits(formModel.query);
-      setLexicalHits(data);
-      setLoading(false);
+      console.log(data);
+      setLexicalHits(pretendModel);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };
+    setLoading(false);
   };
   const handleValidate = (e) => {
     if (!handleValidation()) return;
@@ -174,6 +177,7 @@ const LexicalSearch = ({ initialQueries }) => {
     setFormModel({
       ...formModel, query: e, validated: false
     });
+    setLexicalHits(null);
   }
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
@@ -241,7 +245,7 @@ const LexicalSearch = ({ initialQueries }) => {
             <Box className='lh-container lh-between' stretch >
 
               <SiblingSet stretch gap='sm' >
-                <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Run the Numbers' />
+                <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Check number of records' />
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
@@ -251,18 +255,11 @@ const LexicalSearch = ({ initialQueries }) => {
                 }
               </Box>
             </Box>
-            <Box>
+            <Box className='m-t-1'>
               {lexicalHits &&
-                <Box>
-                  {lexicalHits.map((hit, index) => {
-                    return (
-                      <StatCard key={index} />
-                    )
-                  })
-                  }
-                </Box>
-
-
+                <SiblingSet gap='sm'>
+                  {lexicalHits.map((item, index) => (<StatTag key={`t-${index}`} percentage={item.percentage} title={item.title} count={item.count} total={item.total_count} />))}
+                </SiblingSet>
               }
             </Box>
           </form>
