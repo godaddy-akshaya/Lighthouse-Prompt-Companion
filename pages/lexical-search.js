@@ -146,7 +146,7 @@ const LexicalSearch = ({ initialQueries }) => {
     try {
       const data = await getLexicalQueryHits(formModel.query);
       console.log(data);
-      setLexicalHits(pretendModel);
+      setLexicalHits(data);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };
