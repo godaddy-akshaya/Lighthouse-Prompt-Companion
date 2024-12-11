@@ -21,7 +21,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [prompt, setPrompt] = useState('');
   const [evaluationPrompt, setEvaluationPrompt] = useState('');
   const [includeEval, setIncludeEval] = useState(false);
-  const [promptModel, setPromptModel] = useState(null);
+  const [promptModel, setPromptModel] = useState(modelList?.length > 0 ? modelList[0] : null);
   const [evaluationModel, setEvaluationModel] = useState(modelList?.length > 0 ? modelList[0] : null);
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');

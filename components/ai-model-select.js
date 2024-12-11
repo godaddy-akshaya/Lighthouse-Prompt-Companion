@@ -19,25 +19,28 @@ const AiModelSelect = ({ modelList, onChange, defaultValue }) => {
   */
 
   const handleModelChange = (e) => {
-    const _model = JSON.parse(e);
-    setSelectedValue(JSON.parse(e));
-    onChange(_model);
+    console.log(e);
+    const obj = modelList.find(item => item.model === e);
+    setSelectedValue(obj);
   }
 
   return (
     <>
-      <SelectInput onChange={handleModelChange} required helpMessage={selectedValue ?
-        `input rate: ${selectedValue.input_token_rate} / output rate: ${selectedValue.output_token_rate} /
-      max tokens ${selectedValue?.max_tokens}` : ''}
-        defaultValue={defaultValue} id='model' name='model' label='Model'>
-        <option value=''>Select Model</option>
-        {modelList.map((item, index) => {
-          return <option key={`fn${index}`} value={JSON.stringify(item)}>
-            {item.model_name}
-          </option>
-        })}
-      </SelectInput>
+      {modelList.length > 1 &&
+        <SelectInput onChange={handleModelChange} required helpMessage={selectedValue ?
+          `input rate: ${selectedValue.input_token_rate} / output rate: ${selectedValue.output_token_rate} /
+              max tokens ${selectedValue?.max_tokens}` : ''}
+          defaultValue={defaultValue.model} id='model' name='model' label='Model'>
+          {modelList.map((item, index) => {
+            return <option key={`fn${index}`} value={item.model}>
+              {item.model_name}
+            </option>
+          })}
+        </SelectInput>
+      }
+      {(!modelList || modelList?.length === 0) && <div>{text('No models available')}</div>}
     </>
+
 
   );
 }
