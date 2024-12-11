@@ -241,7 +241,7 @@ const LexicalSearch = ({ initialQueries }) => {
             <Box className='lh-container lh-between' stretch >
 
               <SiblingSet stretch gap='sm' >
-                {/* <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Run the Numbers' /> */}
+                <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Run the Numbers' />
                 <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
                 <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
               </SiblingSet>
