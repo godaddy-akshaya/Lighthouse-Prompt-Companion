@@ -65,10 +65,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
       setNumOfErrorMessage(`Number of transactions to run cannot exceed ${LIMIT_OF_TRANSACTIONS}`);
       passed = false;
     }
-    if (promptModel) {
-      passed = false;
-      setPromptErrorMessage('Prompt must have model selected');
-    }
+
     return passed;
 
   }
