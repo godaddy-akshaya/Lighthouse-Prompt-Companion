@@ -11,7 +11,7 @@ reports
 dist
 build
 .next
-
+.vscode
 # misc
 .env
 .idea
