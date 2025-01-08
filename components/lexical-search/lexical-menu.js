@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu, MenuButton, MenuList, MenuItem, MenuSeparator, MenuGroup } from '@ux/menu';
-import example from '../../lib/lexical-search/example-1';
+import example from '../../lib/data/lexical-search-example-1';
 import Hamburger from '@ux/icon/hamburger';
 
 

@@ -8,7 +8,7 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/data/data.service';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
