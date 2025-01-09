@@ -8,7 +8,7 @@ import Button from '@ux/button';
 import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
-import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/api';
+import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/data/data.service';
 import Wand from '@ux/icon/wand';
 import Refresh from '@ux/icon/refresh';
 import { BannerMessage } from '../components/banner-message';
@@ -17,6 +17,8 @@ import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
 import StatTag from '../components/stat-tag';
+import Card from '@ux/card';
+import Space from '@ux/space';
 
 
 
@@ -100,7 +102,6 @@ const LexicalSearch = ({ initialQueries }) => {
       setFormModel({ ...formModel, query: '', isEdit: false, query_name: '', description: '', validated: false });
     } else {
       setFormModel({ ...formModel, isEdit: true, query_name: e.data.query_name, query: e.data.query, description: e.data?.description || null, validated: false });
-
     }
   };
   const handleClear = () => {
@@ -119,6 +120,7 @@ const LexicalSearch = ({ initialQueries }) => {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString(), formMessage: '' });
     }
   };
+
   const handleSubmit = (e) => {
     if (!formModel.validated) return;
     if (!handleValidation()) return;
@@ -145,8 +147,11 @@ const LexicalSearch = ({ initialQueries }) => {
     setLoading(true);
     try {
       const data = await getLexicalQueryHits(formModel.query);
-      console.log(data);
-      setLexicalHits(data);
+      if (data) {
+        setLoading(false);
+        return setLexicalHits(data);
+      }
+      setLexicalHits(null);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };
@@ -222,50 +227,45 @@ const LexicalSearch = ({ initialQueries }) => {
           <Spinner size='md' />
         </Box>}
       {!loading && !formModel.submitted &&
-        <>
-          <form onSubmit={handleSubmit} id='lexical-form'>
-            <Box className='lh-container lh-end'>
-              {lexicalQueries && <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />}
-              {!lexicalQueries && <Spinner size='sm' />}
-            </Box>
-            <Box blockPadding='md'>
-              <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
-            </Box>
-            <Box blockPadding='md'>
-              <TextInput id='description' multiline rows={2} resize label='Description' value={formModel.description} onChange={(e) => setFormModel({ ...formModel, description: e })} />
-
-            </Box>
-            <Box stretch blockPadding='md'>
-              <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
-              <TextInput ref={textInputRef} rows={15} required resize
-                multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
-
-            </Box>
-
-            <Box className='lh-container lh-between' stretch >
-
-              <SiblingSet stretch gap='sm' >
-                <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Check number of records' />
-                <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
-                <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
-              </SiblingSet>
-              <Box stretch style={{ 'textAlign': 'right' }}>
-                {formModel.isEdit &&
-                  <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
-                }
+        <form onSubmit={handleSubmit} id='lexical-form'>
+          <Box className='lh-container lh-end'>
+            {lexicalQueries && <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />}
+            {!lexicalQueries && <Spinner size='sm' />}
+          </Box>
+          <Box blockPadding='md'>
+            <TextInput id='name' autoComplete='off' required label='Name' value={formModel.query_name} onChange={(e) => setFormModel({ ...formModel, query_name: e, isEdit: false })} />
+          </Box>
+          <Box blockPadding='md'>
+            <TextInput id='description' multiline rows={2} resize label='Description' value={formModel.description} onChange={(e) => setFormModel({ ...formModel, description: e })} />
+          </Box>
+          <Box stretch blockPadding='md'>
+            <FlexTitleAndOptions label='Query (json)' onClear={handleClear} onFormat={handleFormat} />
+            <TextInput ref={textInputRef} rows={15} required resize
+              multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
+          </Box>
+          {lexicalHits && lexicalHits?.length > 0 &&
+            <Box>
+              <text.label as='label' text='Query Counts' />
+              <Box orientation='horizontal' gap='md'>
+                {lexicalHits?.map((item, index) => (
+                  <StatTag key={`t-${index}`} title={item.name} tags={item.sections} />)) || <Card title='No Results' />}
               </Box>
-            </Box>
-            <Box className='m-t-1'>
-              {lexicalHits &&
-                <SiblingSet gap='sm'>
-                  {lexicalHits.map((item, index) => (<StatTag key={`t-${index}`} percentage={item.percentage} title={item.title} count={item.count} total={item.total_count} />))}
-                </SiblingSet>
+            </Box>}
+          <Box gap='lg' blockPadding='lg' className='lh-container lh-between m-t-1' stretch >
+            <SiblingSet stretch gap='sm' >
+              <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Fetch Query Counts' />
+              <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
+              <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
+            </SiblingSet>
+            <Box stretch style={{ 'textAlign': 'right' }}>
+              {formModel.isEdit &&
+                <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
               }
             </Box>
-          </form>
-        </>
+          </Box>
+        </form>
       }
-    </div>
+    </div >
   );
 }
 

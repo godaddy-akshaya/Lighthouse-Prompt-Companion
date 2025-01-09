@@ -9,7 +9,7 @@ import Spinner from '@ux/spinner';
 import text from '@ux/text';
 import SiblingSet from '@ux/sibling-set';
 import Button from '@ux/button';
-import { getSummaryResultsByRunId } from '../../lib/api';
+import { getSummaryResultsByRunId } from '../../lib/data/data.service';
 import { BannerMessage } from '../../components/banner-message';
 import { toTitleCase } from '../../lib/utils';
 

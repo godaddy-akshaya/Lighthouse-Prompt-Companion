@@ -20,7 +20,7 @@ import '@ux/modal/styles';
 import '@ux/table/styles';
 import session from '../lib/session';
 import Copy from '@ux/icon/copy';
-import { getStatus, cancelJob } from '../lib/api';
+import { getStatus, cancelJob } from '../lib/data/data.service';
 import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
 const copyButton = (text) => {

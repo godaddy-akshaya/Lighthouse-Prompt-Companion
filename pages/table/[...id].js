@@ -15,7 +15,7 @@ import '@ux/date-input/styles';
 import Card from '@ux/card';
 import '@ux/filter/styles';
 import TableSelect from '../../components/table-select';
-import { submitRowCountRequest, getTableFilters, submitPromptJob, getModelList } from '../../lib/api';
+import { submitRowCountRequest, getTableFilters, submitPromptJob, getModelList } from '../../lib/data/data.service';
 import Alert from '@ux/alert';
 import session from '../../lib/session';
 import { getGuid } from '../../lib/utils';

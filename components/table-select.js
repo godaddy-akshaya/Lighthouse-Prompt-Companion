@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { getTables } from '../lib/api';
+import { getTables } from '../lib/data/data.service';
 import { Block } from '@ux/layout';
 import Card from '@ux/card';
 import text from '@ux/text';
