@@ -151,7 +151,7 @@ const LexicalSearch = ({ initialQueries }) => {
         setLoading(false);
         return setLexicalHits(data);
       }
-      setLexicalHits([]);
+      setLexicalHits(null);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
     };
@@ -243,12 +243,12 @@ const LexicalSearch = ({ initialQueries }) => {
             <TextInput ref={textInputRef} rows={15} required resize
               multiline visualSize='sm' id='json' errorMessage={formModel.errorMessage} helpMessage={formModel.formMessage} onChange={handleQueryInput} value={formModel.query} />
           </Box>
-          {lexicalHits &&
+          {lexicalHits && lexicalHits?.length > 0 &&
             <Box>
               <text.label as='label' text='Query Counts' />
               <Box orientation='horizontal' gap='md'>
-                {lexicalHits.map((item, index) => (
-                  <StatTag key={`t-${index}`} title={item.name} tags={item.sections} />))}
+                {lexicalHits?.map((item, index) => (
+                  <StatTag key={`t-${index}`} title={item.name} tags={item.sections} />)) || <Card title='No Results' />}
               </Box>
             </Box>}
           <Box gap='lg' blockPadding='lg' className='lh-container lh-between m-t-1' stretch >
