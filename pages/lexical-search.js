@@ -146,9 +146,8 @@ const LexicalSearch = ({ initialQueries }) => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const trimmedJson = formModel.query.replace(/(\r\n|\n|\r)/gm, '');
-
-      const data = await getLexicalQueryHits(trimmedJson);
+      const cleanJson = JSON.parse(formModel.query);
+      const data = await getLexicalQueryHits(cleanJson);
       if (data) {
         setLoading(false);
         return setLexicalHits(data);
@@ -163,7 +162,7 @@ const LexicalSearch = ({ initialQueries }) => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const cleanJson = JSON.stringify(JSON.parse(formModel.query));
+      const cleanJson = JSON.parse(formModel.query);
       validateLexicalQuery(cleanJson)
         .then((response) => {
           setLoading(false);
