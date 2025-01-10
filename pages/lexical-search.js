@@ -81,7 +81,7 @@ const LexicalSearch = ({ initialQueries }) => {
     });
   }, []);
 
-  const handleValidation = () => {
+  const validatie = () => {
     if (!formModel.query) {
       setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
       setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
@@ -123,7 +123,7 @@ const LexicalSearch = ({ initialQueries }) => {
 
   const handleSubmit = (e) => {
     if (!formModel.validated) return;
-    if (!handleValidation()) return;
+    if (!validatie()) return;
     setLoading(true);
     submitLexicalQuery(formModel)
       .then((response) => {
@@ -143,10 +143,12 @@ const LexicalSearch = ({ initialQueries }) => {
       });
   }
   const handleCheckHits = async (e) => {
-    if (!handleValidation()) return;
+    if (!validation()) return;
     setLoading(true);
     try {
-      const data = await getLexicalQueryHits(formModel.query);
+      const trimmedJson = formModel.query.replace(/(\r\n|\n|\r)/gm, '');
+
+      const data = await getLexicalQueryHits(trimmedJson);
       if (data) {
         setLoading(false);
         return setLexicalHits(data);
@@ -158,10 +160,11 @@ const LexicalSearch = ({ initialQueries }) => {
     setLoading(false);
   };
   const handleValidate = (e) => {
-    if (!handleValidation()) return;
+    if (!validatie()) return;
     setLoading(true);
     try {
-      validateLexicalQuery(formModel.query)
+      const cleanJson = JSON.stringify(JSON.parse(formModel.query));
+      validateLexicalQuery(cleanJson)
         .then((response) => {
           setLoading(false);
           try {
