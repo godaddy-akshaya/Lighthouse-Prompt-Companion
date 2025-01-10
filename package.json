@@ -65,6 +65,7 @@
     "@ux/table-legacy": "^2400.11.0",
     "@ux/tag": "^2400.11.0",
     "@ux/text-input": "^2400.11.0",
+    "@ux/text-lockup": "^2400.12.0",
     "@ux/tooltip": "^2400.11.0",
     "@ux/webpack-config": "^2400.11.0",
     "cors": "^2.8.5",
