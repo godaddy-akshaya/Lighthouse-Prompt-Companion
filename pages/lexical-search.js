@@ -16,7 +16,7 @@ import Spinner from '@ux/spinner';
 import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
-import StatTag from '../components/stat-tag';
+import StatTags from '../components/stat-tags';
 import Card from '@ux/card';
 import Space from '@ux/space';
 
@@ -81,7 +81,7 @@ const LexicalSearch = ({ initialQueries }) => {
     });
   }, []);
 
-  const handleValidation = () => {
+  const validate = () => {
     if (!formModel.query) {
       setBanner({ ...banner, show: true, message: 'Query is required', errorType: 'error' });
       setFormModel({ ...formModel, hasErrors: true, errorMessage: 'Query is required' });
@@ -123,7 +123,7 @@ const LexicalSearch = ({ initialQueries }) => {
 
   const handleSubmit = (e) => {
     if (!formModel.validated) return;
-    if (!handleValidation()) return;
+    if (!validate()) return;
     setLoading(true);
     submitLexicalQuery(formModel)
       .then((response) => {
@@ -143,10 +143,11 @@ const LexicalSearch = ({ initialQueries }) => {
       });
   }
   const handleCheckHits = async (e) => {
-    if (!handleValidation()) return;
+    if (!validate()) return;
     setLoading(true);
     try {
-      const data = await getLexicalQueryHits(formModel.query);
+      const cleanJson = JSON.parse(formModel.query);
+      const data = await getLexicalQueryHits(cleanJson);
       if (data) {
         setLoading(false);
         return setLexicalHits(data);
@@ -158,10 +159,11 @@ const LexicalSearch = ({ initialQueries }) => {
     setLoading(false);
   };
   const handleValidate = (e) => {
-    if (!handleValidation()) return;
+    if (!validate()) return;
     setLoading(true);
     try {
-      validateLexicalQuery(formModel.query)
+      const cleanJson = JSON.parse(formModel.query);
+      validateLexicalQuery(cleanJson)
         .then((response) => {
           setLoading(false);
           try {
@@ -245,12 +247,9 @@ const LexicalSearch = ({ initialQueries }) => {
           </Box>
           {lexicalHits && lexicalHits?.length > 0 &&
             <Box>
-              <text.label as='label' text='Query Counts' />
-              <Box orientation='horizontal' gap='md'>
-                {lexicalHits?.map((item, index) => (
-                  <StatTag key={`t-${index}`} title={item.name} tags={item.sections} />)) || <Card title='No Results' />}
-              </Box>
-            </Box>}
+              <StatTags stats={lexicalHits} />
+            </Box>
+          }
           <Box gap='lg' blockPadding='lg' className='lh-container lh-between m-t-1' stretch >
             <SiblingSet stretch gap='sm' >
               <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Fetch Query Counts' />
