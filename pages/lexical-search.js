@@ -230,7 +230,7 @@ const LexicalSearch = ({ initialQueries }) => {
         </Box>}
       {!loading && !formModel.submitted &&
         <form onSubmit={handleSubmit} id='lexical-form'>
-          <Box className='lh-container lh-end'>
+          <Box inlineAlignChildren='end' blockPadding='md' gap='md' className='lh-container lh-end'>
             {lexicalQueries && <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />}
             {!lexicalQueries && <Spinner size='sm' />}
           </Box>
@@ -256,7 +256,7 @@ const LexicalSearch = ({ initialQueries }) => {
               <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
               <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
             </SiblingSet>
-            <Box stretch style={{ 'textAlign': 'right' }}>
+            <Box inlineAlignChildren='end'>
               {formModel.isEdit &&
                 <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
               }
