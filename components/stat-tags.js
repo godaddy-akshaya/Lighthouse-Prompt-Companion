@@ -1,7 +1,6 @@
 import React from 'react';
 import Box from '@ux/box';
 import Card from '@ux/card';
-import SiblingSet from '@ux/sibling-set';
 import text from '@ux/text'
 import TextLockup from '@ux/text-lockup';
 
