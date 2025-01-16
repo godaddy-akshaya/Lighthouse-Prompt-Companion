@@ -5,7 +5,6 @@ import text from '@ux/text';
 import Head from '../components/head';
 import TextInput from '@ux/text-input';
 import Button from '@ux/button';
-import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
 import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/data/data.service';
@@ -17,11 +16,6 @@ import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
 import StatTags from '../components/stat-tags';
-import Card from '@ux/card';
-import Space from '@ux/space';
-
-
-
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;

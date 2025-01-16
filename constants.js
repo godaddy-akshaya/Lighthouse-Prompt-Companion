@@ -10,9 +10,9 @@ const PRODUCTION = 'production';
 
 const API = '/api/v1';
 const HOSTNAMES = new Map([
-    [DEV_PRIVATE, 'lighthouse.c3.int.dev-gdcorp.tools'],
-    [DEVELOPMENT, 'lighthouse.c3.int.dev-gdcorp.tools'],
-    [PRODUCTION, 'lighthouse.c3.int.gdcorp.tools']
+  [DEV_PRIVATE, 'lighthouse.c3.int.dev-gdcorp.tools'],
+  [DEVELOPMENT, 'lighthouse.c3.int.dev-gdcorp.tools'],
+  [PRODUCTION, 'lighthouse.c3.int.gdcorp.tools']
 ]);
 
 /**
@@ -28,8 +28,8 @@ const REGION = 'us-west-2';
 
 
 module.exports = {
-    API,
-    HOSTNAMES,
-    REGION,
-    ENVS: { LOCAL, DEV_PRIVATE, DEVELOPMENT, PRODUCTION }
+  API,
+  HOSTNAMES,
+  REGION,
+  ENVS: { LOCAL, DEV_PRIVATE, DEVELOPMENT, PRODUCTION }
 };

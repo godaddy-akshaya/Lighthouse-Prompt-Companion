@@ -5,7 +5,7 @@ const env = require('./config/.env');
 const localHttpsConfig = {
   hostname: 'local.gasket.dev-godaddy.com',
   http: false,
-  https:8443
+  https: 8443
 };
 // The last element is the name of the api endpoint
 // The api configuration and metat data is stored in the config object
@@ -24,7 +24,7 @@ const getLastElementInUrl = (url) => {
     return 'error';
   }
 
-}
+};
 const getUrlForProxy = (req) => {
   try {
     const id = getLastElementInUrl(req.url);
@@ -37,7 +37,7 @@ const getUrlForProxy = (req) => {
     return '';
   }
 
-}
+};
 module.exports = {
   env,
   http: 8080,
@@ -54,9 +54,8 @@ module.exports = {
       '@gasket/plugin-elastic-apm',
       '@godaddy/gasket-plugin-security-auth-logging',
       '@godaddy/gasket-plugin-security-logger',
-      '@godaddy/gasket-plugin-healthcheck',
       '@godaddy/gasket-plugin-proxy',
-      '@gasket/plugin-express',
+      '@gasket/plugin-express'
     ]
   },
   log: {
@@ -73,25 +72,25 @@ module.exports = {
   securityLogger: {
     aws: {
       accountId: process.env.AWS_ACCT_ID || '000',
-      accountName: process.env.AWS_ACCT_NAME || 'unknown',
+      accountName: process.env.AWS_ACCT_NAME || 'unknown'
     },
-    serviceFullName: 'de-gd-lighthouse-ui',
+    serviceFullName: 'de-gd-lighthouse-ui'
   },
   helmet: {
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: false
   },
   environments: {
     local: {
       ...localHttpsConfig,
       winston: {
-        level: 'debug',
+        level: 'debug'
       }
     },
     development: isCI
       ? localHttpsConfig
       : {},
     winston: {
-      level: 'warn',
+      level: 'warn'
     }
   },
   presentationCentral: {
@@ -109,7 +108,7 @@ module.exports = {
     appName: 'lighthouse-ui',
     basePath: '/',
     realm: 'jomax',
-    groups: ['lighthouse-ui-devs', 'lighthouse-ui-group'],
+    groups: ['lighthouse-ui-devs', 'lighthouse-ui-group']
   },
   proxy: {
     proxies: {
@@ -120,7 +119,7 @@ module.exports = {
           ...request,
           headers: {
             ...request.headers,
-            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
+            Authorization: 'sso-jwt ' + req.cookies.auth_jomax
           },
           options: {
             ...request.options
@@ -135,10 +134,10 @@ module.exports = {
           ...request,
           headers: {
             ...request.headers,
-            Authorization: 'sso-jwt ' + req.cookies['auth_jomax']
-          },
+            Authorization: 'sso-jwt ' + req.cookies.auth_jomax
+          }
         })
       }
     }
   }
-}
+};

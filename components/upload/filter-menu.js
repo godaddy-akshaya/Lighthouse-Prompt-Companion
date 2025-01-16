@@ -20,8 +20,6 @@ import filterParamsMgmtService from '../../lib/filter-params-mgmt-service';
 import FilterFreeFormText from './filter-free-form-text';
 import LoadedFilter from './loaded-filter';
 
-
-
 const FilterMenu = ({ onChange, OnCancel }) => {
     const filterMenuRef = React.createRef();
     const [open, setOpen] = useState(false);

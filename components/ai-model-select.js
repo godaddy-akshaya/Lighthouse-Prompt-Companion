@@ -1,7 +1,5 @@
 import React from 'react';
 import SelectInput from '@ux/select-input';
-import text from '@ux/text';
-import '@ux/menu/styles';
 
 const AiModelSelect = ({ modelList, onChange, defaultValue }) => {
   const [selectedValue, setSelectedValue] = React.useState(defaultValue);

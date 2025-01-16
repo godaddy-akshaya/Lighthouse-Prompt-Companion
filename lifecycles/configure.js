@@ -1,4 +1,4 @@
-const { createCertificate } = require("@godaddy/quickcert");
+const { createCertificate } = require('@godaddy/quickcert');
 
 module.exports = async function (gasket, config) {
   if (process.env.ECS_TLS) {
