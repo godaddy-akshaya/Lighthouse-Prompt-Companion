@@ -26,4 +26,4 @@ Error.propTypes = {
   statusCode: PropTypes.number
 };
 
-//export default Error;
+// export default Error;

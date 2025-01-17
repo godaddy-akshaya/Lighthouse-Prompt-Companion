@@ -7,41 +7,41 @@ import Checkbox from '@ux/checkbox';
 import Save from '@ux/icon/save';
 
 const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
-    const [toSave, setToSave] = useState(false)
-    const [saveAs, setSaveAs] = useState('')
-    const [errorMessage, setErrorMessage] = useState('')
-    const handleCheckbox = () => {
-        setToSave(!toSave);
+  const [toSave, setToSave] = useState(false);
+  const [saveAs, setSaveAs] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const handleCheckbox = () => {
+    setToSave(!toSave);
+  };
+  const handleSaveAs = (e) => {
+    setSaveAs(e);
+  };
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (saveAs === '') {
+      setErrorMessage('Name is required');
+      return;
     }
-    const handleSaveAs = (e) => {
-        setSaveAs(e);
-    }
-    const handleSave = (e) => {
-        e.preventDefault();
-        if (saveAs === '') {
-            setErrorMessage('Name is required');
-            return;
-        }
-        onSave(saveAs)
-    }
-    return (
-        <Lockup>
-            {hasBeenSaved && <Text.label text='Upload has been saved' />}
-            {!hasBeenSaved &&
+    onSave(saveAs);
+  };
+  return (
+    <Lockup>
+      {hasBeenSaved && <Text.label text='Upload has been saved' />}
+      {!hasBeenSaved &&
                 <>
-                    <Checkbox id='save-filter' name='save-filter' checked={toSave} onChange={handleCheckbox} label='Save this upload?' />
-                    {toSave &&
+                  <Checkbox id='save-filter' name='save-filter' checked={toSave} onChange={handleCheckbox} label='Save this upload?' />
+                  {toSave &&
                         <Block orienatation='vertical'>
-                            <Lockup>
-                                <Text.label as='label' text='Save As:' />
-                                <TextInput value={saveAs} onChange={handleSaveAs} errorMessage={errorMessage} placeHolder='Name of upload...' />
-                            </Lockup>
-                            <Button onClick={handleSave} className='m-t-1' text='Save' size='small' icon={<Save />} design='secondary' />
+                          <Lockup>
+                            <Text.label as='label' text='Save As:' />
+                            <TextInput value={saveAs} onChange={handleSaveAs} errorMessage={errorMessage} placeHolder='Name of upload...' />
+                          </Lockup>
+                          <Button onClick={handleSave} className='m-t-1' text='Save' size='small' icon={<Save />} design='secondary' />
                         </Block>
-                    }
+                  }
                 </>
-            }
-        </Lockup>
-    )
-}
+      }
+    </Lockup>
+  );
+};
 export default SaveObjectForm;

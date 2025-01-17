@@ -1,21 +1,43 @@
 module.exports = {
-  plugins: ['prettier', 'import'],
   env: {
-    node: true,
+    browser: true,
+    es2021: true,
     jest: true
   },
+  extends: [
+    'plugin:react/recommended',
+    'godaddy',
+    'plugin:@godaddy/react-intl/recommended',
+    'next'
+  ],
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaFeatures: {
+      jsx: true
+    },
+    ecmaVersion: 12, // ES2021
+    sourceType: 'module'
   },
-  ignorePatterns: ['node_modules/', 'dist/', 'test/'],
-  extends: ['eslint:recommended', 'godaddy'],
+  plugins: [
+    'react'
+  ],
+  ignorePatterns: [
+    "**/*.d.ts",
+    "**/*.js",
+    "**/build/",
+    "**/cdk.out/",
+    "**/coverage/",
+    "**/node_modules/",
+    '**/dist/',
+    '**/lib/',
+    'test/'
+  ],
   rules: {
     'camelcase': 'off',
-    'import/no-unresolved': [2, { commonjs: true }],
-    'import/default': [2],
-    'import/no-absolute-path': [2],
-    'import/no-useless-path-segments': [2],
-    'import/export': [2],
-    'import/no-cycle': [2, { ignoreExternal: true }]
+    'indent': ['error', 2],
+    'linebreak-style': ['error', 'unix']
+  },
+  settings: {
+    localeFiles: [
+      'public/locales/en-US.json']
   }
 };

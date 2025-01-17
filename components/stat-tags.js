@@ -1,7 +1,7 @@
 import React from 'react';
 import Box from '@ux/box';
 import Card from '@ux/card';
-import text from '@ux/text'
+import text from '@ux/text';
 import TextLockup from '@ux/text-lockup';
 
 const StatTags = ({ stats }) => {
@@ -10,15 +10,15 @@ const StatTags = ({ stats }) => {
     // check if has decimal
     if (number % 1 !== 0) {
       return number.toFixed(2).toString().concat('%');
-    } else {
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // add comma to number
     }
-  }
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); // add comma to number
+
+  };
   const toProperCase = (str) => {
     return str.replace(/\w\S*/g, (txt) => {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
-  }
+  };
 
   return (<>
     <text.label as='label' text='Query Counts' />
@@ -39,6 +39,6 @@ const StatTags = ({ stats }) => {
       ))}
     </Box>
   </>
-  )
-}
+  );
+};
 export default StatTags;

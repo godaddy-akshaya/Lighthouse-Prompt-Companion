@@ -33,10 +33,10 @@ const SummaryPage = ({ authDetails }) => {
       .then((data) => {
         if (data?.length > 0) {
 
-          let _headers = [...data?.shift().Data?.map((header) => header?.VarCharValue)];
-          let newHeaders = [..._headers];
-          let newData = data.map((value, index) => {
-            let obj = {};
+          const _headers = [...data?.shift().Data?.map((header) => header?.VarCharValue)];
+          const newHeaders = [..._headers];
+          const newData = data.map((value, index) => {
+            const obj = {};
             newHeaders?.forEach((header, index) => {
               obj[header] = value?.Data[index]?.VarCharValue || '';
             });
@@ -106,7 +106,7 @@ const SummaryPage = ({ authDetails }) => {
         }
       </Card>
     </>
-  )
+  );
 };
 
 SummaryPage.propTypes = {

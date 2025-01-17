@@ -15,7 +15,7 @@ const Head = (props) => {
           href: '/',
           eid: 'pep.prompt-ui.nav.home.click',
           icon: 'home',
-          active: props?.route === 'home' ? true : false
+          active: props?.route === 'home'
         },
         {
           caption: 'Run Status',
@@ -23,19 +23,19 @@ const Head = (props) => {
           href: '/run-status',
           eid: 'pep.prompt-ui.nav.results.click',
           icon: 'checkbox-list',
-          active: props?.route === 'status' ? true : false
+          active: props?.route === 'status'
         },
         {
           caption: 'Lexical Search',
-          'key': '3',
-          'href': '/lexical-search',
-          'eid': 'pep.prompt-ui.nav.lexical-search.click',
-          'icon': 'search',
-          'active': props?.route === 'search' ? true : false
+          key: '3',
+          href: '/lexical-search',
+          eid: 'pep.prompt-ui.nav.lexical-search.click',
+          icon: 'search',
+          active: props?.route === 'search'
         }
       ]);
     });
-  }, [])
+  }, []);
   return (
     <NextHead>
       <meta charSet='UTF-8' />
@@ -44,7 +44,7 @@ const Head = (props) => {
       <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no' />
     </NextHead>
   );
-}
+};
 
 Head.propTypes = {
   title: PropTypes.string,
