@@ -8,24 +8,24 @@ import X from '@ux/icon/x';
 
 const LoadedFilter = ({ rowCount, columnName, onClear }) => {
 
-    const handleCancel = (e) => {
-        e.preventDefault();
-        onClear(columnName);
-    }
-    return (
-        <Lockup className='m-t-1'>
-            <text.label as='label' text={`${columnName}`} />
-            <FieldFrame>
-                <Block>
-                    <SiblingSet gap='md'>
-                        <text.label as='label' text={`${rowCount} Records`} />
-                        <Button icon={<X />} design='inline' onClick={handleCancel} />
-                    </SiblingSet>
-                </Block>
-            </FieldFrame>
-        </Lockup>
-    )
-}
+  const handleCancel = (e) => {
+    e.preventDefault();
+    onClear(columnName);
+  };
+  return (
+    <Lockup className='m-t-1'>
+      <text.label as='label' text={`${columnName}`} />
+      <FieldFrame>
+        <Block>
+          <SiblingSet gap='md'>
+            <text.label as='label' text={`${rowCount} Records`} />
+            <Button icon={<X />} design='inline' onClick={handleCancel} />
+          </SiblingSet>
+        </Block>
+      </FieldFrame>
+    </Lockup>
+  );
+};
 
 
 export default LoadedFilter;

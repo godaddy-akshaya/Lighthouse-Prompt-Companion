@@ -8,7 +8,7 @@ const LexicalMenu = ({ onAction, queries }) => {
   const handleLexicalSelect = (item) => {
     console.log(item);
     onAction({ type: 'load', data: item });
-  }
+  };
   const handleSelect = (value) => {
     if (value === 'example') {
       onAction({ type: 'example', data: JSON.stringify(example, null, 4) });
@@ -16,7 +16,7 @@ const LexicalMenu = ({ onAction, queries }) => {
     if (value === 'new') {
       onAction({ type: 'new', data: '' });
     }
-  }
+  };
   return (
     <>
 
@@ -29,7 +29,7 @@ const LexicalMenu = ({ onAction, queries }) => {
               return (
                 <MenuItem key={index} valueText={item} onSelect={handleLexicalSelect}>{item.query_name}
                 </MenuItem>
-              )
+              );
             })}
           </MenuGroup>
           <MenuSeparator />
@@ -39,7 +39,7 @@ const LexicalMenu = ({ onAction, queries }) => {
       </Menu>
     </>
   );
-}
+};
 
 
 

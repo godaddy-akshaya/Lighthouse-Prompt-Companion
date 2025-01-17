@@ -10,7 +10,7 @@ import Logo from '../components/logo';
 import session from '../lib/session';
 import TableSelect from '../components/table-select';
 import TwoColumnLayout from '../components/layout/two-column-layout';
-const urlToView = `https://aws.amazon.com/blogs/machine-learning/how-godaddy-built-lighthouse-an-interaction-analytics-solution-to-generate-insights-on-support-interactions-using-amazon-bedrock/`
+// const urlToView = `https://aws.amazon.com/blogs/machine-learning/how-godaddy-built-lighthouse-an-interaction-analytics-solution-to-generate-insights-on-support-interactions-using-amazon-bedrock/`;
 export const IndexPage = ({ authDetails }) => {
 
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
@@ -20,7 +20,7 @@ export const IndexPage = ({ authDetails }) => {
         <Logo />
         <Block>
           <Lockup>
-            <text.h1 style={{ 'marginBottom': '0px', 'paddingBottom': '0px' }} as='heading' text='Lighthouse' />
+            <text.h1 style={{ marginBottom: '0px', paddingBottom: '0px' }} as='heading' text='Lighthouse' />
             <text.h3 as='title' text='Insights Platform' />
           </Lockup>
         </Block>
@@ -38,7 +38,7 @@ export const IndexPage = ({ authDetails }) => {
         </Card>
       </TwoColumnLayout>
     </>
-  )
+  );
 };
 
 IndexPage.propTypes = {

@@ -17,7 +17,7 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel }) => {
         </SiblingSet>
       </Box>
     </Modal>
-  )
-}
+  );
+};
 
 export default ConfirmModal;

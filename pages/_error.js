@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function Error({ statusCode }) {
+export default function Error({ statusCode }) {
   return (
     <p>
       {statusCode
@@ -26,4 +26,4 @@ Error.propTypes = {
   statusCode: PropTypes.number
 };
 
-export default Error;
+// export default Error;

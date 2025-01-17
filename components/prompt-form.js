@@ -26,12 +26,12 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
   function insertAction(e) {
-    let text = prompt + ` [${e}]`;
+    const text = prompt + ` [${e}]`;
     setPrompt(text);
   }
 
   function insertActionEval(e) {
-    let text = evaluationPrompt + ` [${e}]`;
+    const text = evaluationPrompt + ` [${e}]`;
     setEvaluationPrompt(text);
   }
   const handlePrompt = useCallback((e) => { setPrompt(e); }, []);
@@ -145,7 +145,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
       </Module>
     </Card>
-  )
-}
+  );
+};
 
 export default PromptForm;

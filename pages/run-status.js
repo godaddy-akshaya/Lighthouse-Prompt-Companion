@@ -25,7 +25,7 @@ import '@ux/search/styles';
 import { copyToClipBoard } from '../lib/utils';
 const copyButton = (text) => {
   copyToClipBoard(text);
-}
+};
 
 export const RunStatusPage = ({ authDetails }) => {
   const router = useRouter();
@@ -37,18 +37,18 @@ export const RunStatusPage = ({ authDetails }) => {
   const [tableLoading, setTableLoading] = useState(true);
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
 
-  //page notes
+  // page notes
   // valid status = Submitted/In Progress/Completed/Cancelled
   /*
       cancel link will be enabled only for IP and Submitted
       View results link will be enabled only for Completed
   */
-  // 
+  //
   useEffect(() => {
     getStatus().then((data) => {
       setResults(data);
       setTableLoading(false);
-    })
+    });
   }, []);
   const actions = (
     <>
@@ -60,33 +60,33 @@ export const RunStatusPage = ({ authDetails }) => {
     <>
       <Button size='small' design='secondary' text='Cancel' onClick={() => confirmCancelModal(job)} />
     </>
-  )
+  );
   const confirmCancelModal = (job) => {
     setModalData(job);
     setShowModal(true);
-  }
+  };
   const abortCancel = () => {
     setShowModal(false);
     setModalData();
-  }
+  };
   const confrimedJobCancel = () => {
     // Check if they are sure they want to cancel the job
     if (modalData) {
       cancelJob(modalData).then((data) => {
         setShowModal(false);
         setModalData();
-        getStatus().then((data) => setResults(data))
+        getStatus().then((data) => setResults(data));
       });
     }
-  }
+  };
 
   const ViewButton = (job) => (
     <Button size='small' design='secondary' aria-label='View Results' text='View Results' onClick={() => view(job)} />
-  )
+  );
 
   const view = (job) => {
     router.push(`/view/${job.run_id}`);
-  }
+  };
   return (
     <>
       {showModal && <Modal id='cancel-confirm' actions={actions} title='Cancel Confirmation'>
@@ -155,7 +155,7 @@ export const RunStatusPage = ({ authDetails }) => {
         </Card>
       </Block>
     </>
-  )
+  );
 };
 
 export default withLocaleRequired('/locales', { initialProps: true })(RunStatusPage);

@@ -30,7 +30,7 @@ const ViewPage = ({ authDetails }) => {
 
   const handleCancelSummaryPrompt = () => {
     setIsSummaryPromptOpen(false);
-  }
+  };
   const handleSubmitSummaryPrompt = (formData) => {
     submitSummaryPromptJob(formData).then((data) => {
       setIsSummaryPromptOpen(false);
@@ -39,11 +39,11 @@ const ViewPage = ({ authDetails }) => {
         setUserMessageType('error');
         setShowUserMessage(true);
         return;
-      } else {
-        setUserMessage('Summary Prompt Job Submitted Successfully');
-        setUserMessageType('success');
-        setShowUserMessage(true);
       }
+      setUserMessage('Summary Prompt Job Submitted Successfully');
+      setUserMessageType('success');
+      setShowUserMessage(true);
+
     });
   };
   function convertToTitleCase(text) {
@@ -54,7 +54,7 @@ const ViewPage = ({ authDetails }) => {
   }
   const handleCloseError = () => {
     setShowUserMessage(false);
-  }
+  };
   useEffect(() => {
     if (router.isReady) {
       console.log(router.query?.id[0] || '0');
@@ -63,9 +63,10 @@ const ViewPage = ({ authDetails }) => {
       getResultsByRunId(router.query?.id[0] || 0).then((data) => {
         let headers = data?.shift();
         headers = [...headers?.Data?.map((header) => header?.VarCharValue)];
-        let dataSet = data.map((value, index) => {
-          let obj = {};
+        const dataSet = data.map((value) => {
+          const obj = {};
           headers?.forEach((header, index) => {
+            /* eslint-disable no-unsafe-optional-chain */
             obj[header] = value?.Data[index]?.VarCharValue;
           });
           return obj;
@@ -73,7 +74,7 @@ const ViewPage = ({ authDetails }) => {
         setData({ headers, dataSet });
         getModelList().then((data) => setModelList(data));
         setTableLoading(false);
-      })
+      });
     }
 
   }, [router.isReady, router.query]);
@@ -137,7 +138,7 @@ const ViewPage = ({ authDetails }) => {
 
       </Card>
     </>
-  )
+  );
 };
 ViewPage.propTypes = {
   authDetails: PropTypes.object

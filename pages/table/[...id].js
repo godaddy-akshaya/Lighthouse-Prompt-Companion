@@ -1,5 +1,5 @@
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from '@ux/spinner';
 import { Block, Lockup } from '@ux/layout';
@@ -7,11 +7,6 @@ import Head from '../../components/head';
 import text from '@ux/text';
 import '@ux/card/styles';
 import Button from '@ux/button';
-import '@ux/select/styles';
-import '@ux/icon/add/index.css';
-import '@ux/checkbox/styles';
-import '@ux/field-frame/styles';
-import '@ux/date-input/styles';
 import Card from '@ux/card';
 import '@ux/filter/styles';
 import TableSelect from '../../components/table-select';
@@ -56,17 +51,17 @@ const PromptBuilder = ({ authDetails }) => {
   function handleOnSubmit(formValues) {
     setIsLoading(true);
     (async () => {
-      let g = await getGuid();
-      let job = {
+      const g = await getGuid();
+      const job = {
         count: formValues.numOfTransactionsToRun,
         run_id: g,
         prompt: formValues.prompt,
         evaluation: formValues.includeEval,
         model: formValues.promptModel,
         evaluation_model: formValues.evaluationModel || null,
-        evaluation_prompt: formValues.evaluationPrompt || null,
-      }
-      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(data => {
+        evaluation_prompt: formValues.evaluationPrompt || null
+      };
+      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(() => {
         router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
       }, error => {
         setErrorMessage(error);
@@ -84,7 +79,7 @@ const PromptBuilder = ({ authDetails }) => {
     setIsLoading(false);
     setShowUserMessage(true);
     setShowMessage(false);
-  }
+  };
 
   /*  after posting prompt form -> results page    */
   const handleTableRowSubmit = (filterOptions, extras) => {
@@ -114,7 +109,7 @@ const PromptBuilder = ({ authDetails }) => {
     } catch (error) {
       handleError(error);
     }
-  }
+  };
   useEffect(() => {
     if (routeParams.table === '0') {
       setShowTableSelect(true);
@@ -198,5 +193,5 @@ const PromptBuilder = ({ authDetails }) => {
       }
     </>
   );
-}
+};
 export default PromptBuilder;

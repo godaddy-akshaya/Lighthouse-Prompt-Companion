@@ -5,7 +5,6 @@ import text from '@ux/text';
 import Head from '../components/head';
 import TextInput from '@ux/text-input';
 import Button from '@ux/button';
-import '@ux/table/styles';
 import SiblingSet from '@ux/sibling-set';
 import Checkmark from '@ux/icon/checkmark';
 import { validateLexicalQuery, submitLexicalQuery, getAllLexicalQueries, deleteLexicalQuery, getLexicalQueryHits } from '../lib/data/data.service';
@@ -17,11 +16,6 @@ import DeleteQuery from '../components/lexical-search/delete-query';
 import LexicalMenu from '../components/lexical-search/lexical-menu';
 import ConfirmModal from '../components/confirm-modal';
 import StatTags from '../components/stat-tags';
-import Card from '@ux/card';
-import Space from '@ux/space';
-
-
-
 
 const headerText = `In lexical search you typically use the bool query to combine multiple 
 conditions using must, should, and must_not.`;
@@ -37,8 +31,8 @@ const FlexTitleAndOptions = ({
         <Button size='sm' onClick={onFormat} design='inline' text='Format' icon={<Wand />} />
       </SiblingSet>
     </div>
-  )
-}
+  );
+};
 const LexicalSearch = ({ initialQueries }) => {
   const textInputRef = useRef();
   const [lexicalHits, setLexicalHits] = useState(null);
@@ -67,12 +61,12 @@ const LexicalSearch = ({ initialQueries }) => {
   useEffect(() => {
     getAllLexicalQueries().then((queries) => {
       try {
-        let data = queries?.map((d) => {
+        const data = queries?.map((d) => {
           return {
             query_name: d.query_name,
             query: d.query,
             description: d.description
-          }
+          };
         }) || [];
         setLexicalQueries(data);
       } catch (e) {
@@ -110,13 +104,12 @@ const LexicalSearch = ({ initialQueries }) => {
   const handleError = ({ error }) => {
     setBanner({ ...banner, show: true, message: error?.toString(), errorType: 'error' });
     setFormModel({ ...formModel, hasErrors: true, errorMessage: error?.toString(), formMessage: '' });
-  }
+  };
   const handleFormat = (queryModel) => {
     try {
       const formatted = JSON.stringify(JSON.parse(formModel.query), null, 4);
       setFormModel({ ...formModel, query: formatted, hasErrors: false, errorMessage: '', formMessage: 'Query formatted' });
-    }
-    catch (e) {
+    } catch (e) {
       setFormModel({ ...formModel, hasErrors: true, errorMessage: e.toString(), formMessage: '' });
     }
   };
@@ -139,9 +132,9 @@ const LexicalSearch = ({ initialQueries }) => {
           handleError({ error: 'Issue with validation, please reach out to support' });
         }
       }).catch((error) => {
-        handleError({ 'error': error?.toString() || 'Need to research this one!' });
+        handleError({ error: error?.toString() || 'Need to research this one!' });
       });
-  }
+  };
   const handleCheckHits = async (e) => {
     if (!validate()) return;
     setLoading(true);
@@ -155,7 +148,7 @@ const LexicalSearch = ({ initialQueries }) => {
       setLexicalHits(null);
     } catch (error) {
       handleError({ error: error?.toString() || 'Need to research this one!' });
-    };
+    }
     setLoading(false);
   };
   const handleValidate = (e) => {
@@ -177,15 +170,15 @@ const LexicalSearch = ({ initialQueries }) => {
           }
         });
     } catch (error) {
-      handleError({ 'error': error?.toString() || 'Need to research this one!' });
-    };
+      handleError({ error: error?.toString() || 'Need to research this one!' });
+    }
   };
   const handleQueryInput = (e) => {
     setFormModel({
       ...formModel, query: e, validated: false
     });
     setLexicalHits(null);
-  }
+  };
   const handleCloseError = (e) => {
     setBanner({ show: false, message: '', errorType: 'error' });
   };
@@ -194,8 +187,8 @@ const LexicalSearch = ({ initialQueries }) => {
     const { queryId } = confirmModal;
     deleteLexicalQuery(queryId).then((data) => {
       if (data) {
-        let lex = [...lexicalQueries];
-        let index = lex.findIndex((d) => d.query_name === formModel.query_name);
+        const lex = [...lexicalQueries];
+        const index = lex.findIndex((d) => d.query_name === formModel.query_name);
         lex.splice(index, 1);
         setLexicalQueries(lex);
         setConfirmModal({ ...confirmModal, show: false, queryId: '' });
@@ -206,7 +199,7 @@ const LexicalSearch = ({ initialQueries }) => {
         }, 2000);
       }
     });
-  }
+  };
   return (
     <div className='container'>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
@@ -266,7 +259,7 @@ const LexicalSearch = ({ initialQueries }) => {
       }
     </div >
   );
-}
+};
 
 
 

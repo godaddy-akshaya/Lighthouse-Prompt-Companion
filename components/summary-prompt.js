@@ -34,22 +34,22 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
   }
 
   function insertAction(e) {
-    let text = prompt + ` [${e.target.value}]`;
+    const text = prompt + ` [${e.target.value}]`;
     setPrompt(text);
   }
   async function handleSaveEvent() {
     if (!checkForm()) {
       return;
     }
-    let formData = {
+    const formData = {
       ...aiModel,
       parent_run_id: runId,
       new_run_id: await getGuid(),
       provider: aiModel.provider,
       model: aiModel.model,
       prompt: prompt,
-      count: numToRun.toString(),
-    }
+      count: numToRun.toString()
+    };
     eventSave(formData);
   }
   const handleNumberOfTransactionChange = (e) => {
@@ -62,10 +62,10 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
       setNumOfErrorMessage('Number of transactions must be less than or equal to the total number of transactions');
     }
     setNumToRun(e);
-  }
+  };
   const handleCancel = () => {
     eventCancel();
-  }
+  };
   const title = 'Create Summary Prompt';
   const actions = (
     <>
@@ -87,8 +87,8 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
   );
   return (
     <>
-      <Button onClick={() => { eventOpen(true) }} text='Create Summary Prompt' icon={<CreateForm />} />
+      <Button onClick={() => { eventOpen(true); }} text='Create Summary Prompt' icon={<CreateForm />} />
       {isModalOpen && modal}
     </>
-  )
-};
+  );
+}

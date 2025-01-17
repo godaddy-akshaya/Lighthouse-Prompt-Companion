@@ -1,7 +1,7 @@
 const { transports } = require('winston');
 
 module.exports = function () {
-    return [
-        new transports.Console()
-    ];
+  return [
+    new transports.Console()
+  ];
 };
