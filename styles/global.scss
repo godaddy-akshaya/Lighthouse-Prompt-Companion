@@ -65,10 +65,13 @@ it is recommended to import those directly to `pages/_app.js`
 
 #learn-more {
     width: 40%;
+    min-width: 300px;
 }
 
 #get-started {
     width: 30%;
+    min-width: 200px;
+    background-color: var(--ux-1vw9arb);
 }
 
 .lexical-query-element {
