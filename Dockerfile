@@ -50,9 +50,7 @@ COPY --chown=worker ./docker-start.sh /app/docker-start.sh
 COPY --chown=worker ./start-me-first.js /app/start-me-first.js
 
 # Build the application
-RUN echo "Building the application"
-RUN echo "THE_ENV: $THE_ENV"
-RUN if [ "$THE_ENV" = "development" ] ; then npm run build:dev ; else npm run build ; fi
+RUN npm run build
 ENV ECS_TLS=1
 #CMD ["/bin/sh", "/app/docker-start.sh $THE_ENV"]
 CMD ["npm", "run", "start"]

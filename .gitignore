@@ -12,6 +12,7 @@ dist
 build
 .next
 .vscode
+.npm_token
 # misc
 .env
 .idea
