@@ -70,7 +70,7 @@ const SummaryPage = ({ authDetails }) => {
           </SiblingSet>
         </div>
       </div>
-      <Card id='view-summary-card' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+      <Card id='view-summary-card' className='m-t-1 lh-view-card' stretch title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
         {tableLoading &&
           <div className='lh-container lh-center'>
             <Spinner size='md' />

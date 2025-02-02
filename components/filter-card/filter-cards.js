@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Card from '@ux/card';
-import Checkbox from '@ux/checkbox';
-import { Block } from '@ux/layout';
 import text from '@ux/text';
 import Collapsible from '@ux/collapsible';
-import '@ux/tag/styles';
-import '@ux/collapsible/styles';
 import ItemFilterSearch from './item-filter-search';
 
 const FilterCardTitle = ({ isOpen, label, count }) => {
@@ -51,7 +47,7 @@ const FilterCards = ({ options, label, id, rowIndex, onChange }) => {
   };
   return (
     <>
-      <Card className='lh-filter-card' stretch={true} id={id} space={{ block: true, inline: true, as: 'block' }}>
+      <Card className='lh-filter-card' stretch id={id} space={{ block: true, inline: true, as: 'block' }}>
         <Collapsible defaultOpen={open} open={open} id={`${id}-coll`} onChange={handleCollapsibleChange} aria-label='collaspible-container' className='lh-no-padding'
           title={<FilterCardTitle count={`${checkboxColumns?.filter(r => r.value).length} of ${checkboxColumns?.length}`} label={label} isOpen={open} />}>
           <div className='lh-content'>

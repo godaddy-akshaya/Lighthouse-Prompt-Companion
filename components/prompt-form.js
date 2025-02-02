@@ -13,7 +13,7 @@ import Add from '@ux/icon/add';
 import { Menu, MenuButton, MenuList, MenuItem } from '@ux/menu';
 
 
-const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
+const PromptForm = ({ onSubmit, numOfTransactions }) => {
   const LIMIT_OF_TRANSACTIONS = 400;
   const [numberToRunHelpMessage, setNumberToRunHelpMessage] = useState();
   const [numOfTransactionsToRun, setNumOfTransactionsToRun] = useState(numOfTransactions > LIMIT_OF_TRANSACTIONS ? LIMIT_OF_TRANSACTIONS : numOfTransactions);
@@ -21,8 +21,8 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
   const [prompt, setPrompt] = useState('');
   const [evaluationPrompt, setEvaluationPrompt] = useState('');
   const [includeEval, setIncludeEval] = useState(false);
-  const [promptModel, setPromptModel] = useState(modelList?.length > 0 ? modelList[0] : null);
-  const [evaluationModel, setEvaluationModel] = useState(modelList?.length > 0 ? modelList[0] : null);
+  const [promptModel, setPromptModel] = useState(null);
+  const [evaluationModel, setEvaluationModel] = useState(null);
   const [promptErrorMessage, setPromptErrorMessage] = useState('');
   const [evalPromptErrorMessage, setEvalPromptErrorMessage] = useState('');
   function insertAction(e) {
@@ -88,7 +88,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
     setIncludeEval(!includeEval);
   }
   return (
-    <Card className='lh-prompt-form-card' id='para-card' stretch={true}>
+    <Card className='lh-prompt-form-card' id='para-card' stretch>
       <Module>
         <Block>
           <Lockup>
@@ -99,7 +99,7 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
         </Block>
         <Block>
           <Lockup>
-            <AiModelSelect id='aiModel' name='aiModel' label='AI Model' modelList={modelList} onChange={handleModelChange} defaultValue={promptModel} selectedValue={promptModel} />
+            <AiModelSelect id='aiModel' name='aiModel' label='AI Model' onChange={handleModelChange} defaultValue={promptModel} />
           </Lockup>
           <Lockup>
             <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
@@ -121,15 +121,15 @@ const PromptForm = ({ onSubmit, numOfTransactions, modelList = [] }) => {
             onChange={handlePrompt} value={prompt} multiline size={10} />
         </Block>
         <Block>
-          <Card id='evaluation' className='m-t-1' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-            <Box blockPadding='lg' inlinePadding='lg' stretch={true}>
+          <Card id='evaluation' className='m-t-1' stretch title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+            <Box blockPadding='lg' inlinePadding='lg' stretch>
               <Lockup orientation='vertical'>
                 <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
               </Lockup>
               {includeEval ?
                 <div className="eval m-t-1">
                   <text.label as='label' text='Evaluation Parameters' />
-                  <AiModelSelect id='model-select-eval' className='m-b-1' name='model-select-eval' label='Model' modelList={modelList} onChange={handleEvalModelChange} defaultValue={evaluationModel} />
+                  <AiModelSelect id='model-select-eval' className='m-b-1' name='model-select-eval' label='Model' onChange={handleEvalModelChange} defaultValue={evaluationModel} />
                   <Menu id='my-menu-for-eval' className='m-t-1'>
                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
                     <MenuList className='lh-menu' design='primary'>

@@ -11,7 +11,7 @@ import Button from '@ux/button';
 import Upload from '@ux/icon/upload';
 import Spinner from '@ux/spinner';
 import SaveObjectForm from './save-object-form';
-import '@ux/icon/x/index.css';
+
 import Alert from '@ux/alert';
 import UploadTemplate from './upload-template';
 import FieldFrame from '@ux/field-frame';
@@ -154,7 +154,7 @@ const FilterMenu = ({ onChange }) => {
         <Lockup className='m-t-1'>
           <text.h3 text='Upload Interaction IDs' as='title' />
         </Lockup>
-        <Card className='card-dark-background' id='upload' stretch={true}>
+        <Card className='card-dark-background' id='upload' stretch>
           {AlertMessage &&
             <Block>
               <Alert title={AlertMessage}

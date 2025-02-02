@@ -2,15 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from '@ux/spinner';
-import { Block, Lockup } from '@ux/layout';
+import Box from '@ux/box';
 import Head from '../../components/head';
 import text from '@ux/text';
-import '@ux/card/styles';
 import Button from '@ux/button';
 import Card from '@ux/card';
-import '@ux/filter/styles';
 import TableSelect from '../../components/table-select';
-import { submitRowCountRequest, getTableFilters, submitPromptJob, getModelList } from '../../lib/data/data.service';
+import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/data/data.service';
 import Alert from '@ux/alert';
 import session from '../../lib/session';
 import { getGuid } from '../../lib/utils';
@@ -22,11 +20,11 @@ import TwoColumnLayout from '../../components/layout/two-column-layout';
 const PromptBuilder = ({ authDetails }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
-  const [numOfTransactions, setNumOfTransactions] = useState();
-  const [modelList, setModelList] = useState(null);
+  const [numOfTransactions, setNumOfTransactions] = useState(null);
   const [showUserMessage, setShowUserMessage] = useState(false);
   const [showTableSelect, setShowTableSelect] = useState(false);
   const [isPromptVisible, setIsPromptVisible] = useState(false);
+  const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [filters, setFilters] = useState();
 
   const [jobModel, setJobModel] = useState({
@@ -40,7 +38,6 @@ const PromptBuilder = ({ authDetails }) => {
     extras: []
   });
   const [errorMessage, setErrorMessage] = useState('Something went wrong');
-
   const router = useRouter();
   const [routeParams, setRouteParams] = useState({
     table: decodeURIComponent(router.query?.id?.[0] || '0'),
@@ -84,7 +81,9 @@ const PromptBuilder = ({ authDetails }) => {
   /*  after posting prompt form -> results page    */
   const handleTableRowSubmit = (filterOptions, extras) => {
     setIsPromptVisible(true);
-    setShowMessage(true);
+    setIsPromptLoading(true);
+    setShowMessage(false);
+    setNumOfTransactions(null);
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 300);
@@ -101,11 +100,13 @@ const PromptBuilder = ({ authDetails }) => {
           setNumOfTransactions(data || 0);
           setShowMessage(false);
         }
+        setIsPromptLoading(false);
       }, error => {
         setErrorMessage(error);
         setIsLoading(false);
         setShowUserMessage(true);
       });
+
     } catch (error) {
       handleError(error);
     }
@@ -120,75 +121,62 @@ const PromptBuilder = ({ authDetails }) => {
         setShowTableSelect(false);
         setIsLoading(false);
       }).catch(error => handleError(error));
-      getModelList().then(data => {
-        console.log(data);
-        setModelList(data);
-      }).catch(error => handleError(error));
     }
-  }, []);
+  }, [routeParams]);
   return (
     <>  <Head title='Prompt Parameters' route='table' />
+      {showTableSelect && <TableSelect />}
       {showUserMessage &&
-        <Block>
+        <Box>
           <Alert
             title={errorMessage}
             id='critical-message'
             emphasis="critical"
             actions={<Button design="inline" onClick={handleCloseError} text="Close" />} />
-        </Block>
+        </Box>
       }
       {isLoading &&
-        <div className='text-center'>
+        <Box blockPadding='xl' inlinePadding='xl' inlineAlignChildren='center'>
           <Spinner size='md' />
-        </div>
+        </Box>
       }
-      {showTableSelect && <TableSelect />}
       {
         !isLoading && !showTableSelect && <>
-          <Block as='stack' orientation='vertical'>
-            <Lockup >
-              <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
-            </Lockup>
+          <Box>
+            <text.h1 text={routeParams.display_name || 'missing'} as='heading' />
             <TwoColumnLayout>
-              <Block>
+              <Box>
                 <TableFilter filters={filters} onSubmit={handleTableRowSubmit} />
-              </Block>
-              <Block>
-
-                {isPromptVisible &&
-                  <><text.h3 as='title' text='Parameters' />
-                    {showMessage &&
-                      <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
+              </Box>
+              {isPromptVisible &&
+                <Box stretch>
+                  <text.h3 as='title' text='Parameters' />
+                  {numOfTransactions > 0 &&
+                    <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} />
+                  }
+                  {numOfTransactions == 0 && <Box>
+                    <Card className='lh-prompt-form-card' id='para-card' stretch title='Parameters' space={{ block: 'lg', inline: 'lg' }}>
+                      <text.h4 as='title' text='No Transactions Found' />
+                      <text.p text='No transactions found based on your selections' />
+                    </Card>
+                  </Box>
+                  }
+                  {isPromptLoading &&
+                    <Box stretch>
+                      <Card className='lh-prompt-form-card' stretch id='para-card' title='Parameters'>
                         <MessageOverlay onEventBehind={handleTableRowSubmit} >
-                          <Block as='stack' className='text-center' orientation='vertical'>
+                          <Box blockPadding='lg' inlinePadding='lg' className='text-center'>
                             <text.label as='label' text='Getting number of transcripts based on your selections' />
-                            <br />
                             <Spinner size='md' />
-                          </Block>
+                          </Box>
                         </MessageOverlay>
                       </Card>
-                    }
-                    {!showMessage && <>
-                      {numOfTransactions == 0 && <>
-                        <Card className='lh-prompt-form-card' id='para-card' stretch={true} title='Parameters'>
-                          <Block>
-                            <text.h4 as='title' text='No Transactions Found' />
-                            <text.p text='No transactions found based on your selections' />
-                          </Block>
-                        </Card>
-                      </>
-                      }
-                      {modelList && numOfTransactions > 0 &&
-                        <PromptForm onSubmit={handleOnSubmit} numOfTransactions={numOfTransactions} modelList={modelList} />
-                      }
-                    </>}
-
-                  </>
-                }
-
-              </Block>
+                    </Box>
+                  }
+                </Box>
+              }
             </TwoColumnLayout>
-          </Block>
+          </Box>
         </>
       }
     </>

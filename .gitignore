@@ -6,7 +6,8 @@ node_modules
 # testing
 coverage
 reports
-
+.certs
+certs
 # production
 dist
 build

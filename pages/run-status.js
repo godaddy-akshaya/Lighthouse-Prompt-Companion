@@ -2,26 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { withLocaleRequired } from '@gasket/react-intl';
 import Head from '../components/head';
-import '@ux/text-input/styles';
 import Card from '@ux/card';
 import Button from '@ux/button';
 import Tag from '@ux/tag';
 import { Block, Lockup, Module } from '@ux/layout';
-import '@ux/button/styles';
 import text from '@ux/text';
-import '@ux/select-input/styles';
-import '@ux/icon/settings/index.css';
-import '@ux/icon/wand/index.css';
-import '@ux/icon/play/index.css';
-import '@ux/icon/help/index.css';
-import '@ux/checkbox/styles';
 import Modal from '@ux/modal';
-import '@ux/modal/styles';
-import '@ux/table/styles';
 import session from '../lib/session';
 import Copy from '@ux/icon/copy';
 import { getStatus, cancelJob } from '../lib/data/data.service';
-import '@ux/search/styles';
+
 import { copyToClipBoard } from '../lib/utils';
 const copyButton = (text) => {
   copyToClipBoard(text);
@@ -112,7 +102,7 @@ export const RunStatusPage = ({ authDetails }) => {
           </Lockup>
 
         </div>
-        <Card stretch={true} id='results' title='Results'>
+        <Card stretch id='results' title='Results'>
           <Module>
             {tableLoading && <text.p text='Loading...' />}
             {!tableLoading &&
