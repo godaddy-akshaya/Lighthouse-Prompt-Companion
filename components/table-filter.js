@@ -9,6 +9,7 @@ import TextInput from '@ux/text-input';
 import text from '@ux/text';
 import Button from '@ux/button';
 import FilterMenu from './upload/filter-menu';
+import Box from '@ux/box';
 
 
 // Object to hold the filter options
@@ -71,11 +72,6 @@ const TableFilter = ({ filters, onSubmit }) => {
     setLexicalSearchItems(_search);
   }
   function handleTableRowSubmit() {
-    // Apply the Search items to the column filter object
-    // let ls = { ...lexicalSearch };
-    // ls.column_selected_values = lexicalSearchItems;
-    // setLexicalSearch(ls);
-    // console.log(ls);
     const extras = [lexicalSearch, dateValue, uploadData].filter(extra => extra.column_selected_values.length > 0);
     onSubmit(filterOptions, extras);
   }
@@ -126,43 +122,47 @@ const TableFilter = ({ filters, onSubmit }) => {
     };
     setFilterOptions(_filters);
   }
-  return <>  <text.h3 as='title' text='Available Filters' />
-    <Card id='table-params-card' stretch={true}>
-      <Module ref={formRef}>
-        <Block>
-          <Lockup>
-            <div className='lh-container lh-between'>
-              <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })}
-                page={page}
-                onPaginate={setPage}
-                value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
-              <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+  return <>
+    <text.h3 as='title' text='Available Filters' />
+    <Card id='table-params-card' stretch space={{ block: 'lg', inline: 'lg' }}>
+      {filters.length > 0 &&
+        <Box ref={formRef}>
+          <Block>
+            <Lockup>
+              <div className='lh-container lh-between'>
+                <DateInput id='start' name='start-date' className={`m-r-1 ${dateOpen} ? 'z-me' : ''`} onOpenChange={handleOpenChange} onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })}
+                  page={page}
+                  onPaginate={setPage}
+                  value={startDateValue} onChange={handleStartDateValue} label='Start Date' />
+                <DateInput id='end' name='end-date' className='lh-date-on-top' value={endDateValue} onChange={handleEndDateValue} label='End Date' />
+              </div>
+              {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
+            </Lockup>
+          </Block>
+          <Block>
+            <Lockup>
+              <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} onCancel={handleCancelFilterLoad} />
+            </Lockup>
+          </Block>
+          <Block onFocus={handleOnFocus}>
+            <Lockup>
+              <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+            </Lockup>
+          </Block>
+          <Block>
+            <div className='lh-filter-container'>
+              {
+                filterOptions?.map((field, index) =>
+                  <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
+                )
+              }
             </div>
-            {showDateError && <text.span emphasis='critical' as='paragraph' text='Sorry, cannot retrieve records from more than a year ago.' />}
-          </Lockup>
-        </Block>
-        <Block>
-          <Lockup>
-            <FilterMenu onOpen={handleFilterMenuOpen} onFocus={() => handleOnFocus()} onChange={handleUploadChange} onCancel={handleCancelFilterLoad} />
-          </Lockup>
-        </Block>
-        <Block onFocus={handleOnFocus}>
-          <Lockup>
-            <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
-          </Lockup>
-        </Block>
-        <Block>
-          <div className='lh-filter-container'>
-            {
-              filterOptions?.map((field, index) =>
-                <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
-              )
-            }
-          </div>
-        </Block>
-        <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
-      </Module>
-    </Card>       </>;
+          </Block>
+          <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
+        </Box>
+      }
+    </Card>
+  </>;
 };
 
 

@@ -6,12 +6,14 @@ node_modules
 # testing
 coverage
 reports
-
+.certs
+certs
 # production
 dist
 build
 .next
 .vscode
+.npm_token
 # misc
 .env
 .idea

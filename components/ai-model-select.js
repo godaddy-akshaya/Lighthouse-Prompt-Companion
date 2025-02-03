@@ -1,9 +1,10 @@
 import React from 'react';
 import SelectInput from '@ux/select-input';
+import useAiModels from '../hooks/use-ai-models';
 
-const AiModelSelect = ({ modelList, onChange, defaultValue }) => {
+const AiModelSelect = ({ onChange, defaultValue }) => {
   const [selectedValue, setSelectedValue] = React.useState(defaultValue);
-
+  const { aiModels, loading, error } = useAiModels();
   /*
     ai_model_item: {
       model: ''
@@ -17,26 +18,27 @@ const AiModelSelect = ({ modelList, onChange, defaultValue }) => {
   */
 
   const handleModelChange = (e) => {
-    console.log(e);
-    const obj = modelList.find(item => item.model === e);
+    const obj = aiModels.find(item => item.model === e);
     setSelectedValue(obj);
+    onChange(obj);
   };
 
   return (
     <>
-      {modelList.length > 1 &&
+      {aiModels.length > 1 &&
         <SelectInput onChange={handleModelChange} required helpMessage={selectedValue ?
           `input rate: ${selectedValue.input_token_rate} / output rate: ${selectedValue.output_token_rate} /
               max tokens ${selectedValue?.max_tokens}` : ''}
           defaultValue={defaultValue?.model || null} id='model' name='model' label='Model'>
-          {modelList.map((item, index) => {
+          {aiModels.map((item, index) => {
             return <option key={`fn${index}`} value={item.model}>
               {item.model_name}
             </option>;
           })}
         </SelectInput>
       }
-      {(!modelList || modelList?.length === 0) && <div>{text('No models available')}</div>}
+      { }
+      {(!aiModels || aiModels?.length === 0) && <div>{text('No models available')}</div>}
     </>
 
 

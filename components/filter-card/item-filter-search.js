@@ -82,18 +82,18 @@ const ItemFilterSearch = ({ items, onSubmit, OnCancel }) => {
       </Lockup>
       {filteredItems.length === 0 && <Lockup><text.p text='No results found' /></Lockup>}
       {filteredItems.length > 0 &&
-                <>
-                  {searchTerm === '' &&
-                        <Lockup className='m-t-1'>
-                          <Checkbox id={selectAllChkBox.label} label={selectAllChkBox.label} name={selectAllChkBox.label} onClick={handleSelectAll} checked={selectAllChkBox.value} />
-                        </Lockup>
-                  }
-                  {searchTerm !== '' &&
-                        <Lockup className='m-t-1'>
-                          <Checkbox id={selectAllSearchResultsChkBox.label} label={selectAllSearchResultsChkBox.label} name={selectAllSearchResultsChkBox.label} onClick={handleSelectAll} checked={selectAllSearchResultsChkBox.value} />
-                        </Lockup>
-                  }
-                </>}
+        <>
+          {searchTerm === '' &&
+            <Lockup className='m-t-1'>
+              <Checkbox id={selectAllChkBox.label} label={selectAllChkBox.label} name={selectAllChkBox.label} onClick={handleSelectAll} checked={selectAllChkBox.value} />
+            </Lockup>
+          }
+          {searchTerm !== '' &&
+            <Lockup className='m-t-1'>
+              <Checkbox id={selectAllSearchResultsChkBox.label} label={selectAllSearchResultsChkBox.label} name={selectAllSearchResultsChkBox.label} onClick={handleSelectAll} checked={selectAllSearchResultsChkBox.value} />
+            </Lockup>
+          }
+        </>}
       <List
         height={200} // Adjust the height as needed
         itemCount={filteredItems.length}
@@ -103,7 +103,7 @@ const ItemFilterSearch = ({ items, onSubmit, OnCancel }) => {
         children={Row}
       />
       <Lockup className='m-t-1 m-b-1'>
-        <SiblingSet stretch={true} gap='sm'>
+        <SiblingSet stretch gap='sm'>
           <Button design='primary' text='OK' size='small' onClick={() => handleSubmitChanges(filteredItems)} />
           <Button design='secondary' text='Cancel' size='small' onClick={() => handleOnCancel(filteredItems)} />
         </SiblingSet>

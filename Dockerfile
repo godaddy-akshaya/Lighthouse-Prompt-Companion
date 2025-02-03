@@ -1,62 +1,52 @@
 # Golden container - only the best
-FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20-alpine-3.19
+FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:22.9.0-alpine-3.20-arm AS builder
 
-ARG NPM_AUTH_TOKEN
-ARG NODE_ENV
-ARG THE_ENV
 USER root
+ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add bash
-
-# Configure all the permission 
 WORKDIR /app
 
-RUN npm install --global @gasket/cli
-# RUN adduser -D worker
+RUN apk upgrade
+RUN apk add --update --no-cache bash
 
-RUN chown -R worker /app
-USER worker
+# Just the bits we need for npm ci
+COPY package*.json .npmrc .npmrc.auth ./
 
-# Copy minimal set of files needed to install dependencies to ensure cacheability
-COPY --chown=worker package.json /app
-COPY --chown=worker package-lock.json /app
-COPY --chown=worker .npmrc.template /app
+# Copy minimal set of files needed to install dependencies to ensure cacheabilit
 
-RUN cat /app/.npmrc.template | sed "s/{{NPM_AUTH_TOKEN}}/${NPM_AUTH_TOKEN}/g"  > /app/.npmrc
-RUN cat /app/.npmrc
+# Just the credentials, we use the project-level .npmrc for registry and other settings
+RUN cp .npmrc.auth $HOME/.npmrc
+
+RUN --mount=type=secret,id=npm_token,dst=./.npm_token,uid=1000 export ARTIFACTORY_RO_TOKEN=$(cat .npm_token) \
+  && npm install 
+
+# Copy everything - unneeded stuff gets filtered out in the `app-prod-filter` docker target
+COPY . .
+
+FROM builder AS app-prod-preparer
+
+RUN NODE_ENV=production npm run build
+
+RUN --mount=type=secret,id=npm_token,dst=./.npm_token,uid=1000 export ARTIFACTORY_RO_TOKEN=$(cat .npm_token) \
+  && npm prune --production
+
+FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:22.9.0-alpine-3.20-arm AS app-prod-filter
+
+WORKDIR /app
+COPY --from=app-prod-preparer /app/package.json /app/gasket.config.js /app/start-me-first.js ./
+COPY --from=app-prod-preparer /app/node_modules ./node_modules
+COPY --from=app-prod-preparer /app/config ./config
+COPY --from=app-prod-preparer /app/.next ./.next
+COPY --from=app-prod-preparer /app/lib ./lib
+COPY --from=app-prod-preparer /app/redux ./redux
+COPY --from=app-prod-preparer /app/public ./public
 
 
-RUN ls -l
-
-RUN echo "Starting up the installation"
-RUN npm install --force
-
-# Copy application files + core package
-COPY --chown=worker ./.eslintrc.js /app/.eslintrc.js
-COPY --chown=worker ./.babelrc /app/.babelrc
-COPY --chown=worker ./.stylelintrc /app/.stylelintrc
-COPY --chown=worker ./components /app/components
-COPY --chown=worker ./lib /app/lib
-COPY --chown=worker ./lifecycles /app/lifecycles
-COPY --chown=worker ./config /app/config
-COPY --chown=worker ./pages /app/pages
-COPY --chown=worker ./public /app/public
-COPY --chown=worker ./redux /app/redux
-COPY --chown=worker ./styles /app/styles
-COPY --chown=worker ./gasket.config.js /app/gasket.config.js
-COPY --chown=worker ./next.config.js /app/next.config.js
-COPY --chown=worker ./manifest.xml /app/manifest.xml
-COPY --chown=worker ./docker-start.sh /app/docker-start.sh
-COPY --chown=worker ./start-me-first.js /app/start-me-first.js
-
-# Build the application
-RUN echo "Building the application"
-RUN echo "THE_ENV: $THE_ENV"
-RUN if [ "$THE_ENV" = "development" ] ; then npm run build:dev ; else npm run build ; fi
 ENV ECS_TLS=1
-#CMD ["/bin/sh", "/app/docker-start.sh $THE_ENV"]
-CMD ["npm", "run", "start"]
 EXPOSE 8080
+EXPOSE 8443
+CMD ["npm", "run", "start"]
+
 
 
 

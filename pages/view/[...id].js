@@ -10,7 +10,7 @@ import Spinner from '@ux/spinner';
 import text from '@ux/text';
 import SiblingSet from '@ux/sibling-set';
 import SummaryPrompt from '../../components/summary-prompt';
-import { submitSummaryPromptJob, getModelList } from '../../lib/data/data.service';
+import { submitSummaryPromptJob } from '../../lib/data/data.service';
 import Button from '@ux/button';
 import DownloadButton from '../../components/download-button';
 import { BannerMessage } from '../../components/banner-message';
@@ -72,7 +72,6 @@ const ViewPage = ({ authDetails }) => {
           return obj;
         });
         setData({ headers, dataSet });
-        getModelList().then((data) => setModelList(data));
         setTableLoading(false);
       });
     }
@@ -96,7 +95,7 @@ const ViewPage = ({ authDetails }) => {
               <SummaryPrompt runId={routeParams.run_id} count={data?.dataSet?.length || 0}
                 isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)}
                 eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt}
-                modelList={modelList}
+
               />}
               {!modelList && <text.label text={'No models available'} as='label' />}
               <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
@@ -105,7 +104,7 @@ const ViewPage = ({ authDetails }) => {
           }
         </div>
       </div>
-      <Card id='evaluation' className='m-t-1 lh-view-card' stretch={true} title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+      <Card id='evaluation' className='m-t-1 lh-view-card' stretch title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
         <Table className='table table-hover lh-table-full-view-with-scroll' order={data?.headers.map(col => col)}>
           <thead>
             <tr>

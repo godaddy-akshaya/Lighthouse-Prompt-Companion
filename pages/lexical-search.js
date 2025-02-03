@@ -201,28 +201,30 @@ const LexicalSearch = ({ initialQueries }) => {
     });
   };
   return (
-    <div className='container'>
+    <>
       <Head title='Lexical Search' description='Lexical Search' route='search' />
-      <text.h1 as='heading' text={`Lexical Search`} />
-      <text.p as='paragraph' text={headerText} />
-      {confirmModal.show && <ConfirmModal onConfirm={handleDelete} message='Are you sure' onCancel={() => setConfirmModal({ ...confirmModal, show: false })} title='Delete Query' />}
-      <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
-        actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
-      {formModel.submitted &&
-        <Box blockPadding='lg'>
-          <BannerMessage
-            showMessage={true}
-            message={`${formModel.query_name} ${formModel.status} `}
-            handleCloseError={() => window.location.reload()}
-            userMessageType='success' />
-        </Box>
-      }
+      <Box >
+        <text.h1 as='heading' text={`Lexical Search`} />
+        <text.p as='paragraph' text={headerText} />
+        {confirmModal.show && <ConfirmModal onConfirm={handleDelete} message='Are you sure' onCancel={() => setConfirmModal({ ...confirmModal, show: false })} title='Delete Query' />}
+        <BannerMessage showMessage={banner.show} message={banner.message} handleCloseError={handleCloseError}
+          actions={<Button design="inline" text="Action Link" />} userMessageType={banner.errorType} />
+        {formModel.submitted &&
+          <Box blockPadding='lg'>
+            <BannerMessage
+              showMessage={true}
+              message={`${formModel.query_name} ${formModel.status} `}
+              handleCloseError={() => window.location.reload()}
+              userMessageType='success' />
+          </Box>
+        }
+      </Box>
       {loading &&
         <Box>
           <Spinner size='md' />
         </Box>}
       {!loading && !formModel.submitted &&
-        <form onSubmit={handleSubmit} id='lexical-form'>
+        <Box style={{ 'width': '80%' }}><form onSubmit={handleSubmit} id='lexical-form'>
           <Box inlineAlignChildren='end' blockPadding='md' gap='md' className='lh-container lh-end'>
             {lexicalQueries && <LexicalMenu onAction={handleMenuAction} queries={lexicalQueries} />}
             {!lexicalQueries && <Spinner size='sm' />}
@@ -243,21 +245,22 @@ const LexicalSearch = ({ initialQueries }) => {
               <StatTags stats={lexicalHits} />
             </Box>
           }
-          <Box gap='lg' blockPadding='lg' className='lh-container lh-between m-t-1' stretch >
+          <Box gap='lg' blockPadding='lg' blockAlignChildren='spaceBetween' >
             <SiblingSet stretch gap='sm' >
               <Button type='button' size='sm' design='secondary' onClick={handleCheckHits} text='Fetch Query Counts' />
               <Button type='button' size='sm' design='secondary' onClick={handleValidate} text='Validate' icon={<Checkmark />} />
               <Button type='submit' size='sm' aria-label='Validate before submit' design='primary' disabled={!formModel.validated} text='Submit' />
             </SiblingSet>
-            <Box inlineAlignChildren='end'>
-              {formModel.isEdit &&
-                <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
-              }
-            </Box>
+
+            {formModel.isEdit &&
+              <DeleteQuery queryId={formModel.query_name} onDelete={(queryId) => setConfirmModal({ ...confirmModal, show: true, queryId })} />
+            }
+
           </Box>
         </form>
+        </Box>
       }
-    </div >
+    </>
   );
 };
 

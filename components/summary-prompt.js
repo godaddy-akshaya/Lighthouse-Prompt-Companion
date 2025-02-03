@@ -8,11 +8,11 @@ import TextInput from '@ux/text-input';
 import Add from '@ux/icon/add';
 import AiModelSelect from './ai-model-select';
 
-export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, eventOpen, eventCancel, modelList = [] }) {
+export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, eventOpen, eventCancel }) {
   const [prompt, setPrompt] = useState('');
   const [numOfErrorMessage, setNumOfErrorMessage] = useState();
   const [promptErrorMessage, setPromptErrorMessage] = useState();
-  const [aiModel, setAiModel] = useState(modelList?.length > 0 ? modelList[0] : null);
+  const [aiModel, setAiModel] = useState(null);
   const [numToRun, setNumToRun] = useState(count);
 
   function handlePrompt(e) {
@@ -77,7 +77,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
       <Block>
         {modelList.length > 0 &&
-          <AiModelSelect modelList={modelList} onChange={setAiModel} defaultValue={aiModel} id='ai-model' name='ai-model' />
+          <AiModelSelect onChange={setAiModel} defaultValue={aiModel} id='ai-model' name='ai-model' />
         }
         <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun.toString()} defaultValue={count?.toString()} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
         <Button text='Insert' icon={<Add />} className='m-t-1' design='secondary' value='concatenation_of_responses' onClick={insertAction} />

@@ -40,6 +40,9 @@
 @import '@ux/icon/refresh/index.css';
 @import '@ux/spinner/styles';
 @import '@ux/icon/click/index.css';
+@import '@ux/box/styles';
+@import '@ux/search/styles';
+@import '@ux/icon/x/index.css';
 
 /*
 Use this file to define your global styles.
@@ -60,6 +63,17 @@ it is recommended to import those directly to `pages/_app.js`
 .code-block-custom-styles {
     font-size: x-small;
     line-height: normal;
+}
+
+#learn-more {
+    width: 40%;
+    min-width: 300px;
+}
+
+#get-started {
+    width: 30%;
+    min-width: 200px;
+    background-color: var(--ux-1vw9arb);
 }
 
 .lexical-query-element {
@@ -213,13 +227,11 @@ it is recommended to import those directly to `pages/_app.js`
 }
 
 .logo {
-    display: inline-block;
+    display: block;
     max-width: 130px;
     max-height: 135px;
     width: 100%;
     height: 100%;
-    padding: 8px;
-    margin: 16px;
 }
 
 // Menu styles
@@ -228,9 +240,6 @@ it is recommended to import those directly to `pages/_app.js`
     overflow-y: auto;
 }
 
-.grey-card {
-    background-color: var(--ux-1vw9arb, #D4DBE0) !important;
-}
 
 .lh-menu {
     max-height: 250px !important;
