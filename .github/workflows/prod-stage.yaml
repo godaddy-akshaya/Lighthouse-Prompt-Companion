@@ -42,7 +42,7 @@ jobs:
       - name: Request CirrusScan Scans
         uses: gdcorp-actions/cirrusscan-request-scan@v1
         with:
-          requester_arn: arn:aws:iam::255575434142:user/GD-AWS-DeployUser-CKPEtlBatch-Dev-Private 
+          requester_arn: arn:aws:sts::650754360059:assumed-role/GD-AWS-USA-GPD-CKPEtlBatch-CICD
           github_commit: ${{ github.sha }}
           github_repository: ${{ github.repository }}
           github_token: ${{ github.token }}
