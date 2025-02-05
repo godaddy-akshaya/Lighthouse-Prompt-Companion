@@ -34,6 +34,7 @@ https://local.gasket.dev-godaddy.com:8443
 
 ```bash
 npm config set registry https://gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/
+
 docker build -t lighthouse-ui --build-arg NPM_TOKEN=[token] --build-arg AWS_ENV=[env]. --no-cache
 ```
 
