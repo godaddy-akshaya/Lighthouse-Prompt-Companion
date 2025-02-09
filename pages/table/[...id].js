@@ -97,7 +97,6 @@ const PromptBuilder = ({ authDetails }) => {
           setShowUserMessage(true);
           setShowMessage(false);
         } else {
-
           setNumOfTransactions(data || 0);
           setShowMessage(false);
         }
@@ -118,7 +117,6 @@ const PromptBuilder = ({ authDetails }) => {
       setIsLoading(false);
     } else {
       getTableFilters(routeParams.table).then(data => {
-        console.log('page', data.errorMessage);
         if (data?.errorMessage) {
           setErrorMessage(data.errorMessage);
           setShowUserMessage(true);

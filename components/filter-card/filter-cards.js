@@ -9,7 +9,7 @@ const FilterCardTitle = ({ isOpen, label, count }) => {
   const [showCount, setShowCount] = useState(false);
   useEffect(() => { setShowCount(!isOpen); }, [isOpen]);
   return (
-    <Box orientation='horizontal' blockAlignChildren='spaceBetween'>
+    <Box orientation='horizontal' blockPadding='sm' inlinePadding='sm' blockAlignChildren='spaceBetween'>
       <text.label as='label' text={label} />
       <Box orientation='horizontal' inlineAlignChildren='end'>
         {showCount && <text.label as='caption' text={`${count}`} />}
@@ -48,7 +48,7 @@ const FilterCards = ({ options, label, id, rowIndex, onChange }) => {
   };
   return (
     <>
-      <Card className='lh-filter-card' stretch id={id} space={{ block: 'sm', inline: 'sm' }}>
+      <Card className='lh-filter-card' stretch id={id} >
         <Collapsible defaultOpen={open} open={open} id={`${id}-coll`} onChange={handleCollapsibleChange} aria-label='collaspible-container' className='lh-no-padding'
           title={<FilterCardTitle count={`${checkboxColumns?.filter(r => r.value).length} of ${checkboxColumns?.length}`} label={label} isOpen={open} />}>
           <div className='lh-content'>
