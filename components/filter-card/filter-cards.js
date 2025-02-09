@@ -3,17 +3,18 @@ import Card from '@ux/card';
 import text from '@ux/text';
 import Collapsible from '@ux/collapsible';
 import ItemFilterSearch from './item-filter-search';
+import Box from '@ux/box';
 
 const FilterCardTitle = ({ isOpen, label, count }) => {
   const [showCount, setShowCount] = useState(false);
   useEffect(() => { setShowCount(!isOpen); }, [isOpen]);
   return (
-    <>
-      <div className='lh-title'>
-        <text.label as='label' text={label} /><br />
+    <Box orientation='horizontal' blockAlignChildren='spaceBetween'>
+      <text.label as='label' text={label} />
+      <Box orientation='horizontal' inlineAlignChildren='end'>
         {showCount && <text.label as='caption' text={`${count}`} />}
-      </div>
-    </>
+      </Box>
+    </Box>
   );
 };
 
@@ -47,7 +48,7 @@ const FilterCards = ({ options, label, id, rowIndex, onChange }) => {
   };
   return (
     <>
-      <Card className='lh-filter-card' stretch id={id} space={{ block: true, inline: true, as: 'block' }}>
+      <Card className='lh-filter-card' stretch id={id} space={{ block: 'sm', inline: 'sm' }}>
         <Collapsible defaultOpen={open} open={open} id={`${id}-coll`} onChange={handleCollapsibleChange} aria-label='collaspible-container' className='lh-no-padding'
           title={<FilterCardTitle count={`${checkboxColumns?.filter(r => r.value).length} of ${checkboxColumns?.length}`} label={label} isOpen={open} />}>
           <div className='lh-content'>

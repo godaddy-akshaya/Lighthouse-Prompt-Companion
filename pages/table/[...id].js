@@ -87,16 +87,17 @@ const PromptBuilder = ({ authDetails }) => {
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 300);
-
     try {
       setJobModel({ ...jobModel, filterOptions, extras });
       submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
+        console.log('page', data);
         if (data?.errorMessage) {
           setNumOfTransactions(0);
           setErrorMessage(data.errorMessage);
           setShowUserMessage(true);
           setShowMessage(false);
         } else {
+
           setNumOfTransactions(data || 0);
           setShowMessage(false);
         }
@@ -117,7 +118,14 @@ const PromptBuilder = ({ authDetails }) => {
       setIsLoading(false);
     } else {
       getTableFilters(routeParams.table).then(data => {
-        setFilters(data);
+        console.log('page', data.errorMessage);
+        if (data?.errorMessage) {
+          setErrorMessage(data.errorMessage);
+          setShowUserMessage(true);
+          setIsLoading(false);
+          setFilters([]);
+        } else
+          setFilters(data);
         setShowTableSelect(false);
         setIsLoading(false);
       }).catch(error => handleError(error));
