@@ -20,14 +20,14 @@ const TableSelect = () => {
     <Box>
       {error && <text.p as='paragraph' text={error} />}
       {loading && <Box alignSelf='center' blockPadding='md' inlinePadding='md'><Spinner size='sm' /></Box>}
-      {!loading && <>
+      {!loading && <Box blockPadding='sm'>
         {tables?.length === 0 && <text.p as='paragraph' text='No tables found. Please contact the Lighthouse team for assistance' />}
         {tables?.length > 0 &&
-          <SelectInput visualSize='lg' className='select-table' label='' helpMessage={loading ? 'loadding' : ''} stretch onChange={handleTableRouteChange} id='tables' name='select'>
+          <SelectInput className='select-table' label='' helpMessage={loading ? 'loadding' : ''} stretch onChange={handleTableRouteChange} id='tables' name='select'>
             <option value=''>Select...</option>
             {tables?.map(table => <option key={table.column_name} value={table.column_name}>{table.display_name}</option>) || null}
           </SelectInput>
-        } </>}
+        } </Box>}
     </Box>
   );
 };

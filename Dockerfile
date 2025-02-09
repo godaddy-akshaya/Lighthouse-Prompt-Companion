@@ -1,5 +1,5 @@
 # Golden container - only the best
-FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:22.9.0-alpine-3.20-arm AS builder
+FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:20.15.0-alpine-3.20-arm AS builder
 
 USER root
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -36,6 +36,7 @@ WORKDIR /app
 COPY --from=app-prod-preparer /app/package.json /app/gasket.config.js /app/start-me-first.js ./
 COPY --from=app-prod-preparer /app/node_modules ./node_modules
 COPY --from=app-prod-preparer /app/config ./config
+COPY --from=app-prod-preparer /app/hooks ./hooks
 COPY --from=app-prod-preparer /app/.next ./.next
 COPY --from=app-prod-preparer /app/lib ./lib
 COPY --from=app-prod-preparer /app/redux ./redux
