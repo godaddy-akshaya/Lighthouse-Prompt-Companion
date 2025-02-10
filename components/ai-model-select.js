@@ -24,8 +24,8 @@ const AiModelSelect = ({ onChange, defaultValue }) => {
   };
 
   return (
-    <>
-      {aiModels.length > 1 &&
+    <>{loading && <div>Loading...</div>}
+      {!loading && aiModels?.length > 1 && <>
         <SelectInput onChange={handleModelChange} required helpMessage={selectedValue ?
           `input rate: ${selectedValue.input_token_rate} / output rate: ${selectedValue.output_token_rate} /
               max tokens ${selectedValue?.max_tokens}` : ''}
@@ -36,12 +36,9 @@ const AiModelSelect = ({ onChange, defaultValue }) => {
             </option>;
           })}
         </SelectInput>
+        {(!aiModels || aiModels?.length === 0) && <div>No Models Available</div>} </>
       }
-      { }
-      {(!aiModels || aiModels?.length === 0) && <div>{text('No models available')}</div>}
     </>
-
-
   );
 };
 export default AiModelSelect;
