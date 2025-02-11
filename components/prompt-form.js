@@ -41,30 +41,38 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
   function handleJobSumbit(e) {
     e.preventDefault();
     if (!checkForInputs()) return;
-    onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
+    console.log(prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel);
+    // onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
   }
   function checkForInputs() {
     let passed = true;
-    // need to make sure [transcript] is in the prompt
-    if (prompt.indexOf('[transcript]') === -1) {
-      setPromptErrorMessage('Prompt must contain [transcript]');
-      passed = false;
-    }
-    if (includeEval) {
-      if (evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[llm_response]') === -1) {
-        setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
+    try {
+      // need to make sure [transcript] is in the prompt
+      if (prompt.indexOf('[transcript]') === -1) {
+        setPromptErrorMessage('Prompt must contain [transcript]');
         passed = false;
       }
-      if (!evaluationModel) {
-        passed = false;
-        setEvalPromptErrorMessage('Evaluation Prompt must have model selected');
+      if (includeEval) {
+        if (evaluationPrompt.indexOf('[transcript]') === -1 || evaluationPrompt.indexOf('[llm_response]') === -1) {
+          setEvalPromptErrorMessage('Evaluation Prompt must contain [transcript] and [llm_response]');
+          passed = false;
+        }
+        if (!evaluationModel) {
+          passed = false;
+          setEvalPromptErrorMessage('Evaluation Prompt must have model selected');
+        }
       }
-    }
-    // Check if they try to increase the number of transactions to run by more the limit
-    if (numOfTransactionsToRun > LIMIT_OF_TRANSACTIONS) {
-      setNumOfErrorMessage(`Number of transactions to run cannot exceed ${LIMIT_OF_TRANSACTIONS}`);
+      // Check if they try to increase the number of transactions to run by more the limit
+      if (numOfTransactionsToRun > LIMIT_OF_TRANSACTIONS) {
+        setNumOfErrorMessage(`Number of transactions to run cannot exceed ${LIMIT_OF_TRANSACTIONS}`);
+        passed = false;
+      }
+    } catch (err) {
+      console.error('Error in checkForInputs', err);
       passed = false;
     }
+
+
 
     return passed;
 
@@ -129,7 +137,7 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
               {includeEval ?
                 <div className="eval m-t-1">
                   <text.label as='label' text='Evaluation Parameters' />
-                  <AiModelSelect id='model-select-eval' className='m-b-1' name='model-select-eval' label='Model' onChange={handleEvalModelChange} defaultValue={evaluationModel} />
+                  <AiModelSelect id='model-select-eval' className='m-b-1' name='model-select-eval' label='Model' onChange={handleEvalModelChange} />
                   <Menu id='my-menu-for-eval' className='m-t-1'>
                     <MenuButton icon={<Add />} text='Insert' design='secondary' />
                     <MenuList className='lh-menu' design='primary'>

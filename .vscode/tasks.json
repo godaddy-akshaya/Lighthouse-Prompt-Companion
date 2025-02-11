@@ -7,6 +7,14 @@
       "command": "npm run local",
       "problemMatcher": [],
       "isBackground": true
+    },
+    {
+      "type": "npm",
+      "script": "build:dev",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: build:dev",
+      "detail": "gasket build --env development"
     }
   ]
 }
