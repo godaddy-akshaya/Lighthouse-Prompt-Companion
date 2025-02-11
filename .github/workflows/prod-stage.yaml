@@ -64,7 +64,7 @@ jobs:
               ]
             }
       - name: Request CirrusScan Scans
-        uses: ./.github/workflows/request-cirrusscan.yaml
+        uses: request-cirrusscan.yaml
         with:
           requester_arn: arn:aws:iam::255575434142:role/GD-AWS-USA-GPD-CKPEtlBatch-CICD
           github_commit: ${{ github.sha }}
