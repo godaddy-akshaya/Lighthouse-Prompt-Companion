@@ -48,12 +48,12 @@ const FilterCards = ({ options, label, id, rowIndex, onChange }) => {
   };
   return (
     <>
-      <Card className='lh-filter-card' stretch id={id} >
+      <Card className='lh-filter-card' stretch id={id} space={{ inline: 'sm', block: 'sm' }} >
         <Collapsible defaultOpen={open} open={open} id={`${id}-coll`} onChange={handleCollapsibleChange} aria-label='collaspible-container' className='lh-no-padding'
-          title={<FilterCardTitle count={`${checkboxColumns?.filter(r => r.value).length} of ${checkboxColumns?.length}`} label={label} isOpen={open} />}>
-          <div className='lh-content'>
+          title={<FilterCardTitle count={`${checkboxColumns?.filter(r => r.value).length} of ${checkboxColumns?.length}`} label={label} isOpen={open} className='lh-no-padding' />}>
+          <Box>
             <ItemFilterSearch items={checkboxColumns} onSubmit={handleOnSumbit} OnCancel={handleOnCancel} />
-          </div>
+          </Box>
         </Collapsible>
       </Card>
     </>
