@@ -77,7 +77,7 @@ export default function SummaryPrompt({ runId, count, isModalOpen, eventSave, ev
     <Modal className='summary-prompt-modal' id='modal-summary' title={title} onClose={() => handleCancel(false)} actions={actions}>
       <Block>
         {modelList.length > 0 &&
-          <AiModelSelect onChange={setAiModel} defaultValue={aiModel} id='ai-model' name='ai-model' />
+          <AiModelSelect onChange={setAiModel} id='ai-model' name='ai-model' />
         }
         <TextInput id='number-to-run' errorMessage={numOfErrorMessage} className='m-t-1' value={numToRun.toString()} defaultValue={count?.toString()} onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
         <Button text='Insert' icon={<Add />} className='m-t-1' design='secondary' value='concatenation_of_responses' onClick={insertAction} />

@@ -39,13 +39,6 @@ jobs:
           # and then build/tag a test image using the cache from ^^^
           docker build --platform linux/arm64 --target builder --force-rm --secret id=npm_token,env=ARTIFACTORY_RO_TOKEN \
             -t "${{ steps.katana-app.outputs.app }}-tester:${{ github.sha }}" .
-      - name: Request CirrusScan Scans
-        uses: gdcorp-actions/cirrusscan-request-scan@v1
-        with:
-          requester_arn: arn:aws:iam::255575434142:user/GD-AWS-DeployUser-CKPEtlBatch-Dev-Private 
-          github_commit: ${{ github.sha }}
-          github_repository: ${{ github.repository }}
-          github_token: ${{ github.token }}
       - name: Set up build vars for metadata
         run: |
           echo "BUILT_SHORT_SHA=$(git rev-parse HEAD | cut -c1-8)" | tee -a $GITHUB_ENV
@@ -70,7 +63,8 @@ jobs:
                 { "name": "BUILT_AT", "value": "${{ env.BUILT_AT }}" } 
               ]
             }
-      - name: Promote to Production Environment
+    
+      - name: Promote to Stage Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Lockup } from '@ux/layout';
 import { withLocaleRequired } from '@gasket/react-intl';
 import PropTypes from 'prop-types';
 import Head from '../components/head';
@@ -12,7 +11,7 @@ import Logo from '../components/logo';
 import session from '../lib/session';
 import TableSelect from '../components/table-select';
 import TwoColumnLayout from '../components/layout/two-column-layout';
-// const urlToView = `https://aws.amazon.com/blogs/machine-learning/how-godaddy-built-lighthouse-an-interaction-analytics-solution-to-generate-insights-on-support-interactions-using-amazon-bedrock/`;
+
 export const IndexPage = ({ authDetails }) => {
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
   return (

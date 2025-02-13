@@ -2,6 +2,10 @@ module.exports = {
   env: 'local',
   region: 'us-west-2',
   root: 'https://local.c3.int.dev-gdcorp.tools:8443',
+  auth: {
+    app: 'local.gasket',
+    host: 'sso.dev-godaddy.com'
+  },
   api: {
     'table-listing': {
       method: 'GET',
