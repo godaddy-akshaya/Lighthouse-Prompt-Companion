@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import SelectInput from '@ux/select-input';
 import useAiModels from '../hooks/use-ai-models';
 
-const AiModelSelect = ({ onChange, defaultValue }) => {
-  const [selectedValue, setSelectedValue] = React.useState(defaultValue);
-  const { aiModels, loading, error } = useAiModels();
+const AiModelSelect = ({ onChange }) => {
+  const [selectedValue, setSelectedValue] = useState(null);
+  const { aiModels, loading, error, defaultValue } = useAiModels();
   /*
     ai_model_item: {
       model: ''
@@ -16,7 +16,13 @@ const AiModelSelect = ({ onChange, defaultValue }) => {
     }
 
   */
+  useEffect(() => {
 
+    if (aiModels && aiModels.length > 0) {
+      setSelectedValue(aiModels[0]); onChange(aiModels[0]);
+    }
+
+  }, [aiModels]);
   const handleModelChange = (e) => {
     const obj = aiModels.find(item => item.model === e);
     setSelectedValue(obj);
@@ -36,6 +42,7 @@ const AiModelSelect = ({ onChange, defaultValue }) => {
             </option>;
           })}
         </SelectInput>
+        {error && <div>{`Error Loading Models ${error}`}</div>}
         {(!aiModels || aiModels?.length === 0) && <div>No Models Available</div>} </>
       }
     </>

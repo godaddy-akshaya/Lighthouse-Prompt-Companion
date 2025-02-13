@@ -5,7 +5,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against Gasket App",
-            "url": "https://local.c3.int.dev-gdcorp.tools:8443",
+            "url": "https://local.gasket.dev-godaddy.com:8443",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": "npm: run local"
         },
@@ -13,7 +13,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome with npm run local",
-            "url": "https://local.c3.int.dev-gdcorp.tools:8443",
+            "url": "https://local.gasket.dev-godaddy.com:8443",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": "npm: run local"
         }

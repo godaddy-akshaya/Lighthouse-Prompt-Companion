@@ -78,7 +78,7 @@ const ItemFilterSearch = ({ items, onSubmit, OnCancel }) => {
         <text.label as='caption' text={`${filteredItems?.filter(item => item.value).length} of ${items.length}`} />
       </Lockup>
       <Lockup>
-        <TextInput ref={myRef} onFocus={() => myRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })} type='search' id='search-term' label='' defaultValue={searchTerm} onChange={handleInputChange} placeholder='Just start typing...' />
+        <TextInput id='filter-search' ref={myRef} onFocus={() => myRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })} type='search' id='search-term' label='' defaultValue={searchTerm} onChange={handleInputChange} placeholder='Just start typing...' />
       </Lockup>
       {filteredItems.length === 0 && <Lockup><text.p text='No results found' /></Lockup>}
       {filteredItems.length > 0 &&
