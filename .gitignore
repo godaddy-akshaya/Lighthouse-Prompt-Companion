@@ -34,3 +34,4 @@ certs/prompt-ui.c3.int.dev-gdcorp.tools.crt
 .vscode/task.json
 .vscode/launch.json
 pages/test-page.js
+.pat_token
