@@ -1,4 +1,4 @@
-name: (SC) Prod Stage Build and Deploy
+name: (SC) Stage Build and Deploy
 
 on:
   push:
