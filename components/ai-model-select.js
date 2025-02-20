@@ -17,11 +17,10 @@ const AiModelSelect = ({ onChange }) => {
 
   */
   useEffect(() => {
-
-    if (aiModels && aiModels.length > 0) {
-      setSelectedValue(aiModels[0]); onChange(aiModels[0]);
+    if (defaultValue) {
+      setSelectedValue(defaultValue);
+      onChange(defaultValue);
     }
-
   }, [aiModels]);
   const handleModelChange = (e) => {
     const obj = aiModels.find(item => item.model === e);

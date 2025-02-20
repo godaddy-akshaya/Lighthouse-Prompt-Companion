@@ -58,10 +58,20 @@ const PromptBuilder = ({ authDetails }) => {
         evaluation_model: formValues.evaluationModel || null,
         evaluation_prompt: formValues.evaluationPrompt || null
       };
-      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(() => {
-        router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
+
+      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then((data) => {
+
+        if (data?.errorMessage) {
+          setErrorMessage(data.errorMessage);
+          setIsLoading(false);
+          setShowUserMessage(true);
+        } else {
+          router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
+        }
+
       }, error => {
-        setErrorMessage(error);
+        console.log('error', error);
+        setErrorMessage(error.toString());
         setIsLoading(false);
         setShowUserMessage(true);
       });
@@ -97,7 +107,8 @@ const PromptBuilder = ({ authDetails }) => {
           setShowUserMessage(true);
           setShowMessage(false);
         } else {
-          setNumOfTransactions(data || 10);
+          setNumOfTransactions(data || 0);
+          // used in testing  setNumOfTransactions(10);
           setShowMessage(false);
         }
         setIsPromptLoading(false);

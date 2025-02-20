@@ -146,7 +146,7 @@ const TableFilter = ({ filters, onSubmit }) => {
           </Block>
           <Block onFocus={handleOnFocus}>
             <Lockup>
-              <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+              <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
             </Lockup>
           </Block>
           <Box blockPadding='lg' inlinePadding='lg'>
