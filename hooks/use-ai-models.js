@@ -30,7 +30,7 @@ const useAiModels = () => {
     fetchAiModels();
   }, []);
 
-  return { aiModels, loading, error };
+  return { aiModels, loading, error, defaultValue: aiModels?.[0] };
 
 }
 
