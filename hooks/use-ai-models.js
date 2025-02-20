@@ -19,7 +19,6 @@ const useAiModels = () => {
   React.useEffect(() => {
     const fetchAiModels = async () => {
       setLoading(true);
-
       try {
         const data = await getModelList();
         setAiModels(data);

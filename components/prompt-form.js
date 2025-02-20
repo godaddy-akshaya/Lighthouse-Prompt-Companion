@@ -41,8 +41,7 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
   function handleJobSumbit(e) {
     e.preventDefault();
     if (!checkForInputs()) return;
-    console.log(prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel);
-    // onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
+    onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
   }
   function checkForInputs() {
     let passed = true;
@@ -78,10 +77,11 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
 
   }
   function handleModelChange(e) {
-    setPromptModel(e);
+    console.log('Setting the prompt model', e);
+    setPromptModel({ ...e });
   }
   function handleEvalModelChange(e) {
-    setEvaluationModel(e);
+    setEvaluationModel({ ...e });
   }
   function handleNumberOfTransactionChange(e) {
     if (e > LIMIT_OF_TRANSACTIONS) {
@@ -96,8 +96,8 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
     setIncludeEval(!includeEval);
   }
   return (
-    <Card className='lh-prompt-form-card' id='para-card' stretch>
-      <Module>
+    <Card className='lh-prompt-form-card' id='para-card' stretch space={{ inline: 'md', block: 'md' }}>
+      <Box blockPadding='md' inlinePadding='md'>
         <Block>
           <Lockup>
             <Tag emphasis='neutral'>
@@ -105,33 +105,30 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
             </Tag>
           </Lockup>
         </Block>
-        <Block>
-          <Lockup>
-            <AiModelSelect id='aiModel' name='aiModel' label='AI Model' onChange={handleModelChange} defaultValue={promptModel} />
-          </Lockup>
-          <Lockup>
-            <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
-              className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
-              onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
-          </Lockup>
-          <Lockup>
-            <Menu id='my-menu' size='small' className='m-t-1'>
-              <MenuButton icon={<Add />} text='Insert' design='secondary' />
-              <MenuList className='lh-menu' design='primary'>
-                <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
-                <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertAction}>llm_response</MenuItem>
-              </MenuList>
-            </Menu>
-          </Lockup>
+        <Box blockPadding='sm' inlinePadding='md'>
+          <AiModelSelect id='aiModel' name='aiModel' label='AI Model' onChange={handleModelChange} />
+        </Box>
+        <Box blockPadding='sm' inlinePadding='md'>
+          <TextInput id='number-to-run' errorMessage={numOfErrorMessage}
+            className='m-t-1' helpMessage={numberToRunHelpMessage} value={numOfTransactionsToRun}
+            onChange={handleNumberOfTransactionChange} label='Number of Transcripts to Run' name='numOfTranscripts' />
+        </Box>
+        <Box blockPadding='sm' inlinePadding='md'>
+          <Menu id='my-menu' size='small' className='m-t-1'>
+            <MenuButton icon={<Add />} text='Insert' design='secondary' />
+            <MenuList className='lh-menu' design='primary'>
+              <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
+              <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertAction}>llm_response</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+        <Box blockPadding='sm' inlinePadding='md'>
           <text.p as='paragraph' className='m-t-1' text='Do not insert MNPI (Material Non-Public Information) into Lighthouse' emphasis='critical' />
-
           <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
             label='Prompt' name='prompt' helpMessage='[transcript] is a required prompt insert'
             onChange={handlePrompt} value={prompt} multiline size={10} />
-        </Block>
-        <Block>
           <Card id='evaluation' className='m-t-1' stretch title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
-            <Box blockPadding='lg' inlinePadding='lg' stretch>
+            <Box blockPadding='md' inlinePadding='md' stretch>
               <Lockup orientation='vertical'>
                 <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
               </Lockup>
@@ -150,9 +147,12 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                 </div> : null}
             </Box>
           </Card>
-        </Block>
-        <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
-      </Module>
+
+        </Box>
+        <Box orientation='horizontal' blockAlignChildren='end' inlinePadding='lg'>
+          <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />
+        </Box>
+      </Box>
     </Card>
   );
 };
