@@ -41,8 +41,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
   function handleJobSumbit(e) {
     e.preventDefault();
     if (!checkForInputs()) return;
-    console.log(promptModel);
-    //  console.log(prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel);
     onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
   }
   function checkForInputs() {
@@ -136,7 +134,7 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
           <TextInput aria-required required={true} id='prompt-form' errorMessage={promptErrorMessage}
             label='Prompt' name='prompt' helpMessage='[transcript] is a required prompt insert'
             onChange={handlePrompt} value={prompt} multiline size={10} />
-          <Card id='evaluation' className='m-t-1' stretch title='Ev' space={{ inline: true, block: true, as: 'blocks' }}>
+          <Card id='evaluation' className='m-t-1' stretch title='Eval'>
             <Box blockPadding='md' inlinePadding='md' stretch>
               <Lockup orientation='vertical'>
                 <Checkbox id='include-eval-chk' label='Include Evaluation' onChange={handleIncludeEval} name='include' />
