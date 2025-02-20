@@ -41,6 +41,8 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
   function handleJobSumbit(e) {
     e.preventDefault();
     if (!checkForInputs()) return;
+    console.log(promptModel);
+    //  console.log(prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel);
     onSubmit({ prompt, promptModel, numOfTransactionsToRun, includeEval, evaluationPrompt, evaluationModel });
   }
   function checkForInputs() {
@@ -78,7 +80,14 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
   }
   function handleModelChange(e) {
     console.log('Setting the prompt model', e);
-    setPromptModel({ ...e });
+    try {
+      setPromptModel({
+        ...promptModel,
+        model: e
+      });
+    } catch (err) {
+      console.error('Error in handleModelChange', err);
+    }
   }
   function handleEvalModelChange(e) {
     setEvaluationModel({ ...e });
@@ -147,7 +156,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
                 </div> : null}
             </Box>
           </Card>
-
         </Box>
         <Box orientation='horizontal' blockAlignChildren='end' inlinePadding='lg'>
           <Button className='m-t-1' text="Run Prompt" onClick={handleJobSumbit} aria-label='submit-run' design='primary' />

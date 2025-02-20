@@ -19,6 +19,7 @@ const AiModelSelect = ({ onChange }) => {
   useEffect(() => {
     if (defaultValue) {
       setSelectedValue(defaultValue);
+      onChange(defaultValue);
     }
   }, [aiModels]);
   const handleModelChange = (e) => {
