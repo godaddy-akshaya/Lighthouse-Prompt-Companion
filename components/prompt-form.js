@@ -119,6 +119,7 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
               <MenuButton icon={<Add />} text='Insert' design='secondary' />
               <MenuList className='lh-menu' design='primary'>
                 <MenuItem key='transcript' aria-label='transcripts' onSelect={insertAction}>transcript</MenuItem>
+                <MenuItem key='llm_response' aria-label='llm_response' onSelect={insertAction}>llm_response</MenuItem>
               </MenuList>
             </Menu>
           </Lockup>
