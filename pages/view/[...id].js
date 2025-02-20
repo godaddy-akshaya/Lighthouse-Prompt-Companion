@@ -25,7 +25,7 @@ const ViewPage = ({ authDetails }) => {
   const [userMessage, setUserMessage] = useState('');
   const [userMessageType, setUserMessageType] = useState('info');
   const [routeParams, setRouteParams] = useState({ run_id: '0' });
-  const [modelList, setModelList] = useState(null);
+
 
 
   const handleCancelSummaryPrompt = () => {
@@ -91,13 +91,11 @@ const ViewPage = ({ authDetails }) => {
         </div>
         <div>
           {!tableLoading > 0 &&
-            <SiblingSet gap={'sm'}>{modelList &&
+            <SiblingSet gap={'sm'}>
               <SummaryPrompt runId={routeParams.run_id} count={data?.dataSet?.length || 0}
                 isModalOpen={isSummaryPromptOpen} eventOpen={() => setIsSummaryPromptOpen(true)}
                 eventCancel={handleCancelSummaryPrompt} eventSave={handleSubmitSummaryPrompt}
-
-              />}
-              {!modelList && <text.label text={'No models available'} as='label' />}
+              />
               <Button href={`/summary/${routeParams.run_id}`} text='Summaries' as='external' />
               <DownloadButton data={data.dataSet} filename={`run_id_${routeParams.run_id}.csv`} />
             </SiblingSet>

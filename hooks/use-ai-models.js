@@ -14,7 +14,6 @@ const useAiModels = () => {
   const [aiModels, setAiModels] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
-  const [defaultAiModel, setDefaultAiModel] = React.useState(null);
 
   React.useEffect(() => {
     const fetchAiModels = async () => {
@@ -22,7 +21,6 @@ const useAiModels = () => {
       try {
         const data = await getModelList();
         setAiModels(data);
-        console.log(data);
       } catch (err) {
         setError(err.message || 'Failed to fetch models');
       } finally {

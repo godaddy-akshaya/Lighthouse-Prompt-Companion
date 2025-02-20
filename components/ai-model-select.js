@@ -4,7 +4,7 @@ import useAiModels from '../hooks/use-ai-models';
 
 const AiModelSelect = ({ onChange }) => {
   const [selectedValue, setSelectedValue] = useState(null);
-  const { aiModels, loading, error, defaultValue } = useAiModels();
+  const { aiModels, loading, error } = useAiModels();
   /*
     ai_model_item: {
       model: ''
@@ -17,12 +17,12 @@ const AiModelSelect = ({ onChange }) => {
 
   */
   useEffect(() => {
-
     if (aiModels && aiModels.length > 0) {
-      setSelectedValue(aiModels[0]); onChange(aiModels[0]);
+      setSelectedValue(aiModels[0]);
+      onChange(aiModels[0]);
     }
-
   }, [aiModels]);
+
   const handleModelChange = (e) => {
     const obj = aiModels.find(item => item.model === e);
     setSelectedValue(obj);
