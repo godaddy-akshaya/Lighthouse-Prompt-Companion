@@ -97,8 +97,8 @@ const PromptBuilder = ({ authDetails }) => {
           setShowUserMessage(true);
           setShowMessage(false);
         } else {
-          // setNumOfTransactions(data || 0);
-          setNumOfTransactions(10);
+          setNumOfTransactions(data || 0);
+          // setNumOfTransactions(10);
           setShowMessage(false);
         }
         setIsPromptLoading(false);
