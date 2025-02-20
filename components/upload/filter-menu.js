@@ -132,7 +132,7 @@ const FilterMenu = ({ onChange }) => {
           {loading && <Spinner size='sm' />}
           <Menu ref={filterMenuRef} id='filter-menu'>
             <MenuButton icon={<Upload />} design='secondary' text='Interaction IDs' />
-            <MenuList style={{ 'overflow-y': 'auto', 'max-height': '250px' }}>
+            <MenuList style={{ 'overflowY': 'auto', 'maxHeight': '250px' }}>
               <MenuItem onSelect={handleOpen}><Tag type='highlight'>Create New</Tag></MenuItem>
               <MenuSeparator />
               <MenuGroup label='Saved Lists'>

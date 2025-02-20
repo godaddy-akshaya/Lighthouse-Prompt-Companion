@@ -146,19 +146,19 @@ const TableFilter = ({ filters, onSubmit }) => {
           </Block>
           <Block onFocus={handleOnFocus}>
             <Lockup>
-              <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch='true' onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
+              <TextInput onFocus={() => formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })} id='lexicalsearch' stretch onChange={handleLexicalSearch} label='Transcripts that contain text' name='lexicalSearch' />
             </Lockup>
           </Block>
-          <Block>
-            <div className='lh-filter-container'>
-              {
-                filterOptions?.map((field, index) =>
-                  <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
-                )
-              }
-            </div>
-          </Block>
-          <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
+          <Box blockPadding='lg' inlinePadding='lg'>
+            {
+              filterOptions?.sort((a, b) => a.column_name.toString().localeCompare(b.column_name.toString())).map((field, index) =>
+                <FilterCards key={index} id={field.column_name} onChange={handleFilterChange} rowIndex={index} label={field.label} options={field.checkbox_columns} />
+              )
+            }
+          </Box>
+          <Box orientation='horizontal' blockAlignChildren='end' inlinePadding='lg'>
+            <Button text="Fetch Results" aria-label='Submit Results' onClick={handleTableRowSubmit} design='primary' />
+          </Box>
         </Box>
       }
     </Card>
