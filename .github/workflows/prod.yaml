@@ -1,4 +1,4 @@
-name: Prod Deploy ckpetlbatch
+name: (SC) Prod Build and Deploy
 
 on:
   push:

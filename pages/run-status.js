@@ -22,8 +22,8 @@ export const RunStatusPage = ({ authDetails }) => {
   // tag for new records created from job submission
   const { newJob } = router.query;
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState();
-  const [results, setResults] = useState();
+  const [modalData, setModalData] = useState(null);
+  const [results, setResults] = useState(null);
   const [tableLoading, setTableLoading] = useState(true);
   if (authDetails) session.setSessionItem('weblogin', authDetails.accountName);
 
@@ -86,9 +86,6 @@ export const RunStatusPage = ({ authDetails }) => {
       }
       <Head title='Run Status' route='status' />
       <Block as='stack' orientation='vertical'>
-
-
-
         <div className='lh-container lh-between m-b-1'>
           <Lockup >
             <text.h3 text={'Run Status'} as='heading' />

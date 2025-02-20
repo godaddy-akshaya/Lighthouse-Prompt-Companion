@@ -14,6 +14,7 @@ build
 .next
 .vscode
 .npm_token
+.pat_token
 # misc
 .env
 .idea

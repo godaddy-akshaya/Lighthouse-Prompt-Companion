@@ -1,4 +1,4 @@
-name: (SC) Prod Stage Build and Deploy
+name: (SC) Stage Build and Deploy
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       - name: Golden Container Registry Login
         run: |
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
-       # Get the Artifactory token from ASM - assumes it has already been set up at artifactory_ro_creds. See https://github.com/gdcorp-actions/fetch-artifactory-creds
+      # Get the Artifactory token from ASM - assumes it has already been set up at artifactory_ro_creds. See https://github.com/gdcorp-actions/fetch-artifactory-creds
       - name: Fetch artifactory token
         uses: gdcorp-actions/fetch-artifactory-creds@v1
         # Execute the necessary commands to build your application's Docker container image. Place any further build commands under `run:`
@@ -63,7 +63,8 @@ jobs:
                 { "name": "BUILT_AT", "value": "${{ env.BUILT_AT }}" } 
               ]
             }
-      - name: Promote to Production Environment
+    
+      - name: Promote to Stage Environment
         uses: gdcorp-actions/katana-promote-artifact@v1
         with:
           jwt: ${{ steps.katana-auth.outputs.jwt }}

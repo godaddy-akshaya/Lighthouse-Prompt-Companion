@@ -3,6 +3,10 @@ module.exports = {
   region: 'us-west-2',
   root: 'https://lighthouse.c3.int.gdcorp.tools',
   groups: ['lighthouse-ui-group', 'lighthouse-ui-devs'],
+  auth: {
+    app: 'lighthouse.c3.int',
+    host: 'sso.gdcorp.tools'
+  },
   api: {
     'table-listing': {
       method: 'GET',

@@ -3,6 +3,10 @@ module.exports = {
   region: 'us-west-2',
   root: 'https://lighthouse.c3.int.dev-gdcorp.tools',
   groups: ['lighthouse-ui-devs'],
+  auth: {
+    app: 'lighthouse.c3.int',
+    host: 'sso.dev-gdcorp.tools'
+  },
   opensearch: 'https://opensearch.org/docs/latest/',
   api: {
     'table-listing': {

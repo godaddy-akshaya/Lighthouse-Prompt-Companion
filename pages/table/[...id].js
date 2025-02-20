@@ -58,10 +58,20 @@ const PromptBuilder = ({ authDetails }) => {
         evaluation_model: formValues.evaluationModel || null,
         evaluation_prompt: formValues.evaluationPrompt || null
       };
-      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then(() => {
-        router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
+
+      submitPromptJob(routeParams.table, job, jobModel.filterOptions, jobModel.extras).then((data) => {
+
+        if (data?.errorMessage) {
+          setErrorMessage(data.errorMessage);
+          setIsLoading(false);
+          setShowUserMessage(true);
+        } else {
+          router.push(`/run-status?newJob=${g}`, undefined, { shallow: true });
+        }
+
       }, error => {
-        setErrorMessage(error);
+        console.log('error', error);
+        setErrorMessage(error.toString());
         setIsLoading(false);
         setShowUserMessage(true);
       });
@@ -87,10 +97,10 @@ const PromptBuilder = ({ authDetails }) => {
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 300);
-
     try {
       setJobModel({ ...jobModel, filterOptions, extras });
       submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
+        console.log('page', data);
         if (data?.errorMessage) {
           setNumOfTransactions(0);
           setErrorMessage(data.errorMessage);
@@ -98,6 +108,7 @@ const PromptBuilder = ({ authDetails }) => {
           setShowMessage(false);
         } else {
           setNumOfTransactions(data || 0);
+          // used in testing  setNumOfTransactions(10);
           setShowMessage(false);
         }
         setIsPromptLoading(false);
@@ -117,7 +128,13 @@ const PromptBuilder = ({ authDetails }) => {
       setIsLoading(false);
     } else {
       getTableFilters(routeParams.table).then(data => {
-        setFilters(data);
+        if (data?.errorMessage) {
+          setErrorMessage(data.errorMessage);
+          setShowUserMessage(true);
+          setIsLoading(false);
+          setFilters([]);
+        } else
+          setFilters(data);
         setShowTableSelect(false);
         setIsLoading(false);
       }).catch(error => handleError(error));

@@ -65,8 +65,6 @@ const SummaryPage = ({ authDetails }) => {
         <div>
           <SiblingSet gap={'sm'}>
             <Button href={`/view/${routerParams.run_id}`} as='external' text='Go Back to Results' />
-
-
           </SiblingSet>
         </div>
       </div>
@@ -102,7 +100,6 @@ const SummaryPage = ({ authDetails }) => {
         {
           tableData.data?.length == 0 &&
           <div className='lh-container lh-center'> <text.label text='No data available' /></div>
-
         }
       </Card>
     </>
