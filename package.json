@@ -75,6 +75,7 @@
     "@ux/text-lockup": "^2400.13.1",
     "@ux/tooltip": "^2400.13.1",
     "@ux/webpack-config": "^2400.11.0",
+    "amazon-quicksight-embedding-sdk": "^2.9.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "elastic-apm-node": "^4.5.4",

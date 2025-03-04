@@ -32,6 +32,14 @@ const Head = (props) => {
           eid: 'pep.prompt-ui.nav.lexical-search.click',
           icon: 'search',
           active: props?.route === 'search'
+        },
+        {
+          'caption': 'QuickSight',
+          key: '4',
+          href: '/quicksight',
+          eid: 'pep.prompt-ui.nav.quicksight.click',
+          icon: 'bar-graph',
+          active: props?.route === 'quicksight'
         }
       ]);
     });
