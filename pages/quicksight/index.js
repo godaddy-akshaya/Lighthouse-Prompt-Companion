@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useMemo,  useState } from 'react';
 import Box from '@ux/box';
-import Text from '@ux/text';  // Capitalized
+import Text from '@ux/text';  
 import Head from '../../components/head';
 import Card from '@ux/card';
-import Spinner from '@ux/spinner';
-import SelectInput from '@ux/select-input';  
 import QuickSightEmbed from '../../components/quicksight/quicksight-embed';  // Fixed import path
 import { BannerMessage } from '../../components/banner-message';
-const getEmbedUrl$ = async (id) => {
-  const response = await fetch('/api/quicksight/embed?id=' + id);
-  const data = await response.json();
-  return data;
-};
+
 
 /* 
 ec5da3b7-a5d8-4685-a334-6e14381daca9 -- Lighthouse Offer Dashboard
@@ -21,11 +14,8 @@ e43656f2-ad59-454a-8825-5e7c0effb3ab - Intent Insights
 */
 
 const QuickSightPage = () => {
-  const [loading, setLoading] = useState(false);
-  const [dashboardId, setDashboardId] = useState();
-  const [dashboardUrl, setDashboardUrl] = useState(null);
   const [error, setError] = useState(null);
-  const [dashbaords, setDashboards] = useState([{
+  const dashbaords= useMemo(() => [{
     name: 'Lighthouse Offer Dashboard',
     id: 'ec5da3b7-a5d8-4685-a334-6e14381daca9',
     description: 'A centralized hub for tracking and analyzing offer performance, the Lighthouse Offer Dashboard provides real-time insights into acceptance rates, customer engagement, and revenue impact. Designed for sales and marketing teams, it helps optimize offer strategies and improve conversion rates.'
@@ -38,37 +28,15 @@ const QuickSightPage = () => {
     id: 'e43656f2-ad59-454a-8825-5e7c0effb3ab',
     description: 'Unlock deeper customer behavior analytics with the Intent Insights dashboard, designed to track user engagement, purchasing signals, and conversion probabilities. Businesses can leverage this data to refine targeting strategies and improve customer acquisition efforts.'
   }]);
-  useEffect(() => {
-    console.log('QuickSightPage mounted');
-    const fetchDashboardUrl = async () => {
-      setLoading(true);
-      try {
-        const data = await getEmbedUrl$(dashboardId); 
-        console.log('Dashboard URL:', data?.EmbedUrl || '');
-        if (data?.EmbedUrl) {
-          setDashboardUrl(data?.EmbedUrl || '');
-        } else {
-          setError('No dashboard URL found');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard URL:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (dashboardId) {
-      fetchDashboardUrl();
-    }
-  }, [dashboardId]);  // Added dependency
 
   return (
     <>
-      <Head title="QuickSight" description="QuickSight Reporting GD Lighthouse" route="search" />
+      <Head title="QuickSight" description="QuickSight Reporting GD Lighthouse" route="quicksight" />
+      <Text.h1 text='QuickSight Reporting' as='heading' />
       {error && <Box gap='md' inlinePadding='sm' blockPadding='md'>
          <BannerMessage showMessage={true} message={error} userMessageType="error" handleCloseError={() => setError(null)} />
       </Box>} 
-       <Box gap='md' blockPadding='md' inlinePadding='md'> 
+       {/* <Box gap='md' blockPadding='md' inlinePadding='md'> 
           <Box orientation="horizontal" gap="md">
               <SelectInput id='dashboard-select' label='Select Dashboard' options={dashbaords} onChange={(e) => setDashboardId(e)}>
               {dashbaords.map((d) => {
@@ -76,11 +44,11 @@ const QuickSightPage = () => {
               })}
             </SelectInput>
 </Box>
-          </Box>
+          </Box> */}
         <Box orientation="vertical" gap="md">
-          {dashbaords.map((d) => {
+          {dashbaords.map((d, i) => {
             return (
-              <Box gap='sm' stretch inlinePadding='sm'>
+              <Box key={`${d}-${i}`} gap='sm' stretch inlinePadding='sm'>
               <Card key={d.id} className="quicksight-card" stretch space={{ inline: 'md', block: 'sm'}}>
                 <Box stretch orientation='horizontal'>
                 <Box>
@@ -88,7 +56,7 @@ const QuickSightPage = () => {
                     <Text.p as='paragraph' text={d.description} />
                   </Box>  
                   <Box stretch inlineAlignChildren='center' blockAlignChildren='center' >
-                    <Text.label as='label' text='QS PLACEHOLDER' />
+                  <QuickSightEmbed dashboardId={d.id} />
                   </Box>
                 </Box>
               </Card>
@@ -96,12 +64,6 @@ const QuickSightPage = () => {
             );
           })}
         </Box>
-        <Card id="quicksight-card" className="quicksight-card">
-          {loading && <Spinner size="lg" />}  {/* Fixed variable */}
-          {dashboardId && dashboardUrl && (
-            <QuickSightEmbed dashboardId={dashboardId} dashboardUrl={dashboardUrl} />
-          )}
-        </Card>
     </>
   );
 };
