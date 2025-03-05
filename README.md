@@ -40,3 +40,9 @@ docker build -t lighthouse-ui --build-arg NPM_TOKEN=[token] --build-arg AWS_ENV=
 
 docker run -d -p 8443:8443 --name local.c3.int.dev-gdcorp.tools lighthouse
 npm login --registry=https://gdartifactory1.jfrog.io/artifactory/api/npm/node-virt/ --auth-type=legacy
+
+## Embed Dashboard Quicksight
+
+```bash
+curl --location 'https://quicksight.api.dna.gdcorp.tools/quicksight-dashboard?dashboardId=ec5da3b7-a5d8-4685-a334-6e14381daca9&region=us-west-2' --header 'Authorization: sso-jwt <token>'
+```
