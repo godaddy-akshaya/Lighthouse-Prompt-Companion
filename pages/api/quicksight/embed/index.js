@@ -2,7 +2,7 @@
 import fetch from '@gasket/fetch';
 
 export default async function handler(req, res) {
-  const URL = process.env.QUICKSIGHT_API || 'https://quicksight.api.dna.gdcorp.tools';
+  const URL = process.env.QUICKSIGHT_API || 'https://quicksight.api.dna.int.gdcorp.tools';
   const { id } = req.query;
   const DASHBOARD_ID = id;
   const REGION = 'us-west-2';
