@@ -107,13 +107,13 @@ const QuickSightEmbed = ({ dashboardId }) => {
   }, [embeddedDashboard, dashboardId]);
 
   return (
-    <Card stretch id='test-2' space={{ block: 'md', inline: 'md' }}>
+    <Card stretch id={`${dashboardId}-card`} space={{ block: 'md', inline: 'md' }}>
       {error && <Box inlinePadding='sm' blockPadding='md'>
        <Text.label as='label' text={error} />
       </Box>}
       {loading && <Spinner size='sm' />}
       {dashboardUrl && 
-      <Box style={{ height: '350px', width: '350px'}}>
+      <Box>
         <div id={dashboardId} ref={dashboardRef}></div>
       </Box>
   }

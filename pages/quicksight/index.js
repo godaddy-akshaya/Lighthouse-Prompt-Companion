@@ -50,7 +50,7 @@ const QuickSightPage = () => {
             return (
               <Box key={`${d}-${i}`} gap='sm' stretch inlinePadding='sm'>
               <Card key={d.id} className="quicksight-card" stretch space={{ inline: 'md', block: 'sm'}}>
-                <Box stretch orientation='horizontal'>
+                <Box stretch orientation='vertical'>
                 <Box>
                     <Text.h3 as='title' text={d.name} />
                     <Text.p as='paragraph' text={d.description} />
