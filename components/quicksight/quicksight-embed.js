@@ -36,7 +36,7 @@ const QuickSightEmbed = ({ dashboardId }) => {
     const options = {
       url: dashboardUrl,
       container: dashboardRef.current,
-      height: '15px',
+      height: '80vh',
       width: '100%'
     };
 
