@@ -113,7 +113,7 @@ const QuickSightEmbed = ({ dashboardId }) => {
       </Box>}
       {loading && <Spinner size='sm' />}
       {dashboardUrl && 
-      <Box>
+      <Box style={{ height: '250px', width: '250px'}}>
         <div id={dashboardId} ref={dashboardRef}></div>
       </Box>
   }
