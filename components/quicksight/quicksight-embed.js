@@ -83,7 +83,7 @@ const QuickSightEmbed = ({ dashboardId }) => {
         if (data?.EmbedUrl) {
           setDashboardUrl(data.EmbedUrl);
         } else {
-          throw new Error('No dashboard URL found');
+          throw new Error('No dashboard found');
         }
       } catch (error) {
         console.error('Error fetching dashboard URL:', error);

@@ -34,12 +34,28 @@ const Head = (props) => {
           active: props?.route === 'search'
         },
         {
-          'caption': 'QuickSight',
+          caption: 'Insights',
           key: '4',
-          href: '/quicksight',
-          eid: 'pep.prompt-ui.nav.quicksight.click',
+          eid: 'uxp.lighthouse.nav.insights.click',
+          active: props?.route === 'insights',
           icon: 'bar-graph',
-          active: props?.route === 'quicksight'
+            children: [
+            {
+              caption: "Lighthouse Intents",
+              href: "/insights?dashboardId=ec5da3b7-a5d8-4685-a334-6e14381daca9?title=Lighthouse%20Intents",
+              eid: "uxp.lighthouse.nav.insights.click"
+            },
+            {
+              caption: "Contact Driver",
+              href: "/insights?dashboardId=35ba3d06-ed89-499a-8d1b-5176205eee64&title=Contact%20Driver",
+              eid: "uxp.example.settings.bar.click"
+            },
+            {
+              caption: "Intents Insights",
+              href: "/insights?dashboardId=e43656f2-ad59-454a-8825-5e7c0effb3ab&title=Intents%20Insights",
+              eid: "uxp.example.settings.bar.click"
+            }
+        ] 
         }
       ]);
     });
