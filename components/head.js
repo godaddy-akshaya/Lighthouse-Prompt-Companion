@@ -42,7 +42,7 @@ const Head = (props) => {
             children: [
             {
               caption: "Lighthouse Intents",
-              href: "/insights?dashboardId=ec5da3b7-a5d8-4685-a334-6e14381daca9?title=Lighthouse%20Intents",
+              href: "/insights?dashboardId=ec5da3b7-a5d8-4685-a334-6e14381daca9&title=Lighthouse%20Intents",
               eid: "uxp.lighthouse.nav.insights.click"
             },
             {

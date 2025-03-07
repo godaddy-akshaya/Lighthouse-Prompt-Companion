@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const DASHBOARD_ID = id;
   const REGION = 'us-west-2';
   const targetUrl = `${URL}/quicksight-dashboard?dashboardId=${DASHBOARD_ID}&region=${REGION}`;
-
+console.log('hello');
   // Build the proxy request
   try {
     const proxyRequest = {

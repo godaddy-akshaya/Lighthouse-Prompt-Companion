@@ -1,33 +1,23 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
-import Box from '@ux/box';
 import Card from '@ux/card';
-import Text from '@ux/text';
-import Spinner from '@ux/spinner';
 
-const getEmbedUrl$ = async (id) => {
-  const response = await fetch('/api/quicksight/embed?id=' + id);
-  const data = await response.json();
-  return data;
-};
-
-const QuickSightEmbed = ({ dashboardId }) => {
+const QuickSightEmbed = ({ dashboardId, dashboardUrl }) => {
   const dashboardRef = useRef(null);
   const [embeddedDashboard, setEmbeddedDashboard] = useState(null);
-  const [dashboardUrl, setDashboardUrl] = useState(null);
   const [embeddingContext, setEmbeddingContext] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // Create embedding context
-  const createContext = async () => {
+  // Create embedding context only if not already created
+  const createContext = useCallback(async () => {
+ //   if (embeddingContext) return; // Avoid redundant calls
+
     try {
       const context = await createEmbeddingContext();
       setEmbeddingContext(context);
     } catch (error) {
       console.error('Error creating embedding context:', error);
     }
-  };
+  }, [embeddingContext]);
 
   // Embed the QuickSight dashboard
   const embedDashboard = useCallback(async () => {
@@ -36,7 +26,7 @@ const QuickSightEmbed = ({ dashboardId }) => {
     const options = {
       url: dashboardUrl,
       container: dashboardRef.current,
-      height: '80vh',
+      height: '800px',
       width: '100%'
     };
 
@@ -60,46 +50,21 @@ const QuickSightEmbed = ({ dashboardId }) => {
     }
   }, [embeddingContext, dashboardUrl]);
 
-  // Initialize embedding context when dashboard URL changes
+  // Initialize embedding context only when dashboardUrl changes
   useEffect(() => {
-    if (dashboardUrl) {
+    if (dashboardUrl && !embeddingContext) {
       createContext();
     }
-  }, [dashboardUrl]);
+  }, [dashboardUrl, createContext]);
 
   // Embed dashboard when embedding context is ready
   useEffect(() => {
     if (embeddingContext) {
       embedDashboard();
     }
-  }, [embeddingContext, embedDashboard, embeddedDashboard]);
+  }, [embeddingContext, embedDashboard]); // Remove embeddedDashboard to prevent unnecessary re-renders
 
-
-    const fetchDashboardUrl = useCallback(async () => {
-      setLoading(true);
-      try {
-        const data = await getEmbedUrl$(dashboardId);
-        console.log('Dashboard URL:', data?.EmbedUrl);
-        if (data?.EmbedUrl) {
-          setDashboardUrl(data.EmbedUrl);
-        } else {
-          throw new Error('No dashboard found');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard URL:', error);
-        setError(error.message || 'Error fetching dashboard URL');
-      } finally {
-        setLoading(false);
-      }
-    }, [dashboardId]);
-    
-    useEffect(() => {
-      if (dashboardId) {
-        fetchDashboardUrl();
-      }
-    }, [dashboardId, fetchDashboardUrl]);  
-
-  // Navigate to dashboard when embedded dashboard instance changes
+  // Navigate to dashboard when embedded dashboard instance is ready
   useEffect(() => {
     if (embeddedDashboard && dashboardId) {
       embeddedDashboard.navigateToDashboard(dashboardId, {});
@@ -108,19 +73,13 @@ const QuickSightEmbed = ({ dashboardId }) => {
 
   return (
     <Card stretch id={`${dashboardId}-card`} space={{ block: 'md', inline: 'md' }}>
-      {error && <Box inlinePadding='sm' blockPadding='md'>
-       <Text.label as='label' text={error} />
-      </Box>}
-      {loading && <Spinner size='sm' />}
       {dashboardUrl && 
-      <Box>
+
         <div id={dashboardId} ref={dashboardRef}></div>
-      </Box>
-  }
+      
+      }
     </Card>
   );
 };
 
 export default QuickSightEmbed;
-
-
