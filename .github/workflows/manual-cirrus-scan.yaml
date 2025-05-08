@@ -1,0 +1,30 @@
+name: Manual Cirrus Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      arn:
+        description: "ARN used to trigger the cirrus scan"
+        required: true
+        type: string
+      commit_id:
+        description: "Using commit to trigger the scan"
+        required: true
+        type: string
+  schedule:
+    - cron: "30 6 * * 1" # Runs every Monday at 12 PM IST (6:30 AM UTC)
+
+jobs:
+  trigger-cirrus:
+    runs-on:
+      group: 6429-hadoopmigratione
+      labels:
+        - self-hosted
+    steps:
+      - name: Run Cirrus Scan
+        uses: gdcorp-actions/cirrusscan-request-scan@v3
+        with:
+          requester_arn: arn:aws:iam::255575434142:user/GD-AWS-DeployUser-CKPEtlBatch-Dev-Private
+          github_commit: ${{ inputs.commit_id || github.sha }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ github.token }}
