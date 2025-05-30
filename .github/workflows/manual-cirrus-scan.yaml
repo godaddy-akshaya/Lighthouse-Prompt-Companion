@@ -16,6 +16,8 @@ on:
 
 jobs:
   trigger-cirrus:
+    permissions:
+      contents: read
     runs-on:
       group: 6429-hadoopmigratione
       labels:
