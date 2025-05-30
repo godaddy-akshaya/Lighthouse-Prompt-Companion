@@ -4,6 +4,8 @@ on:
   push:
     branches: [prod-stage]
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   build_publish_promote:
     runs-on:
