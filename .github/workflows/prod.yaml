@@ -1,4 +1,9 @@
 name: (SC) Prod Build and Deploy
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  statuses: write
 
 on:
   push:
