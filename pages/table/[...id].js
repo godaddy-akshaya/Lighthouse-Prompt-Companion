@@ -10,7 +10,7 @@ import Card from '@ux/card';
 import TableSelect from '../../components/table-select';
 import { submitRowCountRequest, getTableFilters, submitPromptJob } from '../../lib/data/data.service';
 import Alert from '@ux/alert';
-import session from '../../lib/session';
+import session from '../../lib/session.js';
 import { getGuid } from '../../lib/utils';
 import MessageOverlay from '@ux/message-overlay';
 import TableFilter from '../../components/table-filter';
@@ -100,7 +100,6 @@ const PromptBuilder = ({ authDetails }) => {
     try {
       setJobModel({ ...jobModel, filterOptions, extras });
       submitRowCountRequest(routeParams.table, filterOptions, extras).then(data => {
-        console.log('page', data);
         if (data?.errorMessage) {
           setNumOfTransactions(0);
           setErrorMessage(data.errorMessage);
@@ -134,7 +133,7 @@ const PromptBuilder = ({ authDetails }) => {
           setIsLoading(false);
           setFilters([]);
         } else
-          setFilters(data);
+        setFilters(data);
         setShowTableSelect(false);
         setIsLoading(false);
       }).catch(error => handleError(error));

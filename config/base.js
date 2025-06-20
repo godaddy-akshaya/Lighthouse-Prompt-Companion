@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   env: 'development',
   region: 'us-west-2',
   root: 'https://lighthouse.c3.int.dev-gdcorp.tools',

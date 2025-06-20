@@ -8,7 +8,7 @@ import Tag from '@ux/tag';
 import { Block, Lockup, Module } from '@ux/layout';
 import text from '@ux/text';
 import Modal from '@ux/modal';
-import session from '../lib/session';
+import session from '../lib/session.js';
 import Copy from '@ux/icon/copy';
 import { getStatus, cancelJob } from '../lib/data/data.service';
 
@@ -145,4 +145,4 @@ export const RunStatusPage = ({ authDetails }) => {
   );
 };
 
-export default withLocaleRequired('/locales', { initialProps: true })(RunStatusPage);
+export default RunStatusPage;

@@ -77,7 +77,6 @@ const PromptForm = ({ onSubmit, numOfTransactions }) => {
 
   }
   function handleModelChange(e) {
-    console.log('Setting the prompt model', e);
     try {
       setPromptModel({
         ...promptModel,

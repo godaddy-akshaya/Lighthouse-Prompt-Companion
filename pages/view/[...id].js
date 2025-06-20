@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import session from '../../lib/session';
+import session from '../../lib/session.js';
 import Head from '../../components/head';
-import { getResultsByRunId } from '../../lib/data/data.service';
+import { getResultsByRunId } from '../../lib/data/data.service.js';
 import Table from '@ux/table-legacy';
 import Card from '@ux/card';
 import Spinner from '@ux/spinner';
@@ -57,7 +57,6 @@ const ViewPage = ({ authDetails }) => {
   };
   useEffect(() => {
     if (router.isReady) {
-      console.log(router.query?.id[0] || '0');
       setRouteParams({ run_id: decodeURIComponent(router.query?.id[0] || '0') });
       setTableLoading(true);
       getResultsByRunId(router.query?.id[0] || 0).then((data) => {

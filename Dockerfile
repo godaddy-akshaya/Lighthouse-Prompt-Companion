@@ -3,7 +3,7 @@ FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:22.13.0-alpine-3.2
 
 USER root
 ENV NEXT_TELEMETRY_DISABLED=1
-
+# Ensure the worker user and group exist
 WORKDIR /app
 
 RUN apk upgrade
@@ -32,8 +32,11 @@ RUN --mount=type=secret,id=npm_token,dst=./.npm_token,uid=1000 export ARTIFACTOR
 
 FROM 764525110978.dkr.ecr.us-west-2.amazonaws.com/alpine-node:22.13.0-alpine-3.20-arm AS app-prod-filter
 
+
+
 WORKDIR /app
-COPY --from=app-prod-preparer /app/package.json /app/gasket.config.js /app/start-me-first.js ./
+COPY --from=app-prod-preparer /app/server.js ./
+COPY --from=app-prod-preparer /app/package.json /app/gasket.js /app/gasket-data.js /app/start-me-first.js ./
 COPY --from=app-prod-preparer /app/node_modules ./node_modules
 COPY --from=app-prod-preparer /app/config ./config
 COPY --from=app-prod-preparer /app/hooks ./hooks
@@ -52,7 +55,6 @@ USER worker
 WORKDIR /app
 
 ENV ECS_TLS=1
-EXPOSE 8080
 EXPOSE 8443
 CMD ["npm", "run", "start"]
 

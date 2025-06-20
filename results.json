@@ -1,0 +1,145 @@
+{
+  "env": "prod",
+  "proxy": false,
+  "runAt": "2025-05-02T03:02:59.931Z",
+  "results": [
+    {
+      "id": "table-listing",
+      "target": "https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 341,
+      "snippet": "{\"statusCode\":200,\"body\":\"[{\\\"column_name\\\": \\\"gdlh_v2_ai_hosting_insights_cln\\\", \\\"display_name\\\": \\\"Hosting Insights v2\\\"}, {\\\"column_name\\\": \\\"gdlh_v2_ai_top_level_insights_cln\\\", \\\"display_name\\\": \\\"Top Level Insights v2\\\"}, {\\\"column_name\\\": \\\"gdlh_v2_ai_refund_insights_cln\\\", \\\"display_name\\\": \\\"Refund Insights v2\\\"}, {\\\"column_name\\\": \\\"gdlh_v2_ai_email_insights_cln\\\", \\\"display_name\\\": \\\"Email Insights V2\\\"}]\"}"
+    },
+    {
+      "id": "view-status",
+      "target": "https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 4396,
+      "snippet": "{\"statusCode\":200,\"body\":\"[{\\\"model\\\": \\\"claude-3-5-sonnet\\\", \\\"run_date\\\": \\\"2025-04-03\\\", \\\"run_id\\\": \\\"ea01f715-e9cd-4281-ab4d-4edc0758b09a\\\", \\\"query\\\": \\\"WITH cc_data AS (     SELECT * FROM (         SELECT             CASE WHEN LOWER(platform) IN ('chat', 'messaging') THEN parent_contact_id ELSE interaction_id END AS interaction_id,             customer_type_name, routing_report_region_2, contact_routing_name, handled_repeat_contact_platform,             css_score, nps_score, agent_departm"
+    },
+    {
+      "id": "table-filters",
+      "target": "https://xk89vym7gd.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3779,
+      "snippet": "{\"errorMessage\":\"An error occurred (ResourceNotFoundException) when calling the Scan operation: Requested resource not found\",\"errorType\":\"ResourceNotFoundException\",\"requestId\":\"e1a7d383-1a18-4e49-8005-3880c8904cb1\",\"stackTrace\":[\"  File \\\"/var/task/get-gdlh-insights.py\\\", line 10, in lambda_handler\\n    response = table.scan()\\n\",\"  File \\\"/var/lang/lib/python3.13/site-packages/boto3/resources/factory.py\\\", line 581, in do_action\\n    response = action(self, *args, **kwargs)\\n\",\"  File \\\"/var/"
+    },
+    {
+      "id": "row-count",
+      "target": "https://0nc6ejrszd.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 2603,
+      "snippet": "{\"errorMessage\":\"cannot access local variable 'start_date' where it is not associated with a value\",\"errorType\":\"UnboundLocalError\",\"requestId\":\"a2150f0c-217b-450c-b845-b5949a93f659\",\"stackTrace\":[\"  File \\\"/var/task/get-gdlh-query-count.py\\\", line 18, in lambda_handler\\n    where_condition, start_date, end_date = get_filter_criteria(table_name, event, care_contact_list)\\n\",\"  File \\\"/var/task/get-gdlh-query-count.py\\\", line 115, in get_filter_criteria\\n    return where_condition, start_date, en"
+    },
+    {
+      "id": "submit-job",
+      "target": "https://70bwwwm445.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3591,
+      "snippet": "{\"errorMessage\":\"'int' object has no attribute 'isdigit'\",\"errorType\":\"AttributeError\",\"requestId\":\"21e02c45-0514-4b15-bc3c-2c25043ed79b\",\"stackTrace\":[\"  File \\\"/var/task/post-gdlh-user-query.py\\\", line 30, in lambda_handler\\n    if count.isdigit():\\n\"]}"
+    },
+    {
+      "id": "cancel-job",
+      "target": "https://7y9v81tazb.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3890,
+      "snippet": "{\"statusCode\":200,\"body\":\"\\\"Successfully cancelled\\\"\"}"
+    },
+    {
+      "id": "view-results",
+      "target": "https://nk7y0uidib.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 14234,
+      "snippet": "{\"statusCode\":200,\"body\":\"[{\\\"Data\\\": [{\\\"VarCharValue\\\": \\\"conversation_summary\\\"}, {\\\"VarCharValue\\\": \\\"prompt_template_text\\\"}, {\\\"VarCharValue\\\": \\\"evaluation_summary\\\"}, {\\\"VarCharValue\\\": \\\"evaluation_prompt_text\\\"}, {\\\"VarCharValue\\\": \\\"interaction_id\\\"}, {\\\"VarCharValue\\\": \\\"orexc_id\\\"}, {\\\"VarCharValue\\\": \\\"routing_report_region_2\\\"}, {\\\"VarCharValue\\\": \\\"customer_type_name\\\"}, {\\\"VarCharValue\\\": \\\"handled_repeat_contact_platform\\\"}, {\\\"VarCharValue\\\": \\\"css_score\\\"}, {\\\"VarCharValue\\\":"
+    },
+    {
+      "id": "view-summary",
+      "target": "https://jkb6iltdd7.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3889,
+      "snippet": "{\"statusCode\":200,\"body\":\"[]\"}"
+    },
+    {
+      "id": "submit-summary-job",
+      "target": "https://o4aj4d6r36.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3476,
+      "snippet": "{\"errorMessage\":\"'count'\",\"errorType\":\"KeyError\",\"requestId\":\"22f629c8-76dc-4976-ae30-dd627f1dc266\",\"stackTrace\":[\"  File \\\"/var/task/post-gdlh-summarize-query.py\\\", line 15, in lambda_handler\\n    count = event['body-json']['count']\\n\"]}"
+    },
+    {
+      "id": "gdlh_get_interaction_ids",
+      "target": "https://nnb0qzh6nc.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3999,
+      "snippet": "{\"statusCode\":200,\"body\":\"[\\\"1k\\\", \\\"Sept PS Calls\\\", \\\"1k_ids\\\", \\\"Commerce Test\\\", \\\"5k_list\\\", \\\"Hardware\\\", \\\"LH_m365_off\\\", \\\"Transferred_Calls\\\", \\\"o365_10000\\\", \\\"Airo Bulk Upload Test\\\", \\\"Hardware Interaction List\\\", \\\"mwp wrong product refunds\\\"]\"}"
+    },
+    {
+      "id": "gdlh_save_interaction_ids",
+      "target": "https://shmuxe5fik.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 403,
+      "ok": false,
+      "timeMs": 252,
+      "error": {
+        "message": "Invalid key=value pair (missing equal-sign) in Authorization header (hashed with SHA-256 and encoded with Base64): 'l130r9mA9Wx51FE/TmruH+ZbugxjEIXTL4pqk5RKkzs='."
+      }
+    },
+    {
+      "id": "validate-lexical-query",
+      "target": "https://4qwaataj57.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 4157,
+      "snippet": "{\"errorMessage\":\"'queryStringParameters'\",\"errorType\":\"KeyError\",\"requestId\":\"119e0e92-0981-46e0-b4ce-b673b1d38c00\",\"stackTrace\":[\"  File \\\"/var/task/gdlh-opensearch.py\\\", line 36, in lambda_handler\\n    query = event['queryStringParameters']['query']\\n\"]}"
+    },
+    {
+      "id": "submit-lexical-query",
+      "target": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3682,
+      "snippet": "{\"statusCode\":200,\"body\":\"Success\"}"
+    },
+    {
+      "id": "get-all-lexical-queries",
+      "target": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 397,
+      "snippet": "[{\"last_updated_time\":\"2024-11-15 11:19:39\",\"description\":\"Anytime a guide recommends SEO as a sales motion.\",\"query\":\"{\\n  \\\"query\\\": {\\n    \\\"bool\\\": {\\n      \\\"should\\\": [\\n        {\\n          \\\"match_phrase\\\": {\\n            \\\"agent_conversation\\\": {\\n              \\\"query\\\": \\\"offer search engine optimization\\\",\\n              \\\"slop\\\": 2\\n            }\\n          }\\n        },\\n        {\\n          \\\"match_phrase\\\": {\\n            \\\"agent_conversation\\\": {\\n              \\\"query\\\": \\\"offe"
+    },
+    {
+      "id": "delete-lexical-query",
+      "target": "https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 212,
+      "snippet": "{\"errorMessage\":\"'description'\",\"errorType\":\"KeyError\",\"requestId\":\"e04b4343-d316-496e-b5c4-e7b18b8dda23\",\"stackTrace\":[\"  File \\\"/var/task/post-gdlh-osquery-dynamo.py\\\", line 17, in lambda_handler\\n    query_desc = event['body-json']['description']\\n\"]}"
+    },
+    {
+      "id": "dynamic-model-list",
+      "target": "https://r1edo1uwvc.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 3629,
+      "snippet": "{\"statusCode\":200,\"body\":\"[{\\\"model\\\": \\\"claude-v2\\\", \\\"model_name\\\": \\\"claude-v2\\\", \\\"output_token_rate\\\": \\\"0.024\\\", \\\"provider\\\": \\\"anthropic\\\", \\\"max_tokens\\\": \\\"4096\\\", \\\"input_token_rate\\\": \\\"0.008\\\"}, {\\\"model\\\": \\\"claude-3-haiku-20240307-v1:0\\\", \\\"model_name\\\": \\\"claude-3-haiku\\\", \\\"output_token_rate\\\": \\\"0.00125\\\", \\\"provider\\\": \\\"anthropic_chat\\\", \\\"max_tokens\\\": \\\"4096\\\", \\\"input_token_rate\\\": \\\"0.00025\\\"}, {\\\"model\\\": \\\"claude-instant-v1\\\", \\\"model_name\\\": \\\"claude-instant-v1\\\", \\\"ou"
+    },
+    {
+      "id": "get-lexical-query-hits",
+      "target": "https://fo4s1ll5eg.execute-api.us-west-2.amazonaws.com/gddeploy",
+      "status": 200,
+      "ok": true,
+      "timeMs": 4444,
+      "snippet": "{\"errorMessage\":\"'str' object does not support item assignment\",\"errorType\":\"TypeError\",\"requestId\":\"9c1f5267-6fef-41a3-b962-6964a4805b60\",\"stackTrace\":[\"  File \\\"/var/task/post-opensearch-query-run.py\\\", line 150, in lambda_handler\\n    hit_count = query_opensearch(os_client, current_index_name, os_query)\\n\",\"  File \\\"/var/task/post-opensearch-query-run.py\\\", line 18, in query_opensearch\\n    query['query'] = {'bool': {}}\\n\"]}"
+    }
+  ]
+}

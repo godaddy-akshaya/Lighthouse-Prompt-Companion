@@ -1,10 +1,2 @@
-/**
- * @type {import('next').NextConfig}
- */
-const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true
-  }
-};
-module.exports = nextConfig;
+import gasket from './gasket.js';
+export default gasket.actions.getNextConfig();

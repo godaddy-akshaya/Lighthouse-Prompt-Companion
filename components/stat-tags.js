@@ -5,7 +5,6 @@ import text from '@ux/text';
 import TextLockup from '@ux/text-lockup';
 
 const StatTags = ({ stats }) => {
-  console.log(stats);
   const formatNumber = (number) => {
     // check if has decimal
     if (number % 1 !== 0) {

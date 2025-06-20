@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import session from '../../lib/session';
+import session from '../../lib/session.js';
 import Head from '../../components/head';
 import Table from '@ux/table-legacy';
 import Card from '@ux/card';
@@ -46,7 +46,6 @@ const SummaryPage = ({ authDetails }) => {
         }
       })
       .catch((error) => {
-        console.log(error);
         setUserMessage(error.toString());
         setUserMessageType('error');
         setShowUserMessage(true);

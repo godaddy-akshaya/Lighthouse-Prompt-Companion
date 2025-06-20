@@ -1,5 +1,5 @@
 import React from 'react';
-import { withLocaleRequired } from '@gasket/react-intl';
+import { withLocaleRequiredFile } from '@gasket/react-intl';
 import PropTypes from 'prop-types';
 import Head from '../components/head';
 import Box from '@ux/box';
@@ -8,7 +8,7 @@ import text from '@ux/text';
 import Card from '@ux/card';
 import TextLockup from '@ux/text-lockup';
 import Logo from '../components/logo';
-import session from '../lib/session';
+import session from '../lib/session.js';
 import TableSelect from '../components/table-select';
 import TwoColumnLayout from '../components/layout/two-column-layout';
 
@@ -49,4 +49,4 @@ IndexPage.propTypes = {
   authDetails: PropTypes.object,
   tables: PropTypes.array
 };
-export default withLocaleRequired('/locales', { initialProps: true })(IndexPage);
+export default IndexPage; 

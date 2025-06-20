@@ -1,11 +1,12 @@
-const { BUILD_INFO } = require('./lib/build-info');
+import { BUILD_INFO } from "./lib/build-info.js";
+import apm from "elastic-apm-node";
 
-// This should be loaded *before* any of the other gasket/nextjs/etc stuff
-require('elastic-apm-node').start({
+// // This should be loaded *before* any of the other gasket/nextjs/etc stuff
+apm.start({
   serviceName: BUILD_INFO.service,
   environment: BUILD_INFO.environment,
   serviceVersion: BUILD_INFO.sha,
-  ignoreUrls: ['/healthcheck', '/favicon.ico']
+  ignoreUrls: ["/healthcheck", "/favicon.ico"],
 });
 
 // eslint-disable-next-line no-console

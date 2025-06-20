@@ -1,7 +1,8 @@
-module.exports = {
+export default {
   env: 'local',
   region: 'us-west-2',
   root: 'https://local.c3.int.dev-gdcorp.tools:8443',
+  selfCerts: false,
   auth: {
     app: 'local.gasket',
     host: 'sso.dev-godaddy.com'

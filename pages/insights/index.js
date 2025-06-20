@@ -24,8 +24,6 @@ const InsightsPage = () => {
   const fetchDashboardUrl = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log(dashboardId);
-      console.log(router.query);
       const data = await getEmbedUrl$(dashboardId);
       if (data?.EmbedUrl) {
         setDashboardUrl(data.EmbedUrl);

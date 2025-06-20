@@ -1,0 +1,323 @@
+openapi: 3.1.0
+info:
+  title: Lighthouse API
+  version: 0.1.0
+  description: |
+    **Internal use only.** Complete specification for the Lighthouse service
+    consumed by the UI proxy (pages/api/aws/[id].js). All request/response
+    contracts are now expressed as JSON‑Schema under `components.schemas`.
+
+# ----------------------------------------------------------------------
+#  Vendor extension: mapping from logical endpoint → **full origin URL**
+#  Split by environment so Security can allow‑list both dev and prod.
+# ----------------------------------------------------------------------
+x-target-hosts:
+  prod:
+    table-listing: https://lojoo506re.execute-api.us-west-2.amazonaws.com/gddeploy
+    view-status:   https://x2x9swo6x5.execute-api.us-west-2.amazonaws.com/gddeploy
+    table-filters: https://xk89vym7gd.execute-api.us-west-2.amazonaws.com/gddeploy
+    row-count:     https://0nc6ejrszd.execute-api.us-west-2.amazonaws.com/gddeploy
+    submit-job:    https://70bwwwm445.execute-api.us-west-2.amazonaws.com/gddeploy
+    cancel-job:    https://7y9v81tazb.execute-api.us-west-2.amazonaws.com/gddeploy
+    view-results:  https://nk7y0uidib.execute-api.us-west-2.amazonaws.com/gddeploy
+    view-summary:  https://jkb6iltdd7.execute-api.us-west-2.amazonaws.com/gddeploy
+    submit-summary-job: https://o4aj4d6r36.execute-api.us-west-2.amazonaws.com/gddeploy
+    gdlh_get_interaction_ids:  https://nnb0qzh6nc.execute-api.us-west-2.amazonaws.com/gddeploy
+    gdlh_save_interaction_ids: https://shmuxe5fik.execute-api.us-west-2.amazonaws.com/gddeploy
+    validate-lexical-query:    https://4qwaataj57.execute-api.us-west-2.amazonaws.com/gddeploy
+    submit-lexical-query:      https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy
+    get-all-lexical-queries:   https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy
+    delete-lexical-query:      https://ttgaka6m0f.execute-api.us-west-2.amazonaws.com/gddeploy
+    dynamic-model-list:        https://r1edo1uwvc.execute-api.us-west-2.amazonaws.com/gddeploy
+    get-lexical-query-hits:    https://fo4s1ll5eg.execute-api.us-west-2.amazonaws.com/gddeploy
+  dev:
+    table-listing: https://4f4y1xez75.execute-api.us-west-2.amazonaws.com/dev
+    view-status:   https://ys6kxhlx6f.execute-api.us-west-2.amazonaws.com/dev
+    table-filters: https://o3un8ndnb8.execute-api.us-west-2.amazonaws.com/dev
+    row-count-2:   https://0nc6ejrszd.execute-api.us-west-2.amazonaws.com/gddeploy
+    submit-job:    https://eest1tmtp4.execute-api.us-west-2.amazonaws.com/dev
+    cancel-job:    https://hhlm0qg1c9.execute-api.us-west-2.amazonaws.com/dev
+    row-count:     https://4qyj0h6rz2.execute-api.us-west-2.amazonaws.com/dev
+    view-results:  https://9kj0a6h69a.execute-api.us-west-2.amazonaws.com/dev
+    view-summary:  https://6n03hx5990.execute-api.us-west-2.amazonaws.com/dev
+    submit-summary-job: https://sfg8vqwjoj.execute-api.us-west-2.amazonaws.com/dev
+    gdlh_get_interaction_ids:  https://km6yahk783.execute-api.us-west-2.amazonaws.com/dev
+    gdlh_save_interaction_ids: https://byq18tmxu0.execute-api.us-west-2.amazonaws.com/dev
+    validate-lexical-query:    https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev
+    submit-lexical-query:      https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev
+    get-all-lexical-queries:   https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev
+    delete-lexical-query:      https://vhaj1p1m78.execute-api.us-west-2.amazonaws.com/dev
+    dynamic-model-list:        https://2yw3f4076j.execute-api.us-west-2.amazonaws.com/default/get_gdlh_model_list
+    get-lexical-query-hits:    https://fo4s1ll5eg.execute-api.us-west-2.amazonaws.com/gddeploy
+
+servers:
+  - url: https://lighthouse.c3.int.gdcorp.tools
+    description: Production UI proxy
+  - url: https://lighthouse.c3.int.dev-gdcorp.tools
+    description: Development UI proxy
+  - url: https://local.c3.int.dev-gdcorp.tools:8443
+    description: Local developer environment
+
+# ----------------------------------------------------------------------
+#  Global security requirement: Authorization header must be
+#  "sso-jwt <JWT>" (custom scheme).
+# ----------------------------------------------------------------------
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Pass the JWT in the **Authorization** header using the custom scheme `sso-jwt`.
+        Example: `Authorization: sso-jwt eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+  # … (schemas and paths unchanged)
+  schemas:
+    # ------------------------------------------------------------------
+    #  Shared/reusable definitions
+    # ------------------------------------------------------------------
+    FilterOption:
+      type: object
+      additionalProperties: false
+      properties:
+        column_name:
+          type: string
+          description: Table column name
+        column_data_type:
+          type: string
+          description: SQL data type for the column
+          enum: [string, integer, number, boolean, date, timestamp, other]
+        column_selected_values:
+          type: array
+          description: Selected literal values (excludes NULL)
+          items:
+            type: string
+        null:
+          type: boolean
+          description: Whether NULL values are included in the filter
+      required: [column_name]
+
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    # ------------------------------------------------------------------
+    #  /table-listing
+    # ------------------------------------------------------------------
+    TableListingResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: List of table names the caller can query
+      required: [tables]
+
+    # ------------------------------------------------------------------
+    #  /view-status
+    # ------------------------------------------------------------------
+    JobStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id:
+          type: string
+        run_date:
+          type: string
+          format: date-time
+        last_updated_time:
+          type: string
+          format: date-time
+        query:
+          type: string
+        user_id:
+          type: string
+        status:
+          type: string
+          enum: [Submitted, "In Progress", Cancelled, Complete, Error]
+        action:
+          type: string
+      required: [run_id, status]
+
+    StatusResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/JobStatus'
+
+    # ------------------------------------------------------------------
+    #  /table-filters
+    # ------------------------------------------------------------------
+    TableFiltersResponse:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          column_name:
+            type: string
+          column_data_type:
+            type: string
+            enum: [string, integer, number, boolean, date, timestamp, other]
+          column_values:
+            type: array
+            items:
+              type: string
+          null:
+            type: boolean
+        required: [column_name, column_values, null]
+
+    # ------------------------------------------------------------------
+    #  /row-count
+    # ------------------------------------------------------------------
+    RowCountRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        table_name:
+          type: string
+        filterOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOption'
+      required: [table_name]
+
+    RowCountResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        row_count:
+          type: integer
+          minimum: 0
+      required: [row_count]
+
+    # ------------------------------------------------------------------
+    #  /submit-job & friends
+    # ------------------------------------------------------------------
+    SubmitJobRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        table_name: { type: string }
+        user_id: { type: string }
+        run_id: { type: string }
+        model: { type: string }
+        provider: { type: string }
+        prompt: { type: string }
+        count: { type: integer, minimum: 1 }
+        evaluation: { type: boolean }
+        evaluation_model: { type: string }
+        evaluation_provider: { type: string }
+        evaluation_prompt: { type: string }
+        filterOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOption'
+      required: [table_name, user_id, run_id, model, provider, prompt]
+
+    JobAccepted:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id: { type: string }
+        message: { type: string }
+      required: [run_id]
+
+    CancelJobRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id: { type: string }
+        user_id: { type: string }
+      required: [run_id, user_id]
+
+    CancelJobResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id: { type: string }
+        status: { type: string }
+        message: { type: string }
+      required: [run_id, status]
+
+    ViewResultsResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id: { type: string }
+        results:
+          type: array
+          items:
+            type: object
+        summary:
+          type: string
+      required: [run_id, results]
+
+    # ------------------------------------------------------------------
+    #  /submit-summary-job
+    # ------------------------------------------------------------------
+    SummaryJobRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id: { type: string }
+        prompt: { type: string }
+        model: { type: string }
+        provider: { type: string }
+        table_name: { type: string }
+        filterOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOption'
+      required: [user_id, prompt]
+
+    SummaryJobResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        run_id: { type: string }
+        message: { type: string }
+      required: [run_id]
+
+    # ------------------------------------------------------------------
+    #  /gdlh_* endpoints
+    # ------------------------------------------------------------------
+    InteractionIds:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id: { type: string }
+        interaction_ids:
+          type: array
+          items:
+            type: string
+      required: [interaction_ids]
+
+    # ------------------------------------------------------------------
+    #  Lexical‑query endpoints
+    # ------------------------------------------------------------------
+    LexicalQuery:
+      type: object
+      additionalProperties: false
+      properties:
+        query_name: { type: string }
+        description: { type: string }
+        query:
+          oneOf:
+            - type: string
+            - type: object
+        action:
+          type: string
+          enum: [validate, insert_query, get_all, delete_query]
+      requireed
