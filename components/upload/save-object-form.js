@@ -34,7 +34,7 @@ const SaveObjectForm = ({ onSave, hasBeenSaved }) => {
                         <Block orienatation='vertical'>
                           <Lockup>
                             <Text.label as='label' text='Save As:' />
-                            <TextInput value={saveAs} onChange={handleSaveAs} errorMessage={errorMessage} placeHolder='Name of upload...' />
+                            <TextInput value={saveAs} onChange={handleSaveAs} errorMessage={errorMessage} placeholder='Name of upload...' />
                           </Lockup>
                           <Button onClick={handleSave} className='m-t-1' text='Save' size='small' icon={<Save />} design='secondary' />
                         </Block>

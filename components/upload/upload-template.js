@@ -8,7 +8,7 @@ const UploadTemplate = () => {
     window.open(fileUrl);
   };
   return (
-    <Button size='small' as='button'
+    <Button size='sm'
       design='inline' text='Template for convenience'
       onClick={handleClick} icon={<Download />}
     />
