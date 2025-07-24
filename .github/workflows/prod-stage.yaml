@@ -30,8 +30,12 @@ jobs:
           aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
       # Get the Artifactory token from ASM - assumes it has already been set up at artifactory_ro_creds. See https://github.com/gdcorp-actions/fetch-artifactory-creds
       - name: Fetch artifactory token
-        uses: gdcorp-actions/fetch-artifactory-creds@v1
-        # Execute the necessary commands to build your application's Docker container image. Place any further build commands under `run:`
+        uses: gdcorp-actions/fetch-artifactory-creds@v2
+        with:
+          asm_secret_name: artifact_secret
+          asm_secret_key_user: 'username'
+          asm_secret_key_token: 'token'
+      # Execute the necessary commands to build your application's Docker container image. Place any further build commands under `run:`
       - name: Build Container
         run: |
           # builds the prod image first
