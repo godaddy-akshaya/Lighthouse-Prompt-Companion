@@ -24,7 +24,7 @@
   "dependencies": {
     "@gasket/fetch": "^7.3.6",
     "@gasket/nextjs": "^7.5.4",
-    "@gasket/plugin-elastic-apm": "^7.4.4",
+    "@gasket/plugin-elastic-apm": "^7.4.7",
     "@gasket/plugin-express": "^7.4.1",
     "@gasket/plugin-https": "^7.3.8",
     "@gasket/plugin-logger": "^7.3.5",
