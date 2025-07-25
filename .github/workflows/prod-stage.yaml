@@ -33,8 +33,7 @@ jobs:
         uses: gdcorp-actions/fetch-artifactory-creds@v2
         with:
           asm_secret_name: artifactory_ro_creds
-          asm_secret_key_user: 'username'
-          asm_secret_key_token: 'token'
+          asm_secret_token_only: true
       # Execute the necessary commands to build your application's Docker container image. Place any further build commands under `run:`
       - name: Build Container
         run: |
