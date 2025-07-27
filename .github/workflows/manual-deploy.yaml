@@ -1,0 +1,91 @@
+name: Manual Deploy
+
+on:
+  push:
+    branches: [prod-stage]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to promote to"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - dev-private
+          - prod-stage
+          - prod
+permissions:
+  contents: read
+jobs:
+  build_publish_promote:
+    runs-on:
+      labels: self-hosted
+      group: 6429-hadoopmigratione
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - id: katana-auth
+        name: Authenticate with Katana
+        uses: gdcorp-actions/katana-auth@v1
+
+      - id: katana-app
+        name: Get Katana App Info
+        uses: gdcorp-actions/katana-get-app@v1
+        with:
+          jwt: ${{ steps.katana-auth.outputs.jwt }}
+
+      - name: Golden Container Registry Login
+        run: |
+          aws ecr get-login-password --region us-west-2 | docker login 764525110978.dkr.ecr.us-west-2.amazonaws.com -u AWS --password-stdin
+      # Get the Artifactory token from ASM - assumes it has already been set up at artifactory_ro_creds. See https://github.com/gdcorp-actions/fetch-artifactory-creds
+      - name: Fetch artifactory token
+        uses: gdcorp-actions/fetch-artifactory-creds@v1
+      # Execute the necessary commands to build your application's Docker container image. Place any further build commands under `run:`
+      - name: Build Container
+        run: |
+          # builds the prod image first
+          docker build --platform linux/arm64 --no-cache --force-rm --secret id=npm_token,env=ARTIFACTORY_RO_TOKEN \
+            --build-arg GIT_SHORT_SHA="$(git rev-parse HEAD | cut -c1-8)" --build-arg GIT_BRANCH="$(git branch --show-current)" \
+            -t "${{ steps.katana-app.outputs.app }}-image:${{ github.sha }}" .
+          # and then build/tag a test image using the cache from ^^^
+          docker build --platform linux/arm64 --target builder --force-rm --secret id=npm_token,env=ARTIFACTORY_RO_TOKEN \
+            -t "${{ steps.katana-app.outputs.app }}-tester:${{ github.sha }}" .
+      - name: Set up build vars for metadata
+        run: |
+          echo "BUILT_SHORT_SHA=$(git rev-parse HEAD | cut -c1-8)" | tee -a $GITHUB_ENV
+          echo "BUILT_BRANCH=$(git branch --show-current)" | tee -a $GITHUB_ENV
+          echo "BUILT_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" | tee -a $GITHUB_ENV
+      - id: katana-publish
+        name: Publish Katana Artifact
+        uses: gdcorp-actions/katana-publish-artifact@v1
+        with:
+          jwt: ${{ steps.katana-auth.outputs.jwt }}
+          namespace: ckpetlbatch
+          app: ${{ steps.katana-app.outputs.app }}
+          image_name: ${{ steps.katana-app.outputs.app }}-image:${{ github.sha }}
+          artifact_kind: ecs
+          artifact_options_json: |
+            {
+              "ports": [8443],
+              "healthcheckPath": "/healthcheck",
+              "protocol": "https",
+              "intervalSeconds": 30,
+              "timeoutSeconds": 5,
+              "healthyThresholdCount": 2,
+              "unhealthyThresholdCount": 2,
+              "environmentVariables": [
+                { "name": "BUILT_SHORT_SHA", "value": "${{ env.BUILT_SHORT_SHA }}" },
+                { "name": "BUILT_BRANCH", "value": "${{ env.BUILT_BRANCH }}" },
+                { "name": "BUILT_AT", "value": "${{ env.BUILT_AT }}" } 
+              ]
+            }
+
+      - name: Promote to Stage Environment
+        uses: gdcorp-actions/katana-promote-artifact@v1
+        with:
+          jwt: ${{ steps.katana-auth.outputs.jwt }}
+          namespace: ckpetlbatch
+          app: ${{ steps.katana-app.outputs.app }}
+          environment: ${{ github.event.inputs.environment || 'prod-stage' }}
+          artifact_id: ${{ steps.katana-publish.outputs.artifact_id }}
