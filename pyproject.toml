@@ -1,0 +1,16 @@
+[project]
+name = "competitor-analysis"
+version = "0.1.0"
+description = "Prompt Generator Companion"
+requires-python = ">=3.9"
+dependencies = [
+    "openai>=1.87.0",
+    "pydantic>=2.10, <3", 
+    "typing-extensions>=4.12.2, <5",
+    "requests>=2.0, <3",
+    "types-requests>=2.0, <3",
+    "openai-agents",
+    "python-dotenv>=1.0.0",
+    "neo4j",
+    "pandas",
+]

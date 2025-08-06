@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Engineering Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">AI Prompt Engineering Assistant</h1>
+            <p class="text-gray-600">Create and analyze prompts for customer service interactions</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Chat Interface -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div id="chat-container" class="h-96 overflow-y-auto mb-4 p-4 border border-gray-200 rounded">
+                    <div class="welcome-message">
+                        <p class="text-gray-600">Welcome! Please choose your prompt type:</p>
+                        <p class="text-gray-600">1. Initial prompt for analyzing individual transcripts</p>
+                        <p class="text-gray-600">2. Summary of summaries prompt for analyzing multiple transcripts</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="message-input" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Type your message...">
+                    <button id="send-button" 
+                            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Send
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Tools and Analysis -->
+            <div class="space-y-6">
+                <!-- CSV Upload Section -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">CSV Analysis Tools</h2>
+                    <div class="space-y-4">
+                        <div class="file-upload-container">
+                            <label for="csv-upload" 
+                                   class="block w-full px-4 py-2 text-center border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 cursor-pointer">
+                                Click to upload CSV file
+                            </label>
+                            <input type="file" id="csv-upload" accept=".csv" class="hidden">
+                        </div>
+                        <button id="analyze-button" 
+                                class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300"
+                                disabled>
+                            Analyze CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analysis Results -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Analysis Results</h2>
+                    <div id="analysis-results" class="prose max-w-none">
+                        <p class="text-gray-600">Upload a CSV file and run analysis to see results here.</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Controls</h2>
+                    <div class="space-y-2">
+                        <button id="clear-history" 
+                                class="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                            Clear History
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
