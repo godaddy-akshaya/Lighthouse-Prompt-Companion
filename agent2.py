@@ -18,13 +18,26 @@ from nltk.util import ngrams
 import spacy
 from tqdm import tqdm
 
-# Download required NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('punkt')
-    nltk.download('stopwords')
+# Download all required NLTK data
+def download_nltk_data():
+    """Download required NLTK resources."""
+    resources = [
+        'punkt',
+        'stopwords',
+        'averaged_perceptron_tagger',
+        'maxent_ne_chunker',
+        'words',
+        'punkt_tab'
+    ]
+    for resource in resources:
+        try:
+            nltk.data.find(f'tokenizers/{resource}')
+        except LookupError:
+            print(f"Downloading NLTK resource: {resource}")
+            nltk.download(resource, quiet=True)
+
+# Download NLTK data
+download_nltk_data()
 
 # Load spaCy model
 try:
@@ -440,73 +453,78 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         Returns:
             str: Detailed analysis results
         """
-        if self.current_csv_data is None:
-            return "No CSV file has been loaded yet."
-            
-        # Use cache if available
-        cache_key = id(self.current_csv_data)
-        if cache_key in self.analysis_cache:
-            return self.analysis_cache[cache_key]
-            
-        analysis = []
-        series = self.current_csv_data['conversation_summary']
-        texts = series.dropna().tolist()
-        
-        # Basic Statistics
-        analysis.append("📊 Overview")
-        analysis.append(f"Total summaries analyzed: {len(series)}")
-        analysis.append(f"Unique summaries: {series.nunique()}")
-        missing = series.isna().sum()
-        if missing > 0:
-            analysis.append(f"⚠️ Missing entries: {missing}")
-            
-        # Text Statistics
-        stats = self._analyze_text_stats(texts)
-        analysis.append("\n📝 Content Statistics")
-        analysis.append(f"- Average length: {stats['avg_words']:.1f} words (±{stats['std_words']:.1f})")
-        analysis.append(f"- Average sentences: {stats['avg_sentences']:.1f} (±{stats['std_sentences']:.1f})")
-        analysis.append(f"- Length range: {stats['min_words']} to {stats['max_words']} words")
-        
-        # Length Distribution
-        word_counts = series.str.split().str.len()
-        analysis.append("\n📊 Length Distribution")
-        bins = [0, 50, 100, 200, 500, float('inf')]
-        labels = ['Very Short (0-50)', 'Short (51-100)', 'Medium (101-200)', 'Long (201-500)', 'Very Long (500+)']
-        dist = pd.cut(word_counts, bins=bins, labels=labels).value_counts()
-        for category, count in dist.items():
-            percentage = (count / len(word_counts) * 100)
-            analysis.append(f"- {category}: {count} summaries ({percentage:.1f}%)")
-            
-        # Common Topics
-        analysis.append("\n🔍 Common Topics/Phrases")
-        topics = self._get_common_topics(texts)
-        for topic, count in topics:
-            percentage = (count / len(texts) * 100)
-            analysis.append(f"- '{topic}': {count} mentions ({percentage:.1f}%)")
-            
-        # Sentiment Analysis
-        analysis.append("\n😊 Sentiment Analysis")
-        sentiments = [self._analyze_sentiment(text) for text in tqdm(texts, desc="Analyzing sentiment")]
-        avg_polarity = np.mean([s['polarity'] for s in sentiments])
-        avg_subjectivity = np.mean([s['subjectivity'] for s in sentiments])
-        analysis.append(f"- Overall sentiment: {self._describe_sentiment(avg_polarity)}")
-        analysis.append(f"- Subjectivity: {self._describe_subjectivity(avg_subjectivity)}")
-        
-        # Representative Examples
-        analysis.append("\n📋 Representative Examples")
-        samples = self._find_representative_samples(texts)
-        for i, sample in enumerate(samples, 1):
-            sentiment = self._analyze_sentiment(sample)
-            analysis.append(f"\nExample {i} (Sentiment: {self._describe_sentiment(sentiment['polarity'])}):")
-            analysis.append(sample)
-            key_phrases = self._extract_key_phrases(sample)
-            if key_phrases:
-                analysis.append("Key phrases: " + ", ".join(key_phrases[:5]))
+        try:
+            if self.current_csv_data is None:
+                return "No CSV file has been loaded yet."
                 
-        # Cache the results
-        result = "\n".join(analysis)
-        self.analysis_cache[cache_key] = result
-        return result
+            # Use cache if available
+            cache_key = id(self.current_csv_data)
+            if cache_key in self.analysis_cache:
+                return self.analysis_cache[cache_key]
+            
+            analysis = []
+            series = self.current_csv_data['conversation_summary']
+            texts = series.dropna().tolist()
+            
+            # Basic Statistics
+            analysis.append("📊 Overview")
+            analysis.append(f"Total summaries analyzed: {len(series)}")
+            analysis.append(f"Unique summaries: {series.nunique()}")
+            missing = series.isna().sum()
+            if missing > 0:
+                analysis.append(f"⚠️ Missing entries: {missing}")
+                
+            # Text Statistics
+            stats = self._analyze_text_stats(texts)
+            analysis.append("\n📝 Content Statistics")
+            analysis.append(f"- Average length: {stats['avg_words']:.1f} words (±{stats['std_words']:.1f})")
+            analysis.append(f"- Average sentences: {stats['avg_sentences']:.1f} (±{stats['std_sentences']:.1f})")
+            analysis.append(f"- Length range: {stats['min_words']} to {stats['max_words']} words")
+            
+            # Length Distribution
+            word_counts = series.str.split().str.len()
+            analysis.append("\n📊 Length Distribution")
+            bins = [0, 50, 100, 200, 500, float('inf')]
+            labels = ['Very Short (0-50)', 'Short (51-100)', 'Medium (101-200)', 'Long (201-500)', 'Very Long (500+)']
+            dist = pd.cut(word_counts, bins=bins, labels=labels).value_counts()
+            for category, count in dist.items():
+                percentage = (count / len(word_counts) * 100)
+                analysis.append(f"- {category}: {count} summaries ({percentage:.1f}%)")
+                
+            # Common Topics
+            analysis.append("\n🔍 Common Topics/Phrases")
+            topics = self._get_common_topics(texts)
+            for topic, count in topics:
+                percentage = (count / len(texts) * 100)
+                analysis.append(f"- '{topic}': {count} mentions ({percentage:.1f}%)")
+                
+            # Sentiment Analysis
+            analysis.append("\n😊 Sentiment Analysis")
+            sentiments = [self._analyze_sentiment(text) for text in tqdm(texts, desc="Analyzing sentiment")]
+            avg_polarity = np.mean([s['polarity'] for s in sentiments])
+            avg_subjectivity = np.mean([s['subjectivity'] for s in sentiments])
+            analysis.append(f"- Overall sentiment: {self._describe_sentiment(avg_polarity)}")
+            analysis.append(f"- Subjectivity: {self._describe_subjectivity(avg_subjectivity)}")
+            
+            # Representative Examples
+            analysis.append("\n📋 Representative Examples")
+            samples = self._find_representative_samples(texts)
+            for i, sample in enumerate(samples, 1):
+                sentiment = self._analyze_sentiment(sample)
+                analysis.append(f"\nExample {i} (Sentiment: {self._describe_sentiment(sentiment['polarity'])}):")
+                analysis.append(sample)
+                key_phrases = self._extract_key_phrases(sample)
+                if key_phrases:
+                    analysis.append("Key phrases: " + ", ".join(key_phrases[:5]))
+                
+            # Cache the results
+            result = "\n".join(analysis)
+            self.analysis_cache[cache_key] = result
+            return result
+        except Exception as e:
+            error_msg = str(e)
+            print(f"Error during analysis: {error_msg}")
+            return f"Error during analysis: {error_msg}\n\nPlease try again or contact support if the issue persists."
         
     def _describe_sentiment(self, polarity: float) -> str:
         """Convert sentiment polarity to descriptive text."""

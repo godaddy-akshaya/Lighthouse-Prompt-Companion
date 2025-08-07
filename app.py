@@ -5,10 +5,23 @@ import os
 import asyncio
 from agent2 import ConversationalAgent
 import pandas as pd
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", ping_timeout=300, ping_interval=10)
+
+# Initialize Socket.IO with WebSocket transport only
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    ping_timeout=300,
+    ping_interval=10,
+    transports=['websocket']
+)
 
 # Initialize the conversational agent
 agent = ConversationalAgent()
@@ -27,46 +40,54 @@ def handle_message(data):
     response = loop.run_until_complete(agent.chat(message))
     emit('response', {'response': response})
 
-@socketio.on('upload_csv')
-def handle_csv_upload(data):
-    """Handle CSV file upload."""
+@app.route('/api/upload-csv', methods=['POST'])
+def handle_csv_upload():
+    """Handle CSV file upload via REST API."""
     try:
         print("\n=== Starting CSV Upload Process ===")
         print("Memory usage before processing:", pd.DataFrame().memory_usage().sum() / 1024 / 1024, "MB")
         
-        # Validate input
-        csv_content = data.get('csv')
-        if not csv_content:
-            print("Error: No CSV content received")
-            emit('csv_summary', {'success': False, 'error': 'No CSV content received'})
-            return
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file uploaded'}), 400
             
-        print(f"Received CSV content (length: {len(csv_content)} bytes)")
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+            
+        if not file.filename.endswith('.csv'):
+            return jsonify({'success': False, 'error': 'File must be a CSV'}), 400
+            
+        # Read the file content
+        csv_content = file.read().decode('utf-8')
+        filename = file.filename
+            
+        print(f"Received CSV file: {filename} (length: {len(csv_content)} bytes)")
         
         # Process CSV with explicit error handling
         try:
             import io
             
+            # Create StringIO object with the CSV content
+            csv_buffer = io.StringIO(csv_content)
+            
             # Try to read first few lines to validate format
             print("Validating CSV format...")
-            first_lines = csv_content.split('\n')[:5]
-            print("Header row:", first_lines[0])
+            header = pd.read_csv(csv_buffer, nrows=0)
             
-            # Fast CSV reading with optimized settings
-            print("Speed-reading CSV...")
+            if 'conversation_summary' not in [col.lower() for col in header.columns]:
+                raise ValueError("CSV must contain a 'conversation_summary' column")
+            
+            # Reset buffer position
+            csv_buffer.seek(0)
+            
+            # Read CSV with proper column name handling
+            print("Reading CSV data...")
             df = pd.read_csv(
-                io.StringIO(csv_content),
-                usecols=['conversation_summary'],
-                dtype={'conversation_summary': str},  # Simple string type
-                engine='c',  # Using the fast C engine
-                na_filter=False,  # Disable NA filtering for speed
-                chunksize=1000  # Process in chunks to reduce memory usage
+                csv_buffer,
+                dtype=str,  # Read all columns as strings initially
+                encoding='utf-8',
+                on_bad_lines='warn'  # More permissive CSV parsing
             )
-            # Combine chunks efficiently
-            chunks = []
-            for chunk in df:
-                chunks.append(chunk)
-            df = pd.concat(chunks, ignore_index=True)
             
             print(f"DataFrame loaded: {len(df)} rows, {len(df.columns)} columns")
             print("Columns found:", ', '.join(df.columns))
@@ -81,40 +102,46 @@ def handle_csv_upload(data):
                 })
                 return
                 
+            # Find the conversation_summary column (case-insensitive)
+            conv_summary_col = next(col for col in df.columns if col.lower() == 'conversation_summary')
+            
             # Store only the required column and clean data
             print("Processing conversation_summary column...")
-            agent.current_csv_data = df[['conversation_summary']].copy()
-            agent.current_csv_data['conversation_summary'] = agent.current_csv_data['conversation_summary'].fillna('')
+            agent.current_csv_data = df[[conv_summary_col]].copy()
+            agent.current_csv_data.columns = ['conversation_summary']  # Normalize column name
+            agent.current_csv_data['conversation_summary'] = agent.current_csv_data['conversation_summary'].fillna('').str.strip()
             
             # Generate detailed summary
             print("Generating summary...")
-            total_rows = len(agent.current_csv_data)
-            valid_rows = agent.current_csv_data['conversation_summary'].str.len().gt(0).sum()
-            
-            summary = [
-                f"✅ Successfully loaded CSV file",
-                f"\n📊 Statistics:",
-                f"- Total rows: {total_rows}",
-                f"- Valid summaries: {valid_rows}",
-            ]
-            
-            if valid_rows < total_rows:
-                summary.append(f"⚠️ Found {total_rows - valid_rows} empty or invalid summaries")
-            
-            # Add samples
-            if valid_rows > 0:
-                summary.append("\n📝 Sample Summaries:")
-                samples = agent.current_csv_data[
-                    agent.current_csv_data['conversation_summary'].str.len().gt(0)
-                ]['conversation_summary'].head(3)
+            if len(agent.current_csv_data) > 0:
+                first_row = agent.current_csv_data['conversation_summary'].iloc[0]
+                total_rows = len(agent.current_csv_data)
                 
-                for i, sample in enumerate(samples, 1):
-                    preview = sample[:200] + "..." if len(sample) > 200 else sample
-                    summary.append(f"\n{i}. {preview}")
+                summary = [
+                    f"✅ Successfully loaded CSV file: {filename}",
+                    f"\n📊 File Overview:",
+                    f"- Total rows: {total_rows}",
+                    f"- First row length: {len(first_row)} characters",
+                    f"\n📝 First Row Content:",
+                    f"{first_row}",
+                    f"\n👉 {total_rows - 1} more rows available for analysis"
+                ]
+            else:
+                summary = [
+                    "⚠️ No data found in the CSV file",
+                    "Please check if the file contains valid data with a 'conversation_summary' column"
+                ]
             
             print("Sending success response")
-            emit('csv_summary', {'success': True, 'summary': "\n".join(summary)})
+            response_data = {
+                'success': True,
+                'summary': "\n".join(summary),
+                'socketEvent': 'csv_processed'  # Event name for WebSocket notification
+            }
+            # Send WebSocket notification about successful processing
+            socketio.emit('csv_processed', response_data)
             print("Memory usage after processing:", pd.DataFrame().memory_usage().sum() / 1024 / 1024, "MB")
+            return jsonify(response_data), 200
             
         except pd.errors.EmptyDataError:
             print("Error: Empty CSV file")
@@ -147,4 +174,16 @@ def handle_clear_history():
     emit('history_cleared', {'success': True})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=8080)
+    try:
+        logger.info("Starting server on port 3000...")
+        socketio.run(
+            app,
+            host='0.0.0.0',
+            port=3000,
+            debug=True,
+            allow_unsafe_werkzeug=True,
+            log_output=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to start server: {e}")
+        raise

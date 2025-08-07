@@ -1,5 +1,26 @@
-// Initialize Socket.IO connection
-const socket = io();
+// Initialize Socket.IO connection with WebSocket transport only
+const socket = io({
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000
+});
+
+// Socket connection event handlers
+socket.on('connect', () => {
+    console.log('Connected to WebSocket');
+    addMessage('✅ Connected to server', false);
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected from WebSocket');
+    addMessage('❌ Disconnected from server. Attempting to reconnect...', false);
+});
+
+socket.on('connect_error', (error) => {
+    console.error('Connection error:', error);
+    addMessage('❌ Connection error. Retrying...', false);
+});
 
 // DOM Elements
 const chatContainer = document.getElementById('chat-container');
@@ -101,8 +122,10 @@ csvUpload.addEventListener('change', (e) => {
         reader.onload = (event) => {
             console.log('File read complete, size:', event.target.result.length);
             
-            // Basic CSV validation
-            const firstLine = event.target.result.split('\n')[0];
+            // Basic CSV validation and preprocessing
+            const lines = event.target.result.split('\n');
+            const firstLine = lines[0].toLowerCase(); // Convert header to lowercase for case-insensitive check
+            
             if (!firstLine.includes('conversation_summary')) {
                 addMessage('⚠️ Error: File must contain a "conversation_summary" column', false);
                 removeTypingIndicator(currentUploadIndicator);
@@ -110,8 +133,39 @@ csvUpload.addEventListener('change', (e) => {
                 return;
             }
             
-            addMessage('📤 Sending file to server for processing...', true);
-            socket.emit('upload_csv', { csv: event.target.result });
+            // Clean the CSV data before sending
+            const cleanedCsv = lines.map(line => line.trim()).filter(line => line.length > 0).join('\n');
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Add upload status message
+            const uploadStatusMsg = addMessage('📤 Uploading CSV file...', false);
+            const progressMsg = addMessage('⏳ Processing...', false);
+
+            // Use fetch API for file upload with proper error handling
+            fetch('/api/upload-csv', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    uploadStatusMsg.textContent = '✅ CSV file uploaded successfully!';
+                } else {
+                    uploadStatusMsg.textContent = `❌ Upload failed: ${data.error}`;
+                    progressMsg.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                uploadStatusMsg.textContent = '❌ Upload failed. Please try again.';
+                progressMsg.remove();
+            });
             
             // Set a timeout to clear the indicator if no response
             setTimeout(() => {
@@ -176,8 +230,9 @@ socket.on('response', (data) => {
     addMessage(data.response);
 });
 
-socket.on('csv_summary', (data) => {
-    console.log('Received CSV summary response:', data);
+// Listen for CSV processing completion via WebSocket
+socket.on('csv_processed', (data) => {
+    console.log('Received CSV processing notification:', data);
     
     // Clear upload indicator
     if (currentUploadIndicator) {
@@ -185,13 +240,29 @@ socket.on('csv_summary', (data) => {
         currentUploadIndicator = null;
     }
     
+    // Find and remove the processing message
+    const processingMessages = document.querySelectorAll('.message');
+    processingMessages.forEach(msg => {
+        if (msg.textContent === '⏳ Processing...') {
+            msg.remove();
+        }
+    });
+    
     if (data.success) {
-        addMessage('✅ CSV file processed successfully. Summary:', false);
+        // Update the UI with success messages
+        addMessage('✅ CSV file processed successfully!', false);
+        addMessage('📊 Summary of uploaded data:', false);
         addMessage(data.summary, false);
-        analyzeButton.disabled = false;  // Enable analyze button only after successful upload
+        analyzeButton.disabled = false;  // Enable analyze button
         
         // Add instruction for next step
         addMessage('👉 Click "Analyze CSV" to perform detailed analysis', false);
+        
+        // Visual feedback - briefly highlight the analyze button
+        analyzeButton.classList.add('highlight-button');
+        setTimeout(() => {
+            analyzeButton.classList.remove('highlight-button');
+        }, 2000);
     } else {
         addMessage(`❌ Error processing CSV: ${data.error}`, false);
         addMessage('Please try uploading the file again.', false);
