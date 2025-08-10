@@ -58,11 +58,29 @@
                     </div>
                 </div>
 
+                <!-- Generated Prompt -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Generated Prompt</h2>
+                    <div id="prompt-display" class="prose max-w-none bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-600">Your generated prompt will appear here after answering the questions.</p>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="copy-prompt" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hidden">
+                            Copy Prompt
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Analysis Results -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h2 class="text-xl font-semibold mb-4">Analysis Results</h2>
-                    <div id="analysis-results" class="prose max-w-none">
+                    <div id="analysis-results" class="analysis-content">
                         <p class="text-gray-600">Upload a CSV file and run analysis to see results here.</p>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="print-analysis" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 hidden">
+                            Print Analysis
+                        </button>
                     </div>
                 </div>
 
@@ -81,6 +99,9 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

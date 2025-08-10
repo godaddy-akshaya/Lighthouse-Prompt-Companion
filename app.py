@@ -12,15 +12,21 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type"]}})
 
 # Initialize Socket.IO with WebSocket transport only
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    ping_timeout=300,
-    ping_interval=10,
-    transports=['websocket']
+    ping_timeout=60,  # Reduced timeout
+    ping_interval=5,  # More frequent pings
+    transports=['websocket'],
+    async_mode='eventlet',
+    message_queue=None,
+    engineio_logger=True,
+    logger=True,
+    async_handlers=True,  # Enable async handlers
+    max_http_buffer_size=1e8  # Increased buffer size
 )
 
 # Initialize the conversational agent
@@ -36,9 +42,18 @@ def index():
 @socketio.on('message')
 def handle_message(data):
     """Handle incoming messages from the client."""
-    message = data.get('message', '')
-    response = loop.run_until_complete(agent.chat(message))
-    emit('response', {'response': response})
+    try:
+        message = data.get('message', '')
+        print(f"Received message: {message}")
+        
+        # Process the message synchronously
+        response = loop.run_until_complete(agent.chat(message))
+        print(f"Sending response for message: {message}")
+        emit('response', {'response': response})
+        
+    except Exception as e:
+        print(f"Error in handle_message: {str(e)}")
+        emit('response', {'response': f"An error occurred: {str(e)}"})
 
 @app.route('/api/upload-csv', methods=['POST'])
 def handle_csv_upload():
@@ -60,6 +75,14 @@ def handle_csv_upload():
         # Read the file content
         csv_content = file.read().decode('utf-8')
         filename = file.filename
+        
+        if not csv_content:
+            emit('csv_upload_response', {'success': False, 'error': 'No file content'})
+            return
+            
+        if not filename.endswith('.csv'):
+            emit('csv_upload_response', {'success': False, 'error': 'File must be a CSV'})
+            return
             
         print(f"Received CSV file: {filename} (length: {len(csv_content)} bytes)")
         
@@ -178,7 +201,7 @@ if __name__ == '__main__':
         logger.info("Starting server on port 3000...")
         socketio.run(
             app,
-            host='0.0.0.0',
+            host='localhost',
             port=3000,
             debug=True,
             allow_unsafe_werkzeug=True,

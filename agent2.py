@@ -163,11 +163,23 @@ class ConversationalAgent:
                 if message.lower() in ['1', 'initial prompt']:
                     self.current_mode = 'initial'
                     self.prompt_generated = False
-                    return "You've selected to create an initial prompt for analyzing individual transcripts. Could you please specify the domain or topic you want to analyze?"
+                    return """✨ Individual Transcript Analysis Selected
+
+To create your analysis prompt, I'll ask a few focused questions.
+
+First question:
+What specific domain or topic would you like to analyze in the customer interactions?
+(For example: product issues, technical support, billing inquiries, etc.)"""
                 elif message.lower() in ['2', 'summary of summaries', 'summary of summaries prompt']:
                     self.current_mode = 'summary'
                     self.prompt_generated = False
-                    return "You've selected to create a summary of summaries prompt. Could you please specify the domain or topic you want to analyze from the customer service interactions?"
+                    return """📊 Summary of Summaries Analysis Selected
+
+I'll help you create a prompt to analyze patterns across multiple conversations.
+
+First question:
+What key aspects of the customer service interactions would you like to focus on?
+(For example: common issues, customer satisfaction drivers, product feedback, etc.)"""
                 elif not any(mode in message.lower() for mode in ['1', '2', 'initial prompt', 'summary of summaries']):
                     return """Would you like to create:
 1. An initial prompt for analyzing individual transcripts, or
@@ -177,16 +189,29 @@ Please type '1' or 'initial prompt' for option 1, or '2' or 'summary of summarie
             
             # Create messages array for the API call
             messages = [
-                {"role": "system", "content": """IMPORTANT: Ask only one question at a time. Wait for the user's answer before asking the next question.
+                {"role": "system", "content": """You are an expert LLM Prompt Engineer specializing in conversation analysis. Your responses should be:
+1. Clear and focused - one question at a time
+2. Well-formatted with proper spacing and sections
+3. Patient - wait for the user's answer before proceeding
 
-You are an expert LLM Prompt Engineer that learns from interactions and maintains context. Follow these guidelines:
+INITIAL INTERACTION:
+When starting a new conversation, begin with:
 
-FIRST AND MOST IMPORTANT: If this is a new conversation (no mode set), ALWAYS start by asking:
-"Would you like to create:
-1. An initial prompt for analyzing individual transcripts, or
-2. A summary of summaries prompt for analyzing multiple transcript summaries?
+"👋 Welcome! I'll help you create an effective analysis prompt.
 
-Please type '1' or 'initial prompt' for option 1, or '2' or 'summary of summaries' for option 2."
+Please choose the type of analysis you'd like to perform:
+
+[1] Individual Transcript Analysis
+    - Analyze single customer interactions in detail
+    - Focus on specific conversation patterns
+    - Extract detailed insights from individual cases
+
+[2] Summary of Summaries Analysis
+    - Analyze patterns across multiple conversations
+    - Identify common themes and trends
+    - Generate high-level insights from aggregate data
+
+Please enter 1 or 2 to continue."
 
 DO NOT proceed with any other questions until the user has chosen one of these options.
 
@@ -213,35 +238,105 @@ Task Introduction:
 "You are tasked with analyzing the 'conversation_summary' column from a CSV file containing customer service interaction summaries from GoDaddy.com."
 
 ### Quantitative Analysis
-- Count and list specific domain-related issues mentioned, with counts and percentages
-- Break down each issue into sub-issues or related topics if possible
-- Count and list GoDaddy products mentioned, with counts and percentages
+1. Issue Tracking
+   - Count and categorize domain-specific issues
+   - Calculate frequency and percentage for each category
+   - Break down issues into sub-categories with metrics
+   - Track product mentions and their context
+
+2. Performance Metrics
+   - Response times and resolution rates
+   - Customer satisfaction indicators
+   - Issue recurrence patterns
+   - Support channel effectiveness
 
 ### Top 3 Domain Issues
-For each issue:
-- Frequency (count and percentage)
-- Key pain points (bulleted)
-- Sub-issues or related challenges
-- Representative quotes (3-5 per issue, with attribution)
-- Affected products
-- Relevant metadata (e.g., channel, region, call duration)
+For each major issue:
+
+1. Issue Profile
+   - Frequency (count and %)
+   - Severity level
+   - Impact scope
+   - Affected user segments
+
+2. Detailed Breakdown
+   - Key pain points (bullet list)
+   - Sub-issues and dependencies
+   - Customer impact areas
+   - Technical vs. user experience factors
+
+3. Evidence Base
+   - Representative quotes (3-5 per issue)
+   - Customer scenarios
+   - Product correlations
+   - Context metadata (channel, region, duration)
 
 ### Specific Recommendations
-For each top issue, provide 3 very actionable recommendations, each with a rationale.
+For each top issue:
+
+1. Solution Package
+   - 3 actionable recommendations
+   - Implementation steps
+   - Expected outcomes
+   - Resource needs
+
+2. Implementation Guide
+   - Priority level
+   - Timeline estimate
+   - Success metrics
+   - Risk factors
 
 ### What's Working Well
-- List positive patterns, successful features, and effective processes
-- Include direct positive customer quotes and specific examples
+1. Success Patterns
+   - Effective features
+   - Successful processes
+   - Positive user experiences
+
+2. Supporting Evidence
+   - Customer testimonials
+   - Performance metrics
+   - Best practice examples
 
 ### Additional Insights
-- List any other valuable observations, with supporting data or quotes
+1. Trend Analysis
+   - Emerging patterns
+   - User behavior trends
+   - Cross-product impacts
+   - Support efficiency metrics
+
+2. Opportunity Areas
+   - Process improvements
+   - Feature enhancements
+   - Integration possibilities
 
 ### Not Found
-- List important elements that were specifically searched for but not found
+1. Data Gaps
+   - Missing elements
+   - Incomplete information
+   - Required context
+
+2. Investigation Needs
+   - Additional data points
+   - Verification requirements
+   - Follow-up areas
 
 ### Uncertainties
-- List areas where data is unclear or ambiguous
-- Suggest additional information needed for clarification
+1. Clarity Issues
+   - Ambiguous findings
+   - Unclear patterns
+   - Data inconsistencies
+
+2. Information Needs
+   - Required clarifications
+   - Additional context
+   - Validation points
+
+Analysis Instructions:
+- Focus on actionable insights
+- Provide specific examples
+- Include quantitative metrics
+- Highlight priority areas
+- Note data limitations
 
 When creating the prompt:
 1. First ask about the specific domain/topic they want to analyze
@@ -329,11 +424,26 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             ]
             messages.extend(self.conversation_history[-10:])  # Include last 10 messages
             
-            # Call the API
-            response = await self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages
-            )
+            # Call the API with timeout and retry logic
+            max_retries = 3
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    response = await asyncio.wait_for(
+                        self.client.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            messages=messages,
+                            timeout=60  # 60 seconds timeout
+                        ),
+                        timeout=65  # Overall timeout including network delays
+                    )
+                    break  # Success, exit the retry loop
+                except asyncio.TimeoutError:
+                    retry_count += 1
+                    if retry_count == max_retries:
+                        raise Exception("The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts.")
+                    print(f"Request timed out, retrying ({retry_count}/{max_retries})...")
+                    await asyncio.sleep(1)  # Wait a second before retrying
             
             # Extract and store response
             assistant_response = response.choices[0].message.content
@@ -345,9 +455,16 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 
             return assistant_response
             
+        except asyncio.TimeoutError:
+            error_msg = "The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts."
+            print(f"Error in chat with model: {error_msg}")
+            return error_msg
         except Exception as e:
-            print(f"Error in chat with model: {e}")
-            return f"Sorry, I encountered an error: {str(e)}"
+            error_msg = str(e)
+            print(f"Error in chat with model: {error_msg}")
+            if "timeout" in error_msg.lower():
+                return "The request took too long to complete. Please try again or break your question into smaller parts."
+            return f"I encountered an error. Please try again. Error details: {error_msg}"
 
     def clear_history(self):
         """Clear the conversation history."""
@@ -466,56 +583,106 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             series = self.current_csv_data['conversation_summary']
             texts = series.dropna().tolist()
             
-            # Basic Statistics
-            analysis.append("📊 Overview")
-            analysis.append(f"Total summaries analyzed: {len(series)}")
-            analysis.append(f"Unique summaries: {series.nunique()}")
-            missing = series.isna().sum()
-            if missing > 0:
-                analysis.append(f"⚠️ Missing entries: {missing}")
-                
-            # Text Statistics
-            stats = self._analyze_text_stats(texts)
-            analysis.append("\n📝 Content Statistics")
-            analysis.append(f"- Average length: {stats['avg_words']:.1f} words (±{stats['std_words']:.1f})")
-            analysis.append(f"- Average sentences: {stats['avg_sentences']:.1f} (±{stats['std_sentences']:.1f})")
-            analysis.append(f"- Length range: {stats['min_words']} to {stats['max_words']} words")
+            # Quantitative Analysis
+            analysis.append("# 📊 Quantitative Analysis\n")
             
-            # Length Distribution
-            word_counts = series.str.split().str.len()
-            analysis.append("\n📊 Length Distribution")
-            bins = [0, 50, 100, 200, 500, float('inf')]
-            labels = ['Very Short (0-50)', 'Short (51-100)', 'Medium (101-200)', 'Long (201-500)', 'Very Long (500+)']
-            dist = pd.cut(word_counts, bins=bins, labels=labels).value_counts()
-            for category, count in dist.items():
-                percentage = (count / len(word_counts) * 100)
-                analysis.append(f"- {category}: {count} summaries ({percentage:.1f}%)")
-                
-            # Common Topics
-            analysis.append("\n🔍 Common Topics/Phrases")
+            # Issue Tracking
+            analysis.append("## Issue Tracking")
             topics = self._get_common_topics(texts)
-            for topic, count in topics:
+            analysis.append("\n| Issue Category | Count | Percentage | Example Quote |")
+            analysis.append("|----------------|--------|------------|----------------|")
+            for topic, count in topics[:5]:  # Top 5 issues
                 percentage = (count / len(texts) * 100)
-                analysis.append(f"- '{topic}': {count} mentions ({percentage:.1f}%)")
-                
-            # Sentiment Analysis
-            analysis.append("\n😊 Sentiment Analysis")
+                # Find a relevant quote
+                quote = next((text for text in texts if topic in text.lower()), "")
+                quote = quote[:100] + "..." if len(quote) > 100 else quote
+                analysis.append(f"| {topic} | {count} | {percentage:.1f}% | {quote} |")
+            
+            # Performance Metrics
+            analysis.append("\n## Performance Metrics")
+            stats = self._analyze_text_stats(texts)
             sentiments = [self._analyze_sentiment(text) for text in tqdm(texts, desc="Analyzing sentiment")]
             avg_polarity = np.mean([s['polarity'] for s in sentiments])
-            avg_subjectivity = np.mean([s['subjectivity'] for s in sentiments])
-            analysis.append(f"- Overall sentiment: {self._describe_sentiment(avg_polarity)}")
-            analysis.append(f"- Subjectivity: {self._describe_subjectivity(avg_subjectivity)}")
             
-            # Representative Examples
-            analysis.append("\n📋 Representative Examples")
-            samples = self._find_representative_samples(texts)
-            for i, sample in enumerate(samples, 1):
-                sentiment = self._analyze_sentiment(sample)
-                analysis.append(f"\nExample {i} (Sentiment: {self._describe_sentiment(sentiment['polarity'])}):")
-                analysis.append(sample)
-                key_phrases = self._extract_key_phrases(sample)
-                if key_phrases:
-                    analysis.append("Key phrases: " + ", ".join(key_phrases[:5]))
+            analysis.append("\n| Metric | Value | Notes |")
+            analysis.append("|--------|--------|--------|")
+            analysis.append(f"| Average Response Length | {stats['avg_words']:.1f} words | Indicates detail level of responses |")
+            analysis.append(f"| Customer Satisfaction | {self._describe_sentiment(avg_polarity)} | Based on sentiment analysis |")
+            
+            # Top 3 Issues Analysis
+            analysis.append("\n# 🎯 Top 3 Issues Analysis")
+            
+            # Analyze top 3 issues in detail
+            for i, (topic, count) in enumerate(topics[:3], 1):
+                analysis.append(f"\n## Issue {i}: {topic}")
+                
+                # Issue Profile
+                percentage = (count / len(texts) * 100)
+                analysis.append("\n### Issue Profile")
+                analysis.append("- **Frequency**: " + f"{count} occurrences ({percentage:.1f}%)")
+                analysis.append("- **Severity**: " + self._determine_severity(percentage))
+                analysis.append("- **Impact Scope**: " + self._determine_impact(count, len(texts)))
+                
+                # Detailed Breakdown
+                analysis.append("\n### Detailed Breakdown")
+                # Find related issues
+                related = [t for t, c in topics if topic in t or t in topic][:3]
+                analysis.append("**Related Issues:**")
+                for rel in related:
+                    analysis.append(f"- {rel}")
+                
+                # Evidence Base
+                analysis.append("\n### Evidence Base")
+                # Find relevant examples
+                examples = [text for text in texts if topic in text.lower()][:3]
+                analysis.append("**Representative Quotes:**")
+                for j, example in enumerate(examples, 1):
+                    analysis.append(f"{j}. > {example[:200]}...")
+            
+            # Specific Recommendations
+            analysis.append("\n# 💡 Specific Recommendations")
+            for i, (topic, _) in enumerate(topics[:3], 1):
+                analysis.append(f"\n## For {topic}")
+                
+                analysis.append("\n### Solution Package")
+                analysis.append("1. **Immediate Action**: Implement automated detection and response")
+                analysis.append("2. **Short-term**: Enhance documentation and user guides")
+                analysis.append("3. **Long-term**: Develop preventive measures")
+                
+                analysis.append("\n### Implementation Guide")
+                analysis.append("- **Priority**: High")
+                analysis.append("- **Timeline**: 2-3 months")
+                analysis.append("- **Success Metrics**: Reduction in related issues")
+            
+            # What's Working Well
+            analysis.append("\n# ✅ What's Working Well")
+            positive_texts = [text for text in texts if self._analyze_sentiment(text)['polarity'] > 0.5]
+            
+            analysis.append("\n## Success Patterns")
+            if positive_texts:
+                for text in positive_texts[:3]:
+                    analysis.append(f"- {text[:150]}...")
+            
+            # Additional Insights
+            analysis.append("\n# 🔍 Additional Insights")
+            
+            analysis.append("\n## Trend Analysis")
+            analysis.append("| Trend | Observation |")
+            analysis.append("|-------|-------------|")
+            for topic, count in topics[5:8]:  # Next 3 topics after top 5
+                analysis.append(f"| {topic} | Mentioned in {count} conversations |")
+            
+            # Not Found
+            analysis.append("\n# ❓ Not Found")
+            analysis.append("\n## Data Gaps")
+            analysis.append("- Exact resolution times")
+            analysis.append("- Customer follow-up data")
+            
+            # Uncertainties
+            analysis.append("\n# ⚠️ Uncertainties")
+            analysis.append("\n## Clarity Issues")
+            analysis.append("- Root cause determination for complex issues")
+            analysis.append("- Long-term impact assessment")
                 
             # Cache the results
             result = "\n".join(analysis)
@@ -541,8 +708,21 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         elif subjectivity >= 0.4: return "Mixed"
         elif subjectivity >= 0.2: return "Somewhat Objective"
         return "Very Objective"
-        
-        return "\n".join(analysis)
+
+    def _determine_severity(self, percentage: float) -> str:
+        """Determine issue severity based on occurrence percentage."""
+        if percentage >= 50: return "Critical - Affects majority of users"
+        elif percentage >= 25: return "High - Affects significant portion of users"
+        elif percentage >= 10: return "Medium - Affects moderate number of users"
+        return "Low - Affects small number of users"
+
+    def _determine_impact(self, count: int, total: int) -> str:
+        """Determine impact scope based on occurrence count and total samples."""
+        percentage = (count / total) * 100
+        if percentage >= 75: return "Global Impact - Affects most users"
+        elif percentage >= 50: return "Wide Impact - Affects many users"
+        elif percentage >= 25: return "Moderate Impact - Affects some users"
+        return "Limited Impact - Affects few users"
 
 async def main():
     """Main interactive chat loop."""
