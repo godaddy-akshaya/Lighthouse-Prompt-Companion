@@ -54,14 +54,43 @@ function addMessage(content, isUser = false) {
         // Convert markdown to HTML
         messageDiv.innerHTML = marked.parse(content);
         
-        // If this looks like a prompt, also update the prompt display
-        if (content.includes('Task:') || (content.includes('###') && content.includes('Quantitative Analysis'))) {
+                    // If this looks like a prompt, also update the prompt display
+            if (content.includes('[transcript]') || 
+                content.includes('Individual Transcript Analysis Selected') ||
+                content.includes('Summary of Summaries Analysis Selected')) {
+            
             console.log('Detected prompt content, updating prompt display');
             const promptDisplay = document.getElementById('prompt-display');
             const copyButton = document.getElementById('copy-prompt');
             
             if (promptDisplay && copyButton) {
-                promptDisplay.innerHTML = marked.parse(content);
+                // Convert markdown to HTML with enhanced formatting
+                let htmlContent = marked.parse(content);
+                
+                // Add Google Docs style formatting
+                htmlContent = htmlContent
+                    // Format the transcript framework section
+                    .replace(/\[transcript\]/g, '<div class="instruction-block"><h2>📝 Transcript Analysis Framework</h2>')
+                    .replace(/GD_REDACTED_EMAIL\./g, 'GD_REDACTED_EMAIL.</div>')
+                    // Format the focus area and aspects
+                    .replace(/Focus Area:/g, '<div class="task-section"><div class="section-header"><span class="emoji">🎯</span>Focus Area:</div>')
+                    .replace(/Analysis Aspects:/g, '<div class="task-section"><div class="section-header"><span class="emoji">📊</span>Analysis Aspects:</div>')
+                    // Format other sections
+                    .replace(/<h2>Quantitative Analysis/g, '<div class="task-section"><div class="section-header"><span class="emoji">📊</span>Quantitative Analysis</div>')
+                    .replace(/<h2>Top 3/g, '<div class="task-section"><div class="section-header"><span class="emoji">🎯</span>Top 3')
+                    .replace(/<h2>Specific Recommendations/g, '<div class="task-section"><div class="section-header"><span class="emoji">💡</span>Specific Recommendations')
+                    .replace(/<h2>What's Working Well/g, '<div class="task-section"><div class="section-header"><span class="emoji">✅</span>What\'s Working Well')
+                    .replace(/<h2>Additional Insights/g, '<div class="task-section"><div class="section-header"><span class="emoji">🔍</span>Additional Insights')
+                    .replace(/<h2>Not Found/g, '<div class="task-section"><div class="section-header"><span class="emoji">❓</span>Not Found')
+                    .replace(/<h2>Uncertainties/g, '<div class="task-section"><div class="section-header"><span class="emoji">⚠️</span>Uncertainties')
+                    // Add closing div for sections
+                    .replace(/<h2>/g, '</div><h2>')
+                    // Style instructions
+                    .replace(/<h2>Analysis Instructions:/g, '<div class="instruction-block"><h2>📝 Analysis Instructions:')
+                    // Add note blocks
+                    .replace(/Note:/g, '<div class="note-block">📌 Note:');
+                
+                promptDisplay.innerHTML = htmlContent;
                 copyButton.classList.remove('hidden');
                 
                 // Add copy functionality

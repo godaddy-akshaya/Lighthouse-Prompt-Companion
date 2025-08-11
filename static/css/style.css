@@ -156,34 +156,109 @@ button:active {
 
 /* Prompt display formatting */
 #prompt-display {
-    font-family: 'Monaco', 'Consolas', monospace;
+    font-family: 'Arial', sans-serif;
     line-height: 1.6;
+    color: #202124;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow-x: auto;
-    white-space: pre-wrap;
+}
+
+#prompt-display h1 {
+    font-size: 2rem;
+    color: #202124;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+}
+
+#prompt-display h2 {
+    font-size: 1.5rem;
+    color: #202124;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 400;
 }
 
 #prompt-display h3 {
-    color: #1f2937;
     font-size: 1.25rem;
+    color: #202124;
     margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+#prompt-display p {
     margin-bottom: 1rem;
-    font-weight: 600;
+    color: #3c4043;
 }
 
 #prompt-display ul, #prompt-display ol {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
+    color: #3c4043;
+    list-style-position: outside;
 }
 
 #prompt-display li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
 }
 
 #prompt-display code {
-    background-color: #f3f4f6;
+    font-family: 'Roboto Mono', monospace;
+    background: #f8f9fa;
     padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #202124;
+}
+
+#prompt-display blockquote {
+    border-left: 4px solid #1a73e8;
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    color: #3c4043;
+}
+
+#prompt-display .task-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px solid #e0e0e0;
+}
+
+#prompt-display .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #1a73e8;
+}
+
+#prompt-display .section-header .emoji {
+    margin-right: 0.5rem;
+    font-size: 1.2em;
+}
+
+#prompt-display .instruction-block {
+    background: #e8f0fe;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #4285f4;
+}
+
+#prompt-display .note-block {
+    background: #fef7e0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid #f9ab00;
 }
 
 /* Google Doc style analysis results */

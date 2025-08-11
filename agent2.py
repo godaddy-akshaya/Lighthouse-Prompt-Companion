@@ -165,11 +165,19 @@ class ConversationalAgent:
                     self.prompt_generated = False
                     return """✨ Individual Transcript Analysis Selected
 
-To create your analysis prompt, I'll ask a few focused questions.
+Here's our base template that will be customized based on your needs:
 
-First question:
-What specific domain or topic would you like to analyze in the customer interactions?
-(For example: product issues, technical support, billing inquiries, etc.)"""
+[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: "System", "Bot", "Customer", "Consumer", or "Agent". "Customer" and "Consumer" are synonymous. "Agent" refers to a human support representative, while "Bot" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.
+
+To customize this template, I need two pieces of information:
+
+1. What specific category/topic would you like to analyze?
+   (For example: email issues, hosting problems, domain transfers, etc.)
+
+2. What aspects would you like summarized?
+   (For example: main pain points, customer needs, technical issues, etc.)
+
+I'll incorporate your choices into the template above."""
                 elif message.lower() in ['2', 'summary of summaries', 'summary of summaries prompt']:
                     self.current_mode = 'summary'
                     self.prompt_generated = False
@@ -215,6 +223,22 @@ Please enter 1 or 2 to continue."
 
 DO NOT proceed with any other questions until the user has chosen one of these options.
 
+FOR INITIAL PROMPT MODE (When user selects option 1):
+Follow this exact structure:
+
+UNDERSTAND THEIR NEEDS
+1. Ask about their specific analysis goals and the topic (domain, emails...)
+2. Inquire about the types of transcripts they're analyzing (phone calls, chats, emails)
+3. Determine what actions they want to take based on the insights
+4. Learn what format would make the output most actionable for them
+
+DESIGN THE PROMPT
+Always begin with the required transcript analysis framework:
+[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: "System", "Bot", "Customer", "Consumer", or "Agent". "Customer" and "Consumer" are synonymous. "Agent" refers to a human support representative, while "Bot" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.
+
+Follow Lighthouse format principles contained in the library and including: Specific task instructions
+
+FOR SUMMARY OF SUMMARIES MODE (When user selects option 2):
 1. If the user hasn't chosen a mode (initial or summary), ask them to choose.
 2. Once in summary of summaries mode:
    - First, help create the perfect summary analysis prompt
@@ -230,7 +254,25 @@ DO NOT proceed with any other questions until the user has chosen one of these o
    - Build upon established understanding
    - Show how current insights connect to past ones
 
-You are an expert LLM Prompt Engineer specializing in creating highly effective prompts for analyzing customer service interactions. Your mission is to help users design prompts that extract maximum value from analyzing multiple conversation summaries.
+You are an expert LLM Prompt Engineer specializing in creating highly effective prompts for analyzing customer service interactions.
+
+For Initial Prompt analysis (after getting the first answer about domain/topic):
+1. Thank the user for specifying the domain
+2. Present a simple, focused prompt that emphasizes:
+   - Understanding the conversation flow
+   - Identifying main pain points
+   - Highlighting key customer needs
+   - Suggesting potential solutions
+
+The prompt should follow this format:
+[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: "System", "Bot", "Customer", "Consumer", or "Agent". "Customer" and "Consumer" are synonymous. "Agent" refers to a human support representative, while "Bot" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.
+
+Focus Area: {category}
+Analysis Aspects: {aspects}
+
+Please analyze the conversation and provide a clear summary focusing on these elements.
+
+Keep the analysis straightforward and actionable, focusing on the most important aspects of the interaction.
 
 For Summary of Summaries analysis, use this exact structure:
 
