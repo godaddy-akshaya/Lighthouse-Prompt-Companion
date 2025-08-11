@@ -14,19 +14,24 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type"]}})
 
-# Initialize Socket.IO with WebSocket transport only
+# Initialize Socket.IO with minimal configuration for maximum speed
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    ping_timeout=60,  # Reduced timeout
-    ping_interval=5,  # More frequent pings
+    ping_timeout=5,  # Extremely short timeout
+    ping_interval=60000,  # Very infrequent pings
     transports=['websocket'],
     async_mode='eventlet',
     message_queue=None,
-    engineio_logger=True,
-    logger=True,
-    async_handlers=True,  # Enable async handlers
-    max_http_buffer_size=1e8  # Increased buffer size
+    engineio_logger=False,
+    logger=False,
+    async_handlers=True,
+    max_http_buffer_size=1e5,  # Minimal buffer size
+    always_connect=True,
+    manage_session=False,
+    upgrade_timeout=2000,  # Very fast upgrade
+    cookie=None,
+    cors_credentials=False  # Disable CORS credentials
 )
 
 # Initialize the conversational agent
@@ -41,19 +46,42 @@ def index():
 
 @socketio.on('message')
 def handle_message(data):
-    """Handle incoming messages from the client."""
+    """Handle incoming messages from the client with optimized performance."""
     try:
-        message = data.get('message', '')
-        print(f"Received message: {message}")
+        # Fast input validation
+        if not isinstance(data, dict) or 'message' not in data:
+            emit('response', {'response': 'Invalid request format', 'status': 'error', 'error_type': 'validation'})
+            return
         
-        # Process the message synchronously
-        response = loop.run_until_complete(agent.chat(message))
-        print(f"Sending response for message: {message}")
-        emit('response', {'response': response})
+        message = data['message'].strip()
+        if not message:
+            emit('response', {'response': 'Empty message', 'status': 'error', 'error_type': 'validation'})
+            return
+            
+        # Process message with shorter timeout
+        async def process_with_timeout():
+            try:
+                # Use a shorter timeout for faster response/failure
+                return await asyncio.wait_for(agent.chat(message), timeout=20)
+            except asyncio.TimeoutError:
+                return "Response is taking longer than expected. Please try a shorter message."
+        
+        # Process the message
+        response = loop.run_until_complete(process_with_timeout())
+        
+        # Send response immediately
+        emit('response', {
+            'response': response,
+            'status': 'success' if not response.startswith("Response is taking longer") else 'timeout'
+        })
         
     except Exception as e:
-        print(f"Error in handle_message: {str(e)}")
-        emit('response', {'response': f"An error occurred: {str(e)}"})
+        # Simplified error handling for faster response
+        emit('response', {
+            'response': "An error occurred. Please try again.",
+            'status': 'error',
+            'error_type': 'unexpected'
+        })
 
 @app.route('/api/upload-csv', methods=['POST'])
 def handle_csv_upload():
@@ -198,14 +226,20 @@ def handle_clear_history():
 
 if __name__ == '__main__':
     try:
-        logger.info("Starting server on port 3000...")
+        # Optimize logging
+        logging.getLogger('werkzeug').setLevel(logging.ERROR)
+        logging.getLogger('engineio').setLevel(logging.ERROR)
+        logging.getLogger('socketio').setLevel(logging.ERROR)
+        
+        logger.info("Starting optimized server on port 3000...")
         socketio.run(
             app,
             host='localhost',
             port=3000,
-            debug=True,
+            debug=False,  # Disable debug for better performance
             allow_unsafe_werkzeug=True,
-            log_output=True
+            log_output=False,  # Disable logging for better performance
+            use_reloader=False  # Disable reloader for better performance
         )
     except Exception as e:
         logger.error(f"Failed to start server: {e}")

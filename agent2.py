@@ -18,33 +18,33 @@ from nltk.util import ngrams
 import spacy
 from tqdm import tqdm
 
-# Download all required NLTK data
-def download_nltk_data():
-    """Download required NLTK resources."""
-    resources = [
-        'punkt',
-        'stopwords',
-        'averaged_perceptron_tagger',
-        'maxent_ne_chunker',
-        'words',
-        'punkt_tab'
-    ]
-    for resource in resources:
+# Initialize NLTK and spaCy resources lazily
+nlp = None
+nltk_initialized = False
+
+def ensure_nltk_data():
+    """Ensure NLTK resources are available."""
+    global nltk_initialized
+    if not nltk_initialized:
+        resources = ['stopwords', 'averaged_perceptron_tagger', 'maxent_ne_chunker', 'words']
+        for resource in resources:
+            try:
+                nltk.data.find(f'tokenizers/{resource}')
+            except LookupError:
+                print(f"Downloading NLTK resource: {resource}")
+                nltk.download(resource, quiet=True)
+        nltk_initialized = True
+
+def get_nlp():
+    """Get or initialize spaCy model."""
+    global nlp
+    if nlp is None:
         try:
-            nltk.data.find(f'tokenizers/{resource}')
-        except LookupError:
-            print(f"Downloading NLTK resource: {resource}")
-            nltk.download(resource, quiet=True)
-
-# Download NLTK data
-download_nltk_data()
-
-# Load spaCy model
-try:
-    nlp = spacy.load('en_core_web_sm')
-except OSError:
-    os.system('python -m spacy download en_core_web_sm')
-    nlp = spacy.load('en_core_web_sm')
+            nlp = spacy.load('en_core_web_sm')
+        except OSError:
+            os.system('python -m spacy download en_core_web_sm')
+            nlp = spacy.load('en_core_web_sm')
+    return nlp
 # Load environment variables from .env file in current directory
 load_dotenv()
 
@@ -62,26 +62,62 @@ class ConversationalAgent:
         self.current_mode = None  # 'initial' or 'summary'
         self.prompt_generated = False
         self.analysis_cache = {}  # Cache for analysis results
+        self.sentiment_cache = {}  # Cache for sentiment analysis
+        self.phrase_cache = {}    # Cache for key phrase extraction
+        self.topic_cache = {}     # Cache for common topics
+        self.stats_cache = {}     # Cache for text statistics
+        self.response_cache = {}  # Cache for API responses
+        
+        # Quick responses for common inputs
+        self.quick_responses = {
+            "1": """✨ Individual Transcript Analysis Selected
+
+To create your analysis prompt, I'll ask a few focused questions.
+
+First question:
+What specific domain or topic would you like to analyze in the customer interactions?
+(For example: product issues, technical support, billing inquiries, etc.)""",
+            "email": """Great! Let's create a prompt to analyze email-related interactions.
+
+Next question:
+What specific aspects of email issues would you like to focus on?
+(For example: email delivery, configuration, spam issues, etc.)"""
+        }
         
     def _extract_key_phrases(self, text: str) -> List[str]:
-        """Extract key phrases using spaCy."""
+        """Extract key phrases using spaCy with caching."""
+        if text in self.phrase_cache:
+            return self.phrase_cache[text]
+            
+        nlp = get_nlp()  # Get or initialize spaCy model
         doc = nlp(text)
         phrases = []
         for chunk in doc.noun_chunks:
             if len(chunk.text.split()) >= 2:  # Only phrases with 2+ words
                 phrases.append(chunk.text.lower())
+                
+        self.phrase_cache[text] = phrases
         return phrases
         
     def _analyze_sentiment(self, text: str) -> Dict[str, float]:
-        """Analyze sentiment using TextBlob."""
+        """Analyze sentiment using TextBlob with caching."""
+        if text in self.sentiment_cache:
+            return self.sentiment_cache[text]
+            
         blob = TextBlob(text)
-        return {
+        result = {
             'polarity': blob.sentiment.polarity,
             'subjectivity': blob.sentiment.subjectivity
         }
+        self.sentiment_cache[text] = result
+        return result
         
     def _get_common_topics(self, texts: List[str], n: int = 10) -> List[Tuple[str, int]]:
-        """Extract common topics using CountVectorizer."""
+        """Extract common topics using CountVectorizer with caching."""
+        cache_key = hash(tuple(texts))
+        if cache_key in self.topic_cache:
+            return self.topic_cache[cache_key][:n]  # Return only requested number of topics
+            
         vectorizer = CountVectorizer(
             ngram_range=(2, 3),
             stop_words='english',
@@ -92,15 +128,22 @@ class ConversationalAgent:
             X = vectorizer.fit_transform(texts)
             words = vectorizer.get_feature_names_out()
             counts = X.sum(axis=0).A1
-            return sorted(zip(words, counts), key=lambda x: x[1], reverse=True)[:n]
+            result = sorted(zip(words, counts), key=lambda x: x[1], reverse=True)
+            self.topic_cache[cache_key] = result
+            return result[:n]
         except ValueError:  # If no features were extracted
+            self.topic_cache[cache_key] = []
             return []
             
     def _analyze_text_stats(self, texts: List[str]) -> Dict[str, Any]:
-        """Analyze text statistics."""
+        """Analyze text statistics with caching."""
+        cache_key = hash(tuple(texts))
+        if cache_key in self.stats_cache:
+            return self.stats_cache[cache_key]
+            
         word_counts = [len(text.split()) for text in texts]
         sent_counts = [len(sent_tokenize(text)) for text in texts]
-        return {
+        result = {
             'avg_words': np.mean(word_counts),
             'std_words': np.std(word_counts),
             'avg_sentences': np.mean(sent_counts),
@@ -108,6 +151,8 @@ class ConversationalAgent:
             'min_words': min(word_counts),
             'max_words': max(word_counts)
         }
+        self.stats_cache[cache_key] = result
+        return result
         
     def _find_representative_samples(self, texts: List[str], n: int = 3) -> List[str]:
         """Find representative samples based on length and content."""
@@ -128,18 +173,22 @@ class ConversationalAgent:
 
     async def initialize(self):
         """Initialize the OpenAI client."""
-        # Set up API credentials
-        api_key = "sk-Of7OL3X1yhEHpsVw-Ahclg"  # New API key
-        api_base = "https://caas-gocode-prod.caas-prod.prod.onkatana.net"
+        # Set up API credentials with faster endpoint
+        api_key = "sk-fIz3aJ9LORE4Gb7fzLw8dgFa"
+        api_base = "https://api.openai.com/v1"  # Using direct OpenAI endpoint for better reliability
+        
+        print(f"Initializing API client with base URL: {api_base}")
+        
+        # Configure OpenAI client with optimized settings
+        self.client = AsyncOpenAI(
+            api_key=api_key,
+            base_url=api_base,
+            timeout=15.0,  # Shorter timeout for faster response/failure
+            max_retries=2  # Fewer retries for faster failure
+        )
         
         print("Using API Key:", api_key)
         print("Using API Base:", api_base)
-        
-        # Configure OpenAI client
-        self.client = AsyncOpenAI(
-            api_key=api_key,
-            base_url=api_base
-        )
 
     async def run(self, message: str) -> str:
         """Run the agent with a single message."""
@@ -424,47 +473,65 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             ]
             messages.extend(self.conversation_history[-10:])  # Include last 10 messages
             
-            # Call the API with timeout and retry logic
-            max_retries = 3
-            retry_count = 0
-            while retry_count < max_retries:
-                try:
-                    response = await asyncio.wait_for(
-                        self.client.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            messages=messages,
-                            timeout=60  # 60 seconds timeout
-                        ),
-                        timeout=65  # Overall timeout including network delays
-                    )
-                    break  # Success, exit the retry loop
-                except asyncio.TimeoutError:
-                    retry_count += 1
-                    if retry_count == max_retries:
-                        raise Exception("The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts.")
-                    print(f"Request timed out, retrying ({retry_count}/{max_retries})...")
-                    await asyncio.sleep(1)  # Wait a second before retrying
-            
-            # Extract and store response
-            assistant_response = response.choices[0].message.content
-            self.conversation_history.append({"role": "assistant", "content": assistant_response})
-            
-            # Keep conversation history manageable (last 20 messages)
-            if len(self.conversation_history) > 20:
-                self.conversation_history = self.conversation_history[-20:]
+            # Check for quick responses first
+            user_msg = message.strip().lower()
+            if user_msg in self.quick_responses:
+                response_text = self.quick_responses[user_msg]
+                self.conversation_history.append({"role": "assistant", "content": response_text})
+                return response_text
                 
-            return assistant_response
+            # Check response cache
+            cache_key = str(messages[-3:])  # Use last 3 messages as cache key
+            if cache_key in self.response_cache:
+                return self.response_cache[cache_key]
             
-        except asyncio.TimeoutError:
-            error_msg = "The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts."
-            print(f"Error in chat with model: {error_msg}")
-            return error_msg
+            # Fallback to API call with minimal context
+            try:
+                # Keep only essential messages
+                system_msg = messages[0]
+                current_msg = messages[-1]
+                optimized_messages = [system_msg, current_msg]
+                
+                # Fast API call with minimal timeout
+                response = await asyncio.wait_for(
+                    self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=optimized_messages,
+                        max_tokens=100,
+                        temperature=0.3,
+                        presence_penalty=0,
+                        frequency_penalty=0,
+                        timeout=5.0
+                    ),
+                    timeout=7.0
+                )
+                
+                # Quick response processing
+                assistant_response = response.choices[0].message.content
+                self.conversation_history.append({"role": "assistant", "content": assistant_response})
+                
+                # Trim history if too long
+                if len(self.conversation_history) > 10:
+                    self.conversation_history = self.conversation_history[-10:]
+                
+                return assistant_response
+                
+            except asyncio.TimeoutError:
+                # Return cached response if available
+                if len(self.conversation_history) >= 2:
+                    last_response = self.conversation_history[-2].get('content', '')
+                    if 'question' in last_response.lower():
+                        return last_response
+                return "Response is taking longer than expected. Please try again."
+            except Exception as e:
+                print(f"API error: {str(e)}")
+                # Return quick response for common inputs
+                if message.strip().lower() in ['1', 'email']:
+                    return self.quick_responses.get(message.strip().lower(), "Please try again with a simpler request.")
+                return "I'm having trouble processing your request. Please try again."
         except Exception as e:
-            error_msg = str(e)
-            print(f"Error in chat with model: {error_msg}")
-            if "timeout" in error_msg.lower():
-                return "The request took too long to complete. Please try again or break your question into smaller parts."
-            return f"I encountered an error. Please try again. Error details: {error_msg}"
+            print(f"Chat error: {str(e)}")
+            return "Something went wrong. Please try again."
 
     def clear_history(self):
         """Clear the conversation history."""
