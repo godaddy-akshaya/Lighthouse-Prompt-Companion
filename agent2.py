@@ -94,19 +94,51 @@ class ConversationalAgent:
         }
         
     def _get_common_topics(self, texts: List[str], n: int = 10) -> List[Tuple[str, int]]:
-        """Extract common topics using CountVectorizer."""
+        """Extract common topics using CountVectorizer and NLP analysis."""
+        # First, analyze each text to identify key issues and pain points
+        issue_phrases = []
+        for text in texts:
+            doc = nlp(text)
+            
+            # Look for sentences containing issue indicators
+            for sent in doc.sents:
+                sent_text = sent.text.lower()
+                if any(word in sent_text for word in ['issue', 'problem', 'error', 'difficult', 'cant', "can't", 'fail', 'bug', 'broken', 'slow', 'confusing']):
+                    # Extract the key noun phrases and their context
+                    for chunk in doc.noun_chunks:
+                        if len(chunk.text.split()) >= 2:  # Only phrases with 2+ words
+                            issue_phrases.append(chunk.text.lower())
+        
+        # Use CountVectorizer as a backup for any remaining text
         vectorizer = CountVectorizer(
             ngram_range=(2, 3),
             stop_words='english',
             min_df=2,
             max_df=0.9
         )
+        
         try:
+            # Combine NLP-extracted phrases with vectorizer results
+            if issue_phrases:
+                phrase_counts = Counter(issue_phrases)
+                nlp_topics = [(phrase, count) for phrase, count in phrase_counts.most_common()]
+            else:
+                nlp_topics = []
+            
+            # Get additional topics from vectorizer
             X = vectorizer.fit_transform(texts)
             words = vectorizer.get_feature_names_out()
             counts = X.sum(axis=0).A1
-            return sorted(zip(words, counts), key=lambda x: x[1], reverse=True)[:n]
+            vec_topics = list(zip(words, counts))
+            
+            # Combine and sort all topics
+            all_topics = nlp_topics + vec_topics
+            return sorted(all_topics, key=lambda x: x[1], reverse=True)[:n]
+            
         except ValueError:  # If no features were extracted
+            if issue_phrases:
+                phrase_counts = Counter(issue_phrases)
+                return phrase_counts.most_common(n)
             return []
             
     def _analyze_text_stats(self, texts: List[str]) -> Dict[str, Any]:
@@ -682,17 +714,57 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Quantitative Analysis
             analysis.append("# 📊 Quantitative Analysis\n")
             
-            # Issue Tracking
-            analysis.append("## Issue Tracking")
-            topics = self._get_common_topics(texts)
-            analysis.append("\n| Issue Category | Count | Percentage | Example Quote |")
-            analysis.append("|----------------|--------|------------|----------------|")
-            for topic, count in topics[:5]:  # Top 5 issues
-                percentage = (count / len(texts) * 100)
-                # Find a relevant quote
-                quote = next((text for text in texts if topic in text.lower()), "")
-                quote = quote[:100] + "..." if len(quote) > 100 else quote
-                analysis.append(f"| {topic} | {count} | {percentage:.1f}% | {quote} |")
+            # Comprehensive Pain Point Analysis
+            analysis.append("## Pain Point Analysis")
+            
+            # Analyze pain points in all texts
+            all_pain_points = []
+            category_counts = Counter()
+            
+            for text in tqdm(texts, desc="Analyzing pain points"):
+                pain_point_data = self._analyze_pain_points(text)
+                all_pain_points.extend(pain_point_data['pain_points'])
+                category_counts.update(pain_point_data['categories'])
+            
+            # Overall pain point statistics
+            total_pain_points = len(all_pain_points)
+            if total_pain_points > 0:
+                analysis.append(f"\nTotal Pain Points Identified: {total_pain_points}")
+                analysis.append("\n### Pain Point Categories")
+                analysis.append("\n| Category | Count | Percentage | Top Issues |")
+                analysis.append("|----------|--------|------------|------------|")
+                
+                for category, count in category_counts.most_common():
+                    percentage = (count / total_pain_points) * 100
+                    # Get top 3 issues for this category
+                    category_issues = [p['issue'] for p in all_pain_points if p['category'] == category]
+                    top_issues = Counter(category_issues).most_common(3)
+                    issues_str = "; ".join(f"{issue} ({count})" for issue, count in top_issues)
+                    analysis.append(f"| {category.title()} | {count} | {percentage:.1f}% | {issues_str} |")
+                
+                # Detailed pain point analysis
+                analysis.append("\n### Detailed Pain Point Examples")
+                analysis.append("\n| Category | Issue | Action | Impact | Context | Full Text |")
+                analysis.append("|----------|--------|--------|---------|----------|-----------|")
+                
+                # Show top 2 pain points from each category
+                shown_examples = set()
+                for category in category_counts:
+                    category_points = [p for p in all_pain_points if p['category'] == category]
+                    for point in category_points[:2]:  # Top 2 examples per category
+                        # Create a unique identifier for this example
+                        example_id = (point['category'], point['issue'])
+                        if example_id not in shown_examples:
+                            shown_examples.add(example_id)
+                            
+                            # Format the row data
+                            issue = point['issue'] if point['issue'] else 'N/A'
+                            action = point['action'] if point['action'] else 'N/A'
+                            impact = point['impact'] if point['impact'] else 'N/A'
+                            context = point['context'] if point['context'] else 'N/A'
+                            full_text = point['full_text'][:100] + "..." if len(point['full_text']) > 100 else point['full_text']
+                            
+                            analysis.append(f"| {point['category'].title()} | {issue} | {action} | {impact} | {context} | {full_text} |")
             
             # Performance Metrics
             analysis.append("\n## Performance Metrics")
@@ -705,45 +777,74 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append(f"| Average Response Length | {stats['avg_words']:.1f} words | Indicates detail level of responses |")
             analysis.append(f"| Customer Satisfaction | {self._describe_sentiment(avg_polarity)} | Based on sentiment analysis |")
             
-            # Top 3 Issues Analysis
-            analysis.append("\n# 🎯 Top 3 Issues Analysis")
+            # Top Issues Analysis
+            analysis.append("\n# 🎯 Top Issues Analysis")
             
-            # Analyze top 3 issues in detail
-            for i, (topic, count) in enumerate(topics[:3], 1):
-                analysis.append(f"\n## Issue {i}: {topic}")
+            # Get top 3 categories and their issues
+            for i, (category, count) in enumerate(category_counts.most_common(3), 1):
+                analysis.append(f"\n## Issue Category {i}: {category.title()}")
                 
-                # Issue Profile
-                percentage = (count / len(texts) * 100)
-                analysis.append("\n### Issue Profile")
+                # Category Profile
+                percentage = (count / total_pain_points * 100)
+                analysis.append("\n### Category Profile")
                 analysis.append("- **Frequency**: " + f"{count} occurrences ({percentage:.1f}%)")
                 analysis.append("- **Severity**: " + self._determine_severity(percentage))
-                analysis.append("- **Impact Scope**: " + self._determine_impact(count, len(texts)))
+                analysis.append("- **Impact Scope**: " + self._determine_impact(count, total_pain_points))
+                
+                # Get pain points for this category
+                category_points = [p for p in all_pain_points if p['category'] == category]
                 
                 # Detailed Breakdown
                 analysis.append("\n### Detailed Breakdown")
-                # Find related issues
-                related = [t for t, c in topics if topic in t or t in topic][:3]
-                analysis.append("**Related Issues:**")
-                for rel in related:
-                    analysis.append(f"- {rel}")
+                # Analyze patterns with filtering
+                issues = Counter(p['issue'] for p in category_points if p['issue'])
+                impacts = Counter(p['impact'] for p in category_points if p['impact'])
+                
+                # Filter out generic issues
+                filtered_issues = {
+                    issue: count for issue, count in issues.items() 
+                    if not any(generic in issue.lower() for generic in [
+                        'the customer', 'educational resources', 'the user experience',
+                        'consider', 'help', 'offering'
+                    ])
+                }
+                
+                if filtered_issues:
+                    analysis.append("**Key Issues:**")
+                    for issue, issue_count in sorted(filtered_issues.items(), key=lambda x: x[1], reverse=True)[:3]:
+                        analysis.append(f"- {issue} ({issue_count} occurrences)")
+                
+                if impacts:
+                    analysis.append("\n**Impact Analysis:**")
+                    for impact, impact_count in impacts.most_common(3):
+                        analysis.append(f"- {impact} ({impact_count} occurrences)")
                 
                 # Evidence Base
                 analysis.append("\n### Evidence Base")
-                # Find relevant examples
-                examples = [text for text in texts if topic in text.lower()][:3]
-                analysis.append("**Representative Quotes:**")
-                for j, example in enumerate(examples, 1):
-                    analysis.append(f"{j}. > {example[:200]}...")
+                analysis.append("**Representative Cases:**")
+                for j, point in enumerate(category_points[:3], 1):
+                    analysis.append(f"{j}. Category: {point['category'].title()}")
+                    analysis.append(f"   Issue: {point['issue'] if point['issue'] else 'N/A'}")
+                    analysis.append(f"   Action: {point['action'] if point['action'] else 'N/A'}")
+                    analysis.append(f"   Impact: {point['impact'] if point['impact'] else 'N/A'}")
+                    analysis.append(f"   Context: {point['context'] if point['context'] else 'N/A'}")
+                    analysis.append(f"   Full Text: > {point['full_text'][:200]}...")
             
             # Specific Recommendations
             analysis.append("\n# 💡 Specific Recommendations")
-            for i, (topic, _) in enumerate(topics[:3], 1):
-                analysis.append(f"\n## For {topic}")
+            for i, (category, _) in enumerate(category_counts.most_common(3), 1):
+                analysis.append(f"\n## For {category.title()} Issues")
+                
+                # Get pain points for this category for targeted recommendations
+                category_points = [p for p in all_pain_points if p['category'] == category]
+                common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(3)
                 
                 analysis.append("\n### Solution Package")
-                analysis.append("1. **Immediate Action**: Implement automated detection and response")
-                analysis.append("2. **Short-term**: Enhance documentation and user guides")
-                analysis.append("3. **Long-term**: Develop preventive measures")
+                for j, (issue, _) in enumerate(common_issues, 1):
+                    analysis.append(f"{j}. **{issue}**")
+                    analysis.append(f"   - Immediate Action: Address through automated detection and response")
+                    analysis.append(f"   - Short-term: Enhance documentation and user guides")
+                    analysis.append(f"   - Long-term: Implement preventive measures")
                 
                 analysis.append("\n### Implementation Guide")
                 analysis.append("- **Priority**: High")
@@ -763,10 +864,13 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append("\n# 🔍 Additional Insights")
             
             analysis.append("\n## Trend Analysis")
-            analysis.append("| Trend | Observation |")
-            analysis.append("|-------|-------------|")
-            for topic, count in topics[5:8]:  # Next 3 topics after top 5
-                analysis.append(f"| {topic} | Mentioned in {count} conversations |")
+            analysis.append("| Category | Key Observations |")
+            analysis.append("|----------|------------------|")
+            for category, count in category_counts.most_common()[3:6]:  # Next 3 categories after top 3
+                category_points = [p for p in all_pain_points if p['category'] == category]
+                common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(1)
+                observation = f"Most common issue: {common_issues[0][0]}" if common_issues else "No specific issues identified"
+                analysis.append(f"| {category.title()} | {observation} |")
             
             # Not Found
             analysis.append("\n# ❓ Not Found")
@@ -819,6 +923,88 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         elif percentage >= 50: return "Wide Impact - Affects many users"
         elif percentage >= 25: return "Moderate Impact - Affects some users"
         return "Limited Impact - Affects few users"
+        
+    def _analyze_pain_points(self, text: str) -> Dict[str, Any]:
+        """
+        Analyze text to identify pain points and their context.
+        
+        Args:
+            text: The text to analyze
+            
+        Returns:
+            Dict containing pain point information
+        """
+        doc = nlp(text)
+        pain_points = []
+        
+        for sent in doc.sents:
+            sent_text = sent.text.lower()
+            
+            # Look for pain point indicators
+            pain_indicators = {
+                'technical': ['error', 'bug', 'crash', 'failed', 'broken', 'not working'],
+                'usability': ['confusing', 'difficult', 'hard to', 'cant find', "can't find", 'unclear'],
+                'performance': ['slow', 'lag', 'performance', 'timeout', 'loading'],
+                'support': ['support', 'service', 'help', 'customer service', 'representative'],
+                'feature': ['need', 'want', 'should have', 'missing', 'feature'],
+                'billing': ['price', 'cost', 'billing', 'charge', 'expensive'],
+                'documentation': ['documentation', 'docs', 'guide', 'instruction', 'explain'],
+                'integration': ['integration', 'compatible', 'work with', 'connect']
+            }
+            
+            for category, indicators in pain_indicators.items():
+                if any(ind in sent_text for ind in indicators):
+                    # Extract the specific issue
+                    issue = None
+                    action = None
+                    impact = None
+                    
+                    # Find the main verb and its object
+                    for token in sent:
+                        if token.dep_ == 'ROOT' and token.pos_ == 'VERB':
+                            action = token.text
+                            # Get the object if it exists
+                            for child in token.children:
+                                if child.dep_ in ['dobj', 'pobj']:
+                                    issue = ' '.join([t.text for t in child.subtree])
+                                    break
+                    
+                    # Look for impact statements
+                    impact_markers = ['causing', 'results in', 'leads to', 'prevents', 'blocks']
+                    for marker in impact_markers:
+                        if marker in sent_text:
+                            # Get the text after the marker
+                            marker_idx = sent_text.find(marker)
+                            if marker_idx >= 0:
+                                impact = sent_text[marker_idx:].split('.')[0]
+                    
+                    # Get the surrounding context
+                    context = []
+                    for token in sent:
+                        # Look for temporal markers
+                        if token.dep_ == 'advmod' and token.text.lower() in ['when', 'while', 'during', 'after', 'before']:
+                            for child in token.children:
+                                context.append(f"Time: {' '.join([t.text for t in child.subtree])}")
+                        
+                        # Look for location/system context
+                        if token.dep_ in ['prep', 'pobj'] and token.text.lower() in ['in', 'on', 'at', 'using', 'with']:
+                            context.append(f"Location: {' '.join([t.text for t in token.subtree])}")
+                    
+                    pain_points.append({
+                        'category': category,
+                        'issue': issue if issue else sent.text,  # Use full sentence if no specific issue found
+                        'action': action,
+                        'impact': impact,
+                        'context': '; '.join(context) if context else None,
+                        'full_text': sent.text
+                    })
+                    break  # Stop after finding first matching category
+        
+        return {
+            'pain_points': pain_points,
+            'count': len(pain_points),
+            'categories': Counter(p['category'] for p in pain_points)
+        }
 
 async def main():
     """Main interactive chat loop."""
