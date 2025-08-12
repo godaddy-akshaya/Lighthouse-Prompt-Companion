@@ -196,6 +196,15 @@ def handle_clear_history():
     agent.clear_history()
     emit('history_cleared', {'success': True})
 
+@socketio.on('clear_all_caches')
+def handle_clear_all_caches():
+    """Handle request to clear all application caches."""
+    try:
+        agent.clear_all_caches_runtime()
+        emit('caches_cleared', {'success': True, 'message': 'All caches cleared successfully!'})
+    except Exception as e:
+        emit('caches_cleared', {'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     try:
         logger.info("Starting server on port 3000...")

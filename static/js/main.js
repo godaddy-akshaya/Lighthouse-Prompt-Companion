@@ -32,11 +32,125 @@ const csvUpload = document.getElementById('csv-upload');
 const analyzeButton = document.getElementById('analyze-button');
 const clearHistoryButton = document.getElementById('clear-history');
 const analysisResults = document.getElementById('analysis-results');
+const formatLastPromptButton = document.getElementById('format-last-prompt');
 
 // State
 let isWaitingForResponse = false;
 
 // Helper Functions
+function isCompletePrompt(content) {
+    // Enhanced detection for complete prompts
+    const promptIndicators = [
+        '[transcript]',
+        'You are tasked with analyzing',
+        'Analysis Instructions:',
+        'Focus Area:',
+        'Analysis Aspects:',
+        'Quantitative Analysis',
+        'Top 3',
+        'Specific Recommendations',
+        'What\'s Working Well',
+        'Additional Insights'
+    ];
+    
+    // Check if content contains multiple prompt indicators (suggests complete prompt)
+    const indicatorCount = promptIndicators.reduce((count, indicator) => {
+        return count + (content.toLowerCase().includes(indicator.toLowerCase()) ? 1 : 0);
+    }, 0);
+    
+    // Consider it a complete prompt if it has at least 3 indicators
+    return indicatorCount >= 3;
+}
+
+function displayFormattedPrompt(content) {
+    const promptDisplay = document.getElementById('prompt-display');
+    const copyButton = document.getElementById('copy-prompt');
+    
+    if (!promptDisplay || !copyButton) {
+        console.warn('Prompt display elements not found');
+        return;
+    }
+    
+    // Create Google Doc style formatted content
+    let htmlContent = marked.parse(content);
+    
+    // Enhanced Google Docs style formatting
+    htmlContent = htmlContent
+        // Add document title
+        .replace(/^<p>/, '<div class="document-header"><h1>📋 Generated Analysis Prompt</h1></div><div class="document-body">')
+        
+        // Format the transcript framework section with better styling
+        .replace(/\[transcript\]/gi, '<div class="instruction-block"><div class="section-title"><span class="emoji">📝</span>Transcript Analysis Framework</div><div class="framework-content">')
+        .replace(/GD_REDACTED_EMAIL\./g, 'GD_REDACTED_EMAIL.</div></div>')
+        
+        // Format focus areas with enhanced styling
+        .replace(/Focus Area:/gi, '<div class="task-section"><div class="section-header"><span class="emoji">🎯</span><strong>Focus Area</strong></div><div class="content-block">')
+        .replace(/Analysis Aspects:/gi, '</div></div><div class="task-section"><div class="section-header"><span class="emoji">📊</span><strong>Analysis Aspects</strong></div><div class="content-block">')
+        
+        // Format main sections with better hierarchy
+        .replace(/<h3>([^<]*Quantitative Analysis[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">📊</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*Top 3[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">🎯</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*Specific Recommendations[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">💡</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*What\'s Working Well[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">✅</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*Additional Insights[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">🔍</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*Not Found[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">❓</span>$1</div><div class="section-content">')
+        .replace(/<h3>([^<]*Uncertainties[^<]*)<\/h3>/gi, '</div></div><div class="major-section"><div class="major-header"><span class="emoji">⚠️</span>$1</div><div class="section-content">')
+        
+        // Format subsections
+        .replace(/<h4>/g, '<div class="subsection-header">')
+        .replace(/<\/h4>/g, '</div>')
+        
+        // Format analysis instructions specially
+        .replace(/Analysis Instructions:/gi, '<div class="instruction-block"><div class="instruction-title"><span class="emoji">📝</span>Analysis Instructions</div><div class="instruction-content">')
+        
+        // Format notes and important blocks
+        .replace(/Note:/gi, '<div class="note-block"><span class="emoji">📌</span><strong>Note:</strong>')
+        .replace(/Important:/gi, '<div class="important-block"><span class="emoji">⚠️</span><strong>Important:</strong>')
+        
+        // Close remaining open divs
+        + '</div></div></div>';
+    
+    // Clean up any malformed HTML
+    htmlContent = htmlContent
+        .replace(/<div class="content-block"><\/div>/g, '')
+        .replace(/<div class="section-content"><\/div>/g, '');
+    
+    // Set the formatted content
+    promptDisplay.innerHTML = htmlContent;
+    copyButton.classList.remove('hidden');
+    
+    // Enhanced copy functionality
+    copyButton.onclick = () => {
+        // Copy the original markdown content, not the HTML
+        navigator.clipboard.writeText(content).then(() => {
+            const originalText = copyButton.textContent;
+            copyButton.textContent = '✅ Copied!';
+            copyButton.classList.add('bg-green-500');
+            copyButton.classList.remove('bg-blue-500');
+            
+            setTimeout(() => {
+                copyButton.textContent = originalText;
+                copyButton.classList.remove('bg-green-500');
+                copyButton.classList.add('bg-blue-500');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy prompt:', err);
+            copyButton.textContent = '❌ Failed';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy Prompt';
+            }, 2000);
+        });
+    };
+    
+    // Highlight code blocks if Prism is available
+    if (typeof Prism !== 'undefined') {
+        Prism.highlightAll();
+    }
+    
+    // Scroll the prompt display into view
+    promptDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function addMessage(content, isUser = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
@@ -54,66 +168,10 @@ function addMessage(content, isUser = false) {
         // Convert markdown to HTML
         messageDiv.innerHTML = marked.parse(content);
         
-                    // If this looks like a prompt, also update the prompt display
-            if (content.includes('[transcript]') || 
-                content.includes('Individual Transcript Analysis Selected') ||
-                content.includes('Summary of Summaries Analysis Selected')) {
-            
-            console.log('Detected prompt content, updating prompt display');
-            const promptDisplay = document.getElementById('prompt-display');
-            const copyButton = document.getElementById('copy-prompt');
-            
-            if (promptDisplay && copyButton) {
-                // Convert markdown to HTML with enhanced formatting
-                let htmlContent = marked.parse(content);
-                
-                // Add Google Docs style formatting
-                htmlContent = htmlContent
-                    // Format the transcript framework section
-                    .replace(/\[transcript\]/g, '<div class="instruction-block"><h2>📝 Transcript Analysis Framework</h2>')
-                    .replace(/GD_REDACTED_EMAIL\./g, 'GD_REDACTED_EMAIL.</div>')
-                    // Format the focus area and aspects
-                    .replace(/Focus Area:/g, '<div class="task-section"><div class="section-header"><span class="emoji">🎯</span>Focus Area:</div>')
-                    .replace(/Analysis Aspects:/g, '<div class="task-section"><div class="section-header"><span class="emoji">📊</span>Analysis Aspects:</div>')
-                    // Format other sections
-                    .replace(/<h2>Quantitative Analysis/g, '<div class="task-section"><div class="section-header"><span class="emoji">📊</span>Quantitative Analysis</div>')
-                    .replace(/<h2>Top 3/g, '<div class="task-section"><div class="section-header"><span class="emoji">🎯</span>Top 3')
-                    .replace(/<h2>Specific Recommendations/g, '<div class="task-section"><div class="section-header"><span class="emoji">💡</span>Specific Recommendations')
-                    .replace(/<h2>What's Working Well/g, '<div class="task-section"><div class="section-header"><span class="emoji">✅</span>What\'s Working Well')
-                    .replace(/<h2>Additional Insights/g, '<div class="task-section"><div class="section-header"><span class="emoji">🔍</span>Additional Insights')
-                    .replace(/<h2>Not Found/g, '<div class="task-section"><div class="section-header"><span class="emoji">❓</span>Not Found')
-                    .replace(/<h2>Uncertainties/g, '<div class="task-section"><div class="section-header"><span class="emoji">⚠️</span>Uncertainties')
-                    // Add closing div for sections
-                    .replace(/<h2>/g, '</div><h2>')
-                    // Style instructions
-                    .replace(/<h2>Analysis Instructions:/g, '<div class="instruction-block"><h2>📝 Analysis Instructions:')
-                    // Add note blocks
-                    .replace(/Note:/g, '<div class="note-block">📌 Note:');
-                
-                promptDisplay.innerHTML = htmlContent;
-                copyButton.classList.remove('hidden');
-                
-                // Add copy functionality
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(content).then(() => {
-                        const originalText = copyButton.textContent;
-                        copyButton.textContent = 'Copied!';
-                        copyButton.classList.add('bg-green-500');
-                        copyButton.classList.remove('bg-blue-500');
-                        
-                        setTimeout(() => {
-                            copyButton.textContent = originalText;
-                            copyButton.classList.remove('bg-green-500');
-                            copyButton.classList.add('bg-blue-500');
-                        }, 2000);
-                    });
-                };
-                
-                // Highlight code blocks
-                Prism.highlightAll();
-            } else {
-                console.warn('Prompt display elements not found');
-            }
+                            // Enhanced prompt detection - look for complete prompts
+        if (isCompletePrompt(content)) {
+            console.log('Detected complete prompt, updating prompt display');
+            displayFormattedPrompt(content);
         }
     } else {
         messageDiv.textContent = content;
@@ -313,6 +371,24 @@ clearHistoryButton.addEventListener('click', () => {
     const promptDisplay = document.getElementById('prompt-display');
     promptDisplay.innerHTML = '<p class="text-gray-600">Your generated prompt will appear here after answering the questions.</p>';
     document.getElementById('copy-prompt').classList.add('hidden');
+});
+
+// Format last message as prompt button
+formatLastPromptButton.addEventListener('click', () => {
+    const lastAssistantMessage = Array.from(chatContainer.children)
+        .reverse()
+        .find(msg => msg.classList.contains('assistant-message'));
+    
+    if (lastAssistantMessage) {
+        // Get the text content, preserving markdown formatting
+        const content = lastAssistantMessage.innerHTML.includes('<') ? 
+            lastAssistantMessage.textContent || lastAssistantMessage.innerText :
+            lastAssistantMessage.textContent || lastAssistantMessage.innerText;
+        console.log('Manual prompt formatting triggered');
+        displayFormattedPrompt(content);
+    } else {
+        alert('No assistant messages found to format as prompt.');
+    }
 });
 
 // Socket Event Handlers

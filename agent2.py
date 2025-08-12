@@ -1,5 +1,5 @@
 """
-OpenAI Agents SDK implementation.
+GOCAAS Agents SDK implementation.
 """
 
 import os
@@ -21,6 +21,14 @@ from tqdm import tqdm
 # Download all required NLTK data
 def download_nltk_data():
     """Download required NLTK resources."""
+    import ssl
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
+    
     resources = [
         'punkt',
         'stopwords',
@@ -33,8 +41,11 @@ def download_nltk_data():
         try:
             nltk.data.find(f'tokenizers/{resource}')
         except LookupError:
-            print(f"Downloading NLTK resource: {resource}")
-            nltk.download(resource, quiet=True)
+            try:
+                print(f"Downloading NLTK resource: {resource}")
+                nltk.download(resource, quiet=True)
+            except Exception as e:
+                print(f"Failed to download {resource}: {e}. Continuing without this resource.")
 
 # Download NLTK data
 download_nltk_data()
@@ -48,7 +59,7 @@ except OSError:
 # Load environment variables from .env file in current directory
 load_dotenv()
 
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 class ConversationalAgent:
     """A wrapper class to maintain conversation state."""
@@ -61,7 +72,9 @@ class ConversationalAgent:
         self.prompt_feedback = {}
         self.current_mode = None  # 'initial' or 'summary'
         self.prompt_generated = False
-        self.analysis_cache = {}  # Cache for analysis results
+        self.analysis_cache = {}  # Cache for analysis results - cleared on init
+        # Clear all caches on initialization
+        self.clear_all_caches()
         
     def _extract_key_phrases(self, text: str) -> List[str]:
         """Extract key phrases using spaCy."""
@@ -126,17 +139,30 @@ class ConversationalAgent:
             
         return samples
 
+    def clear_all_caches(self):
+        """Clear all application caches."""
+        self.analysis_cache.clear()
+        self.learned_patterns.clear()
+        self.prompt_feedback.clear()
+        self.conversation_history.clear()
+        self.current_csv_data = None
+        self.csv_summary = None
+        self.current_mode = None
+        self.prompt_generated = False
+        print("All caches cleared.")
+
     async def initialize(self):
-        """Initialize the OpenAI client."""
-        # Set up API credentials
-        api_key = "sk-Of7OL3X1yhEHpsVw-Ahclg"  # New API key
-        api_base = "https://caas-gocode-prod.caas-prod.prod.onkatana.net"
+        """Initialize the GOCAAS client."""
+        # Set up API credentials from environment variables
+        api_key = os.getenv("GOCAAS_API_KEY")  # Put your *proxy* key in .env
+        api_base = os.getenv("GOCAAS_API_BASE", "https://caas-gocode-staging.caas-staging.staging.onkatana.net/v1")
+        assert api_key, "Missing GOCAAS_API_KEY env var"
         
         print("Using API Key:", api_key)
         print("Using API Base:", api_base)
         
-        # Configure OpenAI client
-        self.client = AsyncOpenAI(
+        # Configure GOCAAS client
+        self.client = OpenAI(
             api_key=api_key,
             base_url=api_base
         )
@@ -458,6 +484,17 @@ A section of things that you are uncertain how to do. Don't hallucinate
 Proper formatting according to user preferences 
 
 Present the draft prompt and offer to refine it based on feedback. Continue iterating until the user confirms the prompt meets their needs.
+
+**CRITICAL FORMATTING REQUIREMENT**: When presenting a complete prompt (initial or summary of summaries), ALWAYS format it as a clear, structured document that includes:
+1. A clear indication this is a complete prompt (use "Here is your complete analysis prompt:" or similar)
+2. The [transcript] framework section
+3. Clear section headers using ### for major sections
+4. Well-organized content with bullet points and structured layout
+5. Analysis Instructions section
+6. All required components for the chosen prompt type
+
+This formatting is essential for the UI to properly detect and display the prompt in the dedicated prompt display area.
+
 CSV FILE ANALYSIS: After the user confirms the summary of summaries prompt is satisfactory, let them know they can upload their CSV file using the UI. Once the CSV is uploaded, proceed directly to analysis using the uploaded file—do not ask the user for a file path. Analyze the CSV 'conversation_summary' column only and present the results following the specified output format. Offer to refine or expand the analysis based on user feedback.
 
 Always maintain a helpful, educational tone that builds the user's prompt engineering capabilities while delivering immediate value through your expert prompt design. The more detail the better.
@@ -466,25 +503,25 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             ]
             messages.extend(self.conversation_history[-10:])  # Include last 10 messages
             
-            # Call the API with timeout and retry logic
+            # Call the API with retry logic (OpenAI client is synchronous)
             max_retries = 3
             retry_count = 0
             while retry_count < max_retries:
                 try:
-                    response = await asyncio.wait_for(
-                        self.client.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            messages=messages,
-                            timeout=60  # 60 seconds timeout
-                        ),
-                        timeout=65  # Overall timeout including network delays
+                    response = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=messages,
+                        timeout=60  # 60 seconds timeout
                     )
                     break  # Success, exit the retry loop
-                except asyncio.TimeoutError:
+                except Exception as e:
                     retry_count += 1
                     if retry_count == max_retries:
-                        raise Exception("The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts.")
-                    print(f"Request timed out, retrying ({retry_count}/{max_retries})...")
+                        if "timeout" in str(e).lower():
+                            raise Exception("The request timed out. Please try again. If the problem persists, try breaking your question into smaller parts.")
+                        else:
+                            raise e
+                    print(f"Request failed, retrying ({retry_count}/{max_retries})... Error: {str(e)}")
                     await asyncio.sleep(1)  # Wait a second before retrying
             
             # Extract and store response
@@ -513,6 +550,23 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         self.conversation_history = []
         self.prompt_generated = False
         print("Conversation history cleared.")
+    
+    def clear_all_caches_runtime(self):
+        """Clear all caches during runtime (called by user request)."""
+        self.clear_all_caches()
+        # Also clear any NLTK caches
+        import nltk
+        try:
+            nltk.data.clear_cache()
+        except:
+            pass
+        # Clear spaCy model cache if possible
+        try:
+            import spacy
+            spacy.util.registry.reset()
+        except:
+            pass
+        print("🧹 All application caches cleared successfully!")
         
     def store_feedback(self, prompt_type, feedback):
         """Store feedback about generated prompts for learning."""
