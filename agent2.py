@@ -4,12 +4,13 @@ GOCAAS Agents SDK implementation.
 
 import os
 import asyncio
+import json
 import pandas as pd
 import numpy as np
 from typing import List, Optional, Dict, Any, Tuple
 from dotenv import load_dotenv
 from collections import Counter
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from textblob import TextBlob
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -52,10 +53,11 @@ download_nltk_data()
 
 # Load spaCy model
 try:
-    nlp = spacy.load('en_core_web_sm')
+    nlp = spacy.load('en_core_web_lg')
 except OSError:
-    os.system('python -m spacy download en_core_web_sm')
-    nlp = spacy.load('en_core_web_sm')
+    os.system('python -m spacy download en_core_web_lg')
+    nlp = spacy.load('en_core_web_lg')
+
 # Load environment variables from .env file in current directory
 load_dotenv()
 
@@ -241,11 +243,92 @@ I'll incorporate your choices into the template above."""
                     self.prompt_generated = False
                     return """📊 Summary of Summaries Analysis Selected
 
-I'll help you create a prompt to analyze patterns across multiple conversations.
+Here is your complete analysis prompt for analyzing multiple conversation summaries:
 
-First question:
-What key aspects of the customer service interactions would you like to focus on?
-(For example: common issues, customer satisfaction drivers, product feedback, etc.)"""
+[Task Introduction]
+You are tasked with analyzing multiple customer service conversation summaries from GoDaddy.com to identify patterns, trends, and actionable insights.
+
+### Quantitative Analysis
+1. Issue Distribution
+   - Count and categorize issues by type
+   - Calculate frequency and percentage for each category
+   - Identify most common problems and their patterns
+   - Track product/feature mentions and context
+
+2. Pain Point Analysis
+   - Identify and categorize customer pain points
+   - Determine severity and impact levels
+   - Extract root causes and contributing factors
+   - Map customer journey friction points
+
+3. Impact Assessment
+   - Business impact (revenue, retention, etc.)
+   - Customer experience impact
+   - Technical implications
+   - Resource utilization impact
+
+### Top Issues Analysis
+For each major issue identified:
+
+1. Problem Profile
+   - Clear problem statement
+   - Root cause analysis
+   - Frequency and trends
+   - Affected customer segments
+
+2. Impact Analysis
+   - Customer experience impact
+   - Business impact
+   - Technical implications
+   - Resource requirements
+
+3. Supporting Evidence
+   - Representative examples
+   - Customer quotes
+   - Context and circumstances
+   - Related issues and dependencies
+
+### Recommendations
+For each top issue:
+
+1. Solution Strategy
+   - Immediate actions
+   - Short-term improvements
+   - Long-term solutions
+   - Resource requirements
+
+2. Implementation Plan
+   - Priority level
+   - Timeline
+   - Success metrics
+   - Risk factors
+
+### Additional Insights
+1. Emerging Trends
+   - New issue patterns
+   - Customer behavior shifts
+   - Product/feature impacts
+   - Support efficiency trends
+
+2. Opportunity Areas
+   - Process improvements
+   - Feature enhancements
+   - Documentation needs
+   - Training requirements
+
+### Not Found
+- Document expected but missing elements
+- Data gaps and limitations
+- Areas needing further investigation
+
+### Analysis Instructions
+1. Focus on actionable insights
+2. Provide specific examples
+3. Include quantitative metrics
+4. Note data limitations
+5. Highlight priority areas
+
+Would you like to customize any part of this prompt before we proceed with the analysis?"""
                 elif not any(mode in message.lower() for mode in ['1', '2', 'initial prompt', 'summary of summaries']):
                     return """Would you like to create:
 1. An initial prompt for analyzing individual transcripts, or
@@ -714,57 +797,44 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Quantitative Analysis
             analysis.append("# 📊 Quantitative Analysis\n")
             
-            # Comprehensive Pain Point Analysis
-            analysis.append("## Pain Point Analysis")
+            # Issue Analysis
+            analysis.append("## Issue Analysis")
             
-            # Analyze pain points in all texts
-            all_pain_points = []
-            category_counts = Counter()
+            # Group similar issues using text similarity
+            grouped_issues = {}
+            for text in tqdm(texts, desc="Analyzing issues"):
+                matched = False
+                for key in grouped_issues:
+                    if self._text_similarity(key, text) > 0.7:  # 70% similarity threshold
+                        grouped_issues[key].append(text)
+                        matched = True
+                        break
+                if not matched:
+                    grouped_issues[text] = [text]
             
-            for text in tqdm(texts, desc="Analyzing pain points"):
-                pain_point_data = self._analyze_pain_points(text)
-                all_pain_points.extend(pain_point_data['pain_points'])
-                category_counts.update(pain_point_data['categories'])
+            # Sort issues by frequency
+            sorted_issues = sorted(grouped_issues.items(), key=lambda x: len(x[1]), reverse=True)
             
-            # Overall pain point statistics
-            total_pain_points = len(all_pain_points)
-            if total_pain_points > 0:
-                analysis.append(f"\nTotal Pain Points Identified: {total_pain_points}")
-                analysis.append("\n### Pain Point Categories")
-                analysis.append("\n| Category | Count | Percentage | Top Issues |")
-                analysis.append("|----------|--------|------------|------------|")
+            # Show top issues
+            for i, (main_text, similar_texts) in enumerate(sorted_issues[:5], 1):
+                count = len(similar_texts)
+                percentage = (count / len(texts)) * 100
                 
-                for category, count in category_counts.most_common():
-                    percentage = (count / total_pain_points) * 100
-                    # Get top 3 issues for this category
-                    category_issues = [p['issue'] for p in all_pain_points if p['category'] == category]
-                    top_issues = Counter(category_issues).most_common(3)
-                    issues_str = "; ".join(f"{issue} ({count})" for issue, count in top_issues)
-                    analysis.append(f"| {category.title()} | {count} | {percentage:.1f}% | {issues_str} |")
+                analysis.append(f"\n### Issue {i}: {count} occurrences ({percentage:.1f}%)")
+                analysis.append("\n**Main Example:**")
+                analysis.append(f"- {main_text}")
                 
-                # Detailed pain point analysis
-                analysis.append("\n### Detailed Pain Point Examples")
-                analysis.append("\n| Category | Issue | Action | Impact | Context | Full Text |")
-                analysis.append("|----------|--------|--------|---------|----------|-----------|")
+                if len(similar_texts) > 1:
+                    analysis.append("\n**Similar Cases:**")
+                    for j, text in enumerate(similar_texts[1:3], 1):  # Show up to 2 similar cases
+                        analysis.append(f"{j}. {text}")
                 
-                # Show top 2 pain points from each category
-                shown_examples = set()
-                for category in category_counts:
-                    category_points = [p for p in all_pain_points if p['category'] == category]
-                    for point in category_points[:2]:  # Top 2 examples per category
-                        # Create a unique identifier for this example
-                        example_id = (point['category'], point['issue'])
-                        if example_id not in shown_examples:
-                            shown_examples.add(example_id)
-                            
-                            # Format the row data
-                            issue = point['issue'] if point['issue'] else 'N/A'
-                            action = point['action'] if point['action'] else 'N/A'
-                            impact = point['impact'] if point['impact'] else 'N/A'
-                            context = point['context'] if point['context'] else 'N/A'
-                            full_text = point['full_text'][:100] + "..." if len(point['full_text']) > 100 else point['full_text']
-                            
-                            analysis.append(f"| {point['category'].title()} | {issue} | {action} | {impact} | {context} | {full_text} |")
+                # Add sentiment analysis
+                sentiments = [self._analyze_sentiment(text)['polarity'] for text in similar_texts]
+                avg_sentiment = sum(sentiments) / len(sentiments)
+                analysis.append(f"\n**Customer Sentiment:** {self._describe_sentiment(avg_sentiment)}")
+                
+                analysis.append("")  # Add spacing between issues
             
             # Performance Metrics
             analysis.append("\n## Performance Metrics")
@@ -796,28 +866,157 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 
                 # Detailed Breakdown
                 analysis.append("\n### Detailed Breakdown")
-                # Analyze patterns with filtering
-                issues = Counter(p['issue'] for p in category_points if p['issue'])
-                impacts = Counter(p['impact'] for p in category_points if p['impact'])
-                
-                # Filter out generic issues
-                filtered_issues = {
-                    issue: count for issue, count in issues.items() 
-                    if not any(generic in issue.lower() for generic in [
-                        'the customer', 'educational resources', 'the user experience',
-                        'consider', 'help', 'offering'
-                    ])
-                }
-                
-                if filtered_issues:
-                    analysis.append("**Key Issues:**")
-                    for issue, issue_count in sorted(filtered_issues.items(), key=lambda x: x[1], reverse=True)[:3]:
-                        analysis.append(f"- {issue} ({issue_count} occurrences)")
-                
-                if impacts:
-                    analysis.append("\n**Impact Analysis:**")
-                    for impact, impact_count in impacts.most_common(3):
-                        analysis.append(f"- {impact} ({impact_count} occurrences)")
+                # Use OpenAI to analyze the problems
+                try:
+                    # Prepare the context for analysis
+                    category_texts = [
+                        {
+                            'text': p['full_text'],
+                            'issue': p['issue'],
+                            'impact': p['impact'],
+                            'context': p['context']
+                        }
+                        for p in category_points
+                    ]
+                    
+                    # Create a prompt for the LLM using our summary of summaries structure
+                    analysis_prompt = f"""Analyze these customer service issues in the {category} category following this exact structure:
+
+[Task Introduction]
+Analyze these customer service conversation summaries from GoDaddy.com to identify patterns, trends, and actionable insights.
+
+### Quantitative Analysis
+1. Issue Distribution
+   - Count and categorize issues by type
+   - Calculate frequency and percentage for each category
+   - Identify most common problems and their patterns
+   - Track product/feature mentions and context
+
+2. Pain Point Analysis
+   - Identify and categorize customer pain points
+   - Determine severity and impact levels
+   - Extract root causes and contributing factors
+   - Map customer journey friction points
+
+3. Impact Assessment
+   - Business impact (revenue, retention, etc.)
+   - Customer experience impact
+   - Technical implications
+   - Resource utilization impact
+
+### Top Issues Analysis
+For each major issue identified:
+
+1. Problem Profile
+   - Clear problem statement
+   - Root cause analysis
+   - Frequency and trends
+   - Affected customer segments
+
+2. Impact Analysis
+   - Customer experience impact
+   - Business impact
+   - Technical implications
+   - Resource requirements
+
+3. Supporting Evidence
+   - Representative examples
+   - Customer quotes
+   - Context and circumstances
+   - Related issues and dependencies
+
+### Recommendations
+For each top issue:
+
+1. Solution Strategy
+   - Immediate actions
+   - Short-term improvements
+   - Long-term solutions
+   - Resource requirements
+
+2. Implementation Plan
+   - Priority level
+   - Timeline
+   - Success metrics
+   - Risk factors
+
+### Additional Insights
+1. Emerging Trends
+   - New issue patterns
+   - Customer behavior shifts
+   - Product/feature impacts
+   - Support efficiency trends
+
+2. Opportunity Areas
+   - Process improvements
+   - Feature enhancements
+   - Documentation needs
+   - Training requirements
+
+### Not Found
+- Document expected but missing elements
+- Data gaps and limitations
+- Areas needing further investigation
+
+Issues to analyze:
+{json.dumps(category_texts[:5], indent=2)}
+
+Focus on actionable insights, provide specific examples, include quantitative metrics, note data limitations, and highlight priority areas.
+"""
+                    
+                    # Get analysis from OpenAI
+                    response = self.client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": """You are an expert business analyst specializing in customer service analytics. Your analysis must:
+1. Follow the exact structure provided in the prompt
+2. Use clear section headers with ### for major sections
+3. Provide specific, actionable insights
+4. Include quantitative metrics whenever possible
+5. Support findings with specific examples and quotes
+6. Highlight priority areas and immediate actions needed
+7. Be thorough but concise in each section"""},
+                            {"role": "user", "content": analysis_prompt}
+                        ],
+                        temperature=0.7
+                    )
+                    
+                    # Extract and format the analysis
+                    analysis_text = response.choices[0].message.content
+                    
+                    # Add the analysis to our output
+                    analysis.append("\n### Problem Analysis")
+                    analysis.append(analysis_text)
+                    
+                except Exception as e:
+                    # Fallback to basic analysis if OpenAI call fails
+                    analysis.append("\n### Problem Analysis")
+                    analysis.append("**Key Problems Identified:**")
+                    
+                    # Group similar issues together using text similarity
+                    grouped_issues = {}
+                    for point in category_points:
+                        text = point['full_text'].lower()
+                        matched = False
+                        for key in grouped_issues:
+                            if self._text_similarity(key, text) > 0.7:  # 70% similarity threshold
+                                grouped_issues[key].append(point)
+                                matched = True
+                                break
+                        if not matched:
+                            grouped_issues[text] = [point]
+                    
+                    # Show top 3 most significant problems
+                    for i, (key, points) in enumerate(sorted(grouped_issues.items(), key=lambda x: len(x[1]), reverse=True)[:3], 1):
+                        analysis.append(f"\nProblem {i}:")
+                        # Get the most detailed example
+                        best_example = max(points, key=lambda p: len(p['full_text']))
+                        analysis.append(f"- Issue: {best_example['full_text']}")
+                        if best_example['impact']:
+                            analysis.append(f"- Impact: {best_example['impact']}")
+                        if best_example['context']:
+                            analysis.append(f"- Context: {best_example['context']}")
+                        analysis.append(f"- Frequency: {len(points)} similar occurrences")
                 
                 # Evidence Base
                 analysis.append("\n### Evidence Base")
@@ -884,9 +1083,15 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append("- Root cause determination for complex issues")
             analysis.append("- Long-term impact assessment")
                 
-            # Cache the results
+            # Cache and format the results
             result = "\n".join(analysis)
             self.analysis_cache[cache_key] = result
+            
+            # Print the analysis results for debugging
+            print("\n=== Analysis Results ===")
+            print(result)
+            print("=== End of Analysis ===\n")
+            
             return result
         except Exception as e:
             error_msg = str(e)
@@ -924,87 +1129,48 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         elif percentage >= 25: return "Moderate Impact - Affects some users"
         return "Limited Impact - Affects few users"
         
-    def _analyze_pain_points(self, text: str) -> Dict[str, Any]:
+    def _text_similarity(self, text1: str, text2: str) -> float:
         """
-        Analyze text to identify pain points and their context.
+        Calculate similarity between two texts using TF-IDF and cosine similarity.
         
         Args:
-            text: The text to analyze
+            text1: First text to compare
+            text2: Second text to compare
             
         Returns:
-            Dict containing pain point information
+            float: Similarity score between 0 and 1
         """
-        doc = nlp(text)
-        pain_points = []
+        # Create TF-IDF vectorizer
+        vectorizer = TfidfVectorizer(
+            ngram_range=(1, 2),
+            stop_words='english',
+            min_df=1,
+            strip_accents='unicode',
+            lowercase=True
+        )
         
-        for sent in doc.sents:
-            sent_text = sent.text.lower()
+        # Fit and transform the texts
+        try:
+            tfidf_matrix = vectorizer.fit_transform([text1, text2])
             
-            # Look for pain point indicators
-            pain_indicators = {
-                'technical': ['error', 'bug', 'crash', 'failed', 'broken', 'not working'],
-                'usability': ['confusing', 'difficult', 'hard to', 'cant find', "can't find", 'unclear'],
-                'performance': ['slow', 'lag', 'performance', 'timeout', 'loading'],
-                'support': ['support', 'service', 'help', 'customer service', 'representative'],
-                'feature': ['need', 'want', 'should have', 'missing', 'feature'],
-                'billing': ['price', 'cost', 'billing', 'charge', 'expensive'],
-                'documentation': ['documentation', 'docs', 'guide', 'instruction', 'explain'],
-                'integration': ['integration', 'compatible', 'work with', 'connect']
-            }
+            # Calculate cosine similarity
+            similarity = (tfidf_matrix * tfidf_matrix.T).A[0, 1]
             
-            for category, indicators in pain_indicators.items():
-                if any(ind in sent_text for ind in indicators):
-                    # Extract the specific issue
-                    issue = None
-                    action = None
-                    impact = None
-                    
-                    # Find the main verb and its object
-                    for token in sent:
-                        if token.dep_ == 'ROOT' and token.pos_ == 'VERB':
-                            action = token.text
-                            # Get the object if it exists
-                            for child in token.children:
-                                if child.dep_ in ['dobj', 'pobj']:
-                                    issue = ' '.join([t.text for t in child.subtree])
-                                    break
-                    
-                    # Look for impact statements
-                    impact_markers = ['causing', 'results in', 'leads to', 'prevents', 'blocks']
-                    for marker in impact_markers:
-                        if marker in sent_text:
-                            # Get the text after the marker
-                            marker_idx = sent_text.find(marker)
-                            if marker_idx >= 0:
-                                impact = sent_text[marker_idx:].split('.')[0]
-                    
-                    # Get the surrounding context
-                    context = []
-                    for token in sent:
-                        # Look for temporal markers
-                        if token.dep_ == 'advmod' and token.text.lower() in ['when', 'while', 'during', 'after', 'before']:
-                            for child in token.children:
-                                context.append(f"Time: {' '.join([t.text for t in child.subtree])}")
-                        
-                        # Look for location/system context
-                        if token.dep_ in ['prep', 'pobj'] and token.text.lower() in ['in', 'on', 'at', 'using', 'with']:
-                            context.append(f"Location: {' '.join([t.text for t in token.subtree])}")
-                    
-                    pain_points.append({
-                        'category': category,
-                        'issue': issue if issue else sent.text,  # Use full sentence if no specific issue found
-                        'action': action,
-                        'impact': impact,
-                        'context': '; '.join(context) if context else None,
-                        'full_text': sent.text
-                    })
-                    break  # Stop after finding first matching category
+            # Handle numerical errors
+            similarity = max(0.0, min(1.0, similarity))
+            
+            return float(similarity)
+        except:
+            # Fallback to spaCy similarity if TF-IDF fails
+            doc1 = nlp(text1)
+            doc2 = nlp(text2)
+            
+            if not doc1 or not doc2:
+                return 0.0
+                
+            return doc1.similarity(doc2)
         
-        return {
-            'pain_points': pain_points,
-            'count': len(pain_points),
-            'categories': Counter(p['category'] for p in pain_points)
-        }
+
 
 async def main():
     """Main interactive chat loop."""
@@ -1066,8 +1232,10 @@ async def main():
                     continue
                     
                 if user_input.lower() == 'analyze':
-                    print(conv_agent.analyze_summaries())
-                    continue
+                    analysis_results = conv_agent.analyze_summaries()
+                    print("\nSending analysis results to client...")
+                    print(analysis_results)
+                    return analysis_results
                     
             elif any(cmd in user_input.lower() for cmd in ['load', 'summary', 'analyze']):
                 if conv_agent.current_mode != 'summary':
