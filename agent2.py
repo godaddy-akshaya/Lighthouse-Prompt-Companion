@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from typing import List, Optional, Dict, Any, Tuple
 from dotenv import load_dotenv
-from collections import Counter
+from collections import Counter, defaultdict
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from textblob import TextBlob
 import nltk
@@ -223,21 +223,16 @@ class ConversationalAgent:
                 if message.lower() in ['1', 'initial prompt']:
                     self.current_mode = 'initial'
                     self.prompt_generated = False
-                    return """✨ Individual Transcript Analysis Selected
-
-Here's our base template that will be customized based on your needs:
+                    return """Here is your complete analysis prompt:
 
 [transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: "System", "Bot", "Customer", "Consumer", or "Agent". "Customer" and "Consumer" are synonymous. "Agent" refers to a human support representative, while "Bot" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.
 
-To customize this template, I need two pieces of information:
+1. Identify key pain points experienced by the customers related to domain issues in each call.
+2. Analyze how the bot and/or agent handled the issue(s) in the given call.
+3. Point out what went well and could be improved in terms of the given call and determine if escalating issues specific to domain management.
+4. Provide specific examples from the transcript to support your analysis.
 
-1. What specific category/topic would you like to analyze?
-   (For example: email issues, hosting problems, domain transfers, etc.)
-
-2. What aspects would you like summarized?
-   (For example: main pain points, customer needs, technical issues, etc.)
-
-I'll incorporate your choices into the template above."""
+**Task instructions:**"""
                 elif message.lower() in ['2', 'summary of summaries', 'summary of summaries prompt']:
                     self.current_mode = 'summary'
                     self.prompt_generated = False
@@ -850,16 +845,334 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Top Issues Analysis
             analysis.append("\n# 🎯 Top Issues Analysis")
             
-            # Get top 3 categories and their issues
-            for i, (category, count) in enumerate(category_counts.most_common(3), 1):
-                analysis.append(f"\n## Issue Category {i}: {category.title()}")
+            # Extract and analyze specific content from the conversation summaries
+            all_pain_points = []
+            
+            # First pass - identify specific issues and their context
+            issue_details = defaultdict(list)
+            for text in texts:
+                # Process text with spaCy for better analysis
+                doc = nlp(text.lower())
                 
-                # Category Profile
-                percentage = (count / total_pain_points * 100)
+                # Initialize issue tracking
+                current_issue = {
+                    'text': text,
+                    'specific_issue': None,
+                    'product': None,
+                    'action_taken': None,
+                    'outcome': None,
+                    'customer_impact': None,
+                    'technical_details': None,
+                    'sentiment': TextBlob(text).sentiment.polarity,
+                    'urgency': False
+                }
+                
+                # Extract specific issue details
+                for sent in doc.sents:
+                    sent_text = sent.text.lower()
+                    
+                    # Look for specific product mentions
+                    products = ['hosting', 'domain', 'ssl', 'cpanel', 'wordpress', 'email', 'dns']
+                    for product in products:
+                        if product in sent_text:
+                            current_issue['product'] = product
+                            break
+                    
+                    # Identify technical details
+                    technical_indicators = ['error', 'configuration', 'setup', 'settings', 'server', 'database']
+                    if any(ind in sent_text for ind in technical_indicators):
+                        current_issue['technical_details'] = sent.text
+                    
+                    # Capture action taken
+                    action_indicators = ['resolved', 'fixed', 'implemented', 'updated', 'modified', 'changed']
+                    if any(ind in sent_text for ind in action_indicators):
+                        current_issue['action_taken'] = sent.text
+                    
+                    # Identify customer impact
+                    impact_indicators = ['unable to', 'cannot', 'failed to', 'preventing', 'blocking']
+                    if any(ind in sent_text for ind in impact_indicators):
+                        current_issue['customer_impact'] = sent.text
+                    
+                    # Check for urgency indicators
+                    urgency_indicators = ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down']
+                    if any(ind in sent_text for ind in urgency_indicators):
+                        current_issue['urgency'] = True
+                
+                # Extract the specific issue using key phrases and context
+                issue_phrases = []
+                for chunk in doc.noun_chunks:
+                    if len(chunk.text.split()) >= 2:  # Multi-word phrases
+                        # Look for phrases that indicate specific problems
+                        if any(word in chunk.text.lower() for word in ['issue', 'problem', 'error', 'failure', 'bug']):
+                            issue_phrases.append(chunk.text)
+                
+                if issue_phrases:
+                    # Use the most detailed issue phrase
+                    current_issue['specific_issue'] = max(issue_phrases, key=len)
+                else:
+                    # Fallback to first sentence if no specific issue phrase found
+                    current_issue['specific_issue'] = next(doc.sents).text
+                
+                # Group by product + issue type for more specific categorization
+                issue_key = f"{current_issue['product']}_{current_issue['specific_issue']}" if current_issue['product'] else current_issue['specific_issue']
+                issue_details[issue_key].append(current_issue)
+            
+            # Sort issues by frequency, urgency, and impact
+            sorted_issues = sorted(
+                [(issue_key, details) for issue_key, details in issue_details.items()],
+                key=lambda x: (
+                    len(x[1]),  # frequency
+                    sum(1 for i in x[1] if i['urgency']),  # number of urgent cases
+                    -sum(i['sentiment'] for i in x[1])/len(x[1])  # negative sentiment (higher priority)
+                ),
+                reverse=True
+            )[:5]  # Top 5 most significant issues
+            
+            # Present each issue with full context
+            for i, (issue_key, instances) in enumerate(sorted_issues, 1):
+                # Get the most representative instance (prioritize urgent and detailed cases)
+                best_instance = max(instances, key=lambda x: (
+                    x['urgency'],
+                    bool(x['technical_details']),
+                    bool(x['customer_impact']),
+                    len(x['text'])
+                ))
+                
+                # Format issue title
+                product = best_instance['product']
+                issue_title = f"{product.title() + ' ' if product else ''}{best_instance['specific_issue'].title()}"
+                
+                analysis.append(f"\n## Issue {i}: {issue_title}")
+                analysis.append(f"\n### Issue Details:")
+                analysis.append(f"- **Frequency**: {len(instances)} occurrences")
+                analysis.append(f"- **Product Area**: {product.title() if product else 'General'}")
+                if best_instance['technical_details']:
+                    analysis.append(f"- **Technical Context**: {best_instance['technical_details']}")
+                if best_instance['customer_impact']:
+                    analysis.append(f"- **Customer Impact**: {best_instance['customer_impact']}")
+                
+                # Show urgency and sentiment
+                urgent_count = sum(1 for i in instances if i['urgency'])
+                if urgent_count:
+                    analysis.append(f"- **Urgency**: {urgent_count} urgent cases")
+                avg_sentiment = sum(i['sentiment'] for i in instances)/len(instances)
+                analysis.append(f"- **Customer Sentiment**: {self._describe_sentiment(avg_sentiment)}")
+                
+                # Show resolution information if available
+                resolved_cases = [i for i in instances if i['action_taken']]
+                if resolved_cases:
+                    analysis.append("\n### Resolution Examples:")
+                    for case in resolved_cases[:2]:  # Show up to 2 resolution examples
+                        analysis.append(f"```\n{case['action_taken']}\n```")
+            
+            # Second pass - detailed analysis with context
+            for text in texts:
+                # Initialize analysis variables
+                category = "other"
+                subcategory = "general"
+                issue_type = "other"
+                severity = "medium"
+                issue = None
+                action = None
+                impact = None
+                context = None
+                
+                # Match against identified issues
+                text_lower = text.lower()
+                matched_issues = [key for key, _ in sorted_issues if key.lower() in text_lower]
+                
+                # Enhanced categorization with subcategories
+                # Email issues
+                if any(word in text.lower() for word in ["email", "smtp", "mail", "inbox"]):
+                    category = "email"
+                    if "delivery" in text.lower() or "bounce" in text.lower():
+                        subcategory = "delivery"
+                        issue_type = "email_delivery"
+                    elif "setup" in text.lower() or "configuration" in text.lower():
+                        subcategory = "configuration"
+                        issue_type = "email_setup"
+                    elif "spam" in text.lower() or "filter" in text.lower():
+                        subcategory = "spam"
+                        issue_type = "spam_filtering"
+                
+                # Domain issues
+                elif any(word in text.lower() for word in ["domain", "dns", "nameserver"]):
+                    category = "domain"
+                    if "transfer" in text.lower():
+                        subcategory = "transfer"
+                        issue_type = "domain_transfer"
+                    elif "dns" in text.lower() or "nameserver" in text.lower():
+                        subcategory = "dns"
+                        issue_type = "dns_configuration"
+                    elif "renew" in text.lower() or "expir" in text.lower():
+                        subcategory = "renewal"
+                        issue_type = "domain_renewal"
+                
+                # Hosting issues
+                elif any(word in text.lower() for word in ["host", "server", "website", "site"]):
+                    category = "hosting"
+                    if "down" in text.lower() or "unavailable" in text.lower():
+                        subcategory = "availability"
+                        issue_type = "site_down"
+                    elif "slow" in text.lower() or "performance" in text.lower():
+                        subcategory = "performance"
+                        issue_type = "site_performance"
+                    elif "ssl" in text.lower() or "certificate" in text.lower():
+                        subcategory = "ssl"
+                        issue_type = "ssl_certificate"
+                
+                # Billing issues
+                elif any(word in text.lower() for word in ["bill", "payment", "charge", "refund"]):
+                    category = "billing"
+                    if "refund" in text.lower():
+                        subcategory = "refund"
+                        issue_type = "refund_request"
+                    elif "overcharge" in text.lower() or "wrong" in text.lower():
+                        subcategory = "billing_error"
+                        issue_type = "incorrect_charge"
+                    elif "cancel" in text.lower():
+                        subcategory = "cancellation"
+                        issue_type = "service_cancellation"
+                
+                # Account issues
+                elif any(word in text.lower() for word in ["login", "password", "access", "account"]):
+                    category = "account"
+                    if "password" in text.lower() or "reset" in text.lower():
+                        subcategory = "password"
+                        issue_type = "password_reset"
+                    elif "login" in text.lower() or "access" in text.lower():
+                        subcategory = "access"
+                        issue_type = "login_issues"
+                    elif "security" in text.lower() or "hack" in text.lower():
+                        subcategory = "security"
+                        issue_type = "security_concern"
+                
+                # Determine severity based on keywords and context
+                severity_indicators = {
+                    'high': ['urgent', 'critical', 'emergency', 'immediate', 'serious'],
+                    'medium': ['important', 'significant', 'moderate'],
+                    'low': ['minor', 'small', 'trivial']
+                }
+                
+                text_lower = text.lower()
+                for level, indicators in severity_indicators.items():
+                    if any(indicator in text_lower for indicator in indicators):
+                        severity = level
+                        break
+                
+                # Extract other information
+                for sent in doc.sents:
+                    if "issue" in sent.text or "problem" in sent.text:
+                        issue = sent.text
+                    elif "did" in sent.text or "action" in sent.text:
+                        action = sent.text
+                    elif "impact" in sent.text or "result" in sent.text:
+                        impact = sent.text
+                    elif "when" in sent.text or "during" in sent.text:
+                        context = sent.text
+                
+                # Add to pain points list with enhanced categorization
+                all_pain_points.append({
+                    'category': category,
+                    'subcategory': subcategory,
+                    'issue_type': issue_type,
+                    'severity': severity,
+                    'issue': issue,
+                    'action': action,
+                    'impact': impact,
+                    'context': context,
+                    'full_text': text
+                })
+            
+            # Analyze the significant themes and their contexts
+            for i, (issue_key, instances) in enumerate(sorted_issues, 1):
+                # Calculate statistics
+                urgent_count = sum(1 for i in instances if any(word in i['text'].lower() for word in 
+                    ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down']))
+                avg_sentiment = sum(i['sentiment'] for i in instances) / len(instances)
+                
+                # Format the issue title based on actual content
+                sentiment_desc = "negative" if avg_sentiment < -0.1 else "positive" if avg_sentiment > 0.1 else "neutral"
+                urgency_level = "Critical" if urgent_count/len(instances) > 0.3 else "Important" if urgent_count > 0 else "Regular"
+                
+                analysis.append(f"\n## Issue {i}: {issue_key.title()}")
+                analysis.append(f"\n### Overview:")
+                analysis.append(f"- **Frequency**: {len(instances)} related conversations")
+                analysis.append(f"- **Urgency Level**: {urgency_level} ({urgent_count} urgent cases)")
+                analysis.append(f"- **Customer Sentiment**: {sentiment_desc.title()}")
+                
+                # Add specific examples
+                # Sort instances by severity and get examples
+                severe_cases = []
+                normal_cases = []
+                for instance in instances:
+                    text = instance['text']
+                    # Check for urgency/severity in the text
+                    is_urgent = any(word in text.lower() for word in ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down'])
+                    if is_urgent:
+                        severe_cases.append(text)
+                    else:
+                        normal_cases.append(text)
+
+                if severe_cases:
+                    analysis.append("\n### Critical Case Example:")
+                    # Get complete sentence
+                    doc = nlp(severe_cases[0])
+                    first_sentence = next(doc.sents).text
+                    analysis.append(f"```\n{first_sentence}\n```")
+                
+                if normal_cases:
+                    analysis.append("\n### Typical Case Example:")
+                    # Get complete sentence
+                    doc = nlp(normal_cases[0])
+                    first_sentence = next(doc.sents).text
+                    analysis.append(f"```\n{first_sentence}\n```")
+                
+                # Get all issues for this category
+                category_issues = [p for p in all_pain_points if p['category'] == category]
+                
+                # Category Profile with detailed breakdown
                 analysis.append("\n### Category Profile")
-                analysis.append("- **Frequency**: " + f"{count} occurrences ({percentage:.1f}%)")
-                analysis.append("- **Severity**: " + self._determine_severity(percentage))
-                analysis.append("- **Impact Scope**: " + self._determine_impact(count, total_pain_points))
+                analysis.append("- **Frequency**: " + f"{count} occurrences")
+                
+                # Analyze subcategories
+                subcategory_counts = Counter(issue['subcategory'] for issue in category_issues)
+                analysis.append("\n### Subcategories:")
+                for subcategory, subcount in subcategory_counts.most_common():
+                    sub_percentage = (subcount / count * 100)
+                    analysis.append(f"- {subcategory.title()}: {subcount} ({sub_percentage:.1f}%)")
+                
+                # Analyze issue types
+                issue_type_counts = Counter(issue['issue_type'] for issue in category_issues)
+                analysis.append("\n### Issue Types:")
+                for issue_type, type_count in issue_type_counts.most_common():
+                    type_percentage = (type_count / count * 100)
+                    analysis.append(f"- {issue_type.replace('_', ' ').title()}: {type_count} ({type_percentage:.1f}%)")
+                
+                # Severity breakdown
+                severity_counts = Counter(issue['severity'] for issue in category_issues)
+                analysis.append("\n### Severity Distribution:")
+                for severity, sev_count in severity_counts.most_common():
+                    sev_percentage = (sev_count / count * 100)
+                    analysis.append(f"- {severity.title()}: {sev_count} ({sev_percentage:.1f}%)")
+                
+                # Impact Analysis
+                analysis.append("\n### Impact Analysis:")
+                analysis.append("- **Overall Severity**: " + ("High" if count > 20 else "Medium" if count > 10 else "Low"))
+                analysis.append("- **Impact Scope**: " + ("Wide" if count > 20 else "Moderate" if count > 10 else "Limited"))
+                
+                # Example issues
+                analysis.append("\n### Representative Examples:")
+                high_severity = [issue for issue in category_issues if issue['severity'] == 'high']
+                if high_severity:
+                    analysis.append("\nHigh Severity Example:")
+                    example = high_severity[0]
+                    analysis.append(f"- Type: {example['issue_type'].replace('_', ' ').title()}")
+                    analysis.append(f"- Subcategory: {example['subcategory'].title()}")
+                    # Get complete sentence
+                    doc = nlp(example['full_text'])
+                    first_sentence = next(doc.sents).text
+                    analysis.append(f"- Description: {first_sentence}")
                 
                 # Get pain points for this category
                 category_points = [p for p in all_pain_points if p['category'] == category]
@@ -1027,12 +1340,46 @@ Focus on actionable insights, provide specific examples, include quantitative me
                     analysis.append(f"   Action: {point['action'] if point['action'] else 'N/A'}")
                     analysis.append(f"   Impact: {point['impact'] if point['impact'] else 'N/A'}")
                     analysis.append(f"   Context: {point['context'] if point['context'] else 'N/A'}")
-                    analysis.append(f"   Full Text: > {point['full_text'][:200]}...")
+                    # Get complete sentence
+                    doc = nlp(point['full_text'])
+                    first_sentence = next(doc.sents).text
+                    analysis.append(f"   Full Text: > {first_sentence}")
             
             # Specific Recommendations
             analysis.append("\n# 💡 Specific Recommendations")
-            for i, (category, _) in enumerate(category_counts.most_common(3), 1):
-                analysis.append(f"\n## For {category.title()} Issues")
+            
+            # Get recommendations based on identified issues
+            for i, (issue_key, instances) in enumerate(sorted_issues[:3], 1):
+                best_instance = max(instances, key=lambda x: (
+                    x['urgency'],
+                    bool(x['technical_details']),
+                    bool(x['customer_impact'])
+                ))
+            
+                # Format recommendation title
+                product = best_instance['product']
+                issue_title = f"{product.title() + ' ' if product else ''}{best_instance['specific_issue'].title()}"
+                analysis.append(f"\n## For {issue_title}")
+                
+                # Add specific recommendations based on the issue details
+                analysis.append("\n### Solution Package")
+                if best_instance['technical_details']:
+                    analysis.append("1. **Technical Fix:**")
+                    analysis.append(f"   - Address: {best_instance['technical_details']}")
+                    analysis.append("   - Implement automated detection")
+                    analysis.append("   - Add monitoring alerts")
+                
+                if best_instance['customer_impact']:
+                    analysis.append("\n2. **Customer Experience:**")
+                    analysis.append(f"   - Mitigate: {best_instance['customer_impact']}")
+                    analysis.append("   - Improve error messaging")
+                    analysis.append("   - Add proactive notifications")
+                
+                # Add implementation details
+                analysis.append("\n### Implementation Guide")
+                analysis.append(f"- **Priority**: {'High' if best_instance['urgency'] else 'Medium'}")
+                analysis.append("- **Timeline**: 2-3 weeks")
+                analysis.append("- **Success Metrics**: Reduction in similar issues")
                 
                 # Get pain points for this category for targeted recommendations
                 category_points = [p for p in all_pain_points if p['category'] == category]
@@ -1057,15 +1404,19 @@ Focus on actionable insights, provide specific examples, include quantitative me
             analysis.append("\n## Success Patterns")
             if positive_texts:
                 for text in positive_texts[:3]:
-                    analysis.append(f"- {text[:150]}...")
+                    # Get complete sentence
+                    doc = nlp(text)
+                    first_sentence = next(doc.sents).text
+                    analysis.append(f"- {first_sentence}")
             
             # Additional Insights
             analysis.append("\n# 🔍 Additional Insights")
             
             analysis.append("\n## Trend Analysis")
-            analysis.append("| Category | Key Observations |")
-            analysis.append("|----------|------------------|")
-            for category, count in category_counts.most_common()[3:6]:  # Next 3 categories after top 3
+            analysis.append("| Issue Type | Key Observations |")
+            analysis.append("|------------|------------------|")
+            # Show trends for remaining issues
+            for issue_key, instances in sorted_issues[3:]:  # Themes after top 3
                 category_points = [p for p in all_pain_points if p['category'] == category]
                 common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(1)
                 observation = f"Most common issue: {common_issues[0][0]}" if common_issues else "No specific issues identified"
