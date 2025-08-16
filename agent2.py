@@ -7,6 +7,10 @@ import asyncio
 import json
 import pandas as pd
 import numpy as np
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
 from typing import List, Optional, Dict, Any, Tuple
 from dotenv import load_dotenv
 from collections import Counter, defaultdict
@@ -75,6 +79,13 @@ class ConversationalAgent:
         self.current_mode = None  # 'initial' or 'summary'
         self.prompt_generated = False
         self.analysis_cache = {}  # Cache for analysis results - cleared on init
+        self.current_analysis_prompt = None  # Store the generated analysis prompt
+        self.issue_counts = {  # Track counts for specific categories
+            'Email Configuration': 0,
+            'DNS Settings': 0,
+            'Email Migration': 0,
+            'Email Security': 0
+        }
         # Clear all caches on initialization
         self.clear_all_caches()
         
@@ -178,11 +189,15 @@ class ConversationalAgent:
         self.analysis_cache.clear()
         self.learned_patterns.clear()
         self.prompt_feedback.clear()
-        self.conversation_history.clear()
         self.current_csv_data = None
         self.csv_summary = None
         self.current_mode = None
-        self.prompt_generated = False
+        
+        # Don't clear prompt-related state unless explicitly requested
+        if not self.prompt_generated:
+            self.current_analysis_prompt = None
+            self.prompt_generated = False
+            
         print("All caches cleared.")
 
     async def initialize(self):
@@ -243,12 +258,17 @@ Here is your complete analysis prompt for analyzing multiple conversation summar
 [Task Introduction]
 You are tasked with analyzing multiple customer service conversation summaries from GoDaddy.com to identify patterns, trends, and actionable insights.
 
-### Quantitative Analysis
-1. Issue Distribution
-   - Count and categorize issues by type
-   - Calculate frequency and percentage for each category
-   - Identify most common problems and their patterns
-   - Track product/feature mentions and context
+### Issue Counts
+1. Email-Related Categories
+   - Email Configuration: [count] cases
+   - DNS Settings: [count] cases
+   - Email Migration: [count] cases
+   - Email Security: [count] cases
+   
+2. Key Metrics
+   - Total cases analyzed
+   - Most common issue type
+   - Distribution across categories
 
 2. Pain Point Analysis
    - Identify and categorize customer pain points
@@ -262,41 +282,29 @@ You are tasked with analyzing multiple customer service conversation summaries f
    - Technical implications
    - Resource utilization impact
 
-### Top Issues Analysis
-For each major issue identified:
+### Top 3 Issues Analysis
+For each of the top 3 issues:
 
 1. Problem Profile
    - Clear problem statement
+   - Frequency (count and %)
    - Root cause analysis
-   - Frequency and trends
    - Affected customer segments
 
 2. Impact Analysis
    - Customer experience impact
    - Business impact
    - Technical implications
-   - Resource requirements
 
 3. Supporting Evidence
-   - Representative examples
-   - Customer quotes
+   - 2-3 representative customer quotes
    - Context and circumstances
-   - Related issues and dependencies
 
-### Recommendations
-For each top issue:
-
-1. Solution Strategy
-   - Immediate actions
-   - Short-term improvements
-   - Long-term solutions
-   - Resource requirements
-
-2. Implementation Plan
-   - Priority level
-   - Timeline
+4. Key Recommendation
+   - One clear, actionable recommendation
+   - Expected impact
+   - Implementation timeline
    - Success metrics
-   - Risk factors
 
 ### Additional Insights
 1. Emerging Trends
@@ -638,6 +646,34 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             assistant_response = response.choices[0].message.content
             self.conversation_history.append({"role": "assistant", "content": assistant_response})
             
+            # Handle prompt generation and modifications
+            if self.current_mode == 'summary':
+                # Check if this response contains a complete prompt
+                is_complete_prompt = (
+                    "Here is your complete analysis prompt:" in assistant_response or
+                    "Task Introduction" in assistant_response and "Quantitative Analysis" in assistant_response
+                )
+                
+                # Check if this is a prompt modification request
+                is_prompt_modification = any(keyword in message.lower() for keyword in 
+                    ['change', 'modify', 'update', 'customize', 'edit'] + ['prompt'])
+                
+                if is_complete_prompt or (self.prompt_generated and is_prompt_modification):
+                    # Store the complete response first
+                    self.conversation_history[-1]["content"] = assistant_response
+                    
+                    # Extract and store the actual prompt content
+                    extracted_prompt = self._extract_prompt_content(assistant_response)
+                    self.current_analysis_prompt = extracted_prompt
+                    self.prompt_generated = True
+                    logger.info("Analysis prompt has been stored/updated")
+                    
+                    # Format the response for the prompt display area
+                    formatted_response = self._format_prompt_for_display(extracted_prompt)
+                    
+                    # Return the formatted version for display
+                    assistant_response = formatted_response
+            
             # Keep conversation history manageable (last 20 messages)
             if len(self.conversation_history) > 20:
                 self.conversation_history = self.conversation_history[-20:]
@@ -772,13 +808,45 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
 
     def analyze_summaries(self) -> str:
         """
-        Perform comprehensive analysis of conversation summaries.
+        Perform comprehensive analysis of conversation summaries using the stored prompt.
         Returns:
             str: Detailed analysis results
         """
         try:
+            # Validate CSV data
             if self.current_csv_data is None:
+                logger.error("No CSV data loaded")
                 return "No CSV file has been loaded yet."
+                
+            if 'conversation_summary' not in self.current_csv_data.columns:
+                logger.error("Missing conversation_summary column")
+                return "CSV file must contain a 'conversation_summary' column."
+                
+            if len(self.current_csv_data) == 0:
+                logger.error("CSV file is empty")
+                return "The loaded CSV file contains no data."
+                
+            # Always get the latest prompt before analysis
+            latest_prompt = self._get_latest_prompt()
+            if latest_prompt:
+                self.current_analysis_prompt = latest_prompt
+                self.prompt_generated = True
+                logger.info("Using latest generated prompt for analysis")
+            else:
+                # Double check conversation history for any prompt
+                for message in reversed(self.conversation_history):
+                    if message["role"] == "assistant" and any(marker in message["content"] for marker in [
+                        "Here is your complete analysis prompt:",
+                        "Task Introduction",
+                        "Quantitative Analysis"
+                    ]):
+                        self.current_analysis_prompt = self._extract_prompt_content(message["content"])
+                        self.prompt_generated = True
+                        logger.info("Found prompt in conversation history")
+                        break
+                
+            if not self.current_analysis_prompt:
+                return "No analysis prompt has been generated yet. Please generate a prompt first."
                 
             # Use cache if available
             cache_key = id(self.current_csv_data)
@@ -789,45 +857,147 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             series = self.current_csv_data['conversation_summary']
             texts = series.dropna().tolist()
             
-            # Quantitative Analysis
-            analysis.append("# 📊 Quantitative Analysis\n")
+            # Initialize analysis structure
+            analysis = []
+            total_cases = len(texts)
             
-            # Issue Analysis
-            analysis.append("## Issue Analysis")
+            # Issue Counts Analysis
+            analysis.append("# 📊 Issue Counts\n")
             
-            # Group similar issues using text similarity
-            grouped_issues = {}
+            # Reset issue counts
+            self.issue_counts = {
+                'Email Configuration': 0,
+                'DNS Settings': 0,
+                'Email Migration': 0,
+                'Email Security': 0
+            }
+            
+            # Define category keywords
+            category_keywords = {
+                'Email Configuration': ['smtp', 'imap', 'pop3', 'email setup', 'email config', 'email settings', 'outlook', 'thunderbird'],
+                'DNS Settings': ['dns', 'mx record', 'nameserver', 'domain name system', 'dns zone', 'a record', 'cname'],
+                'Email Migration': ['migrate', 'transfer email', 'move email', 'import email', 'export email', 'switch email'],
+                'Email Security': ['spam', 'phishing', 'security', 'authentication', 'encryption', 'password', 'hack', 'compromise']
+            }
+            
+            # Analyze each text for category matching
+            logger.info(f"Starting analysis of {len(texts)} texts")
             for text in tqdm(texts, desc="Analyzing issues"):
-                matched = False
-                for key in grouped_issues:
-                    if self._text_similarity(key, text) > 0.7:  # 70% similarity threshold
-                        grouped_issues[key].append(text)
-                        matched = True
-                        break
-                if not matched:
-                    grouped_issues[text] = [text]
+                if not text:
+                    continue
+                    
+                text_lower = text.lower()
+                # Count matches for each category
+                for category, keywords in category_keywords.items():
+                    if any(word in text_lower for word in keywords):
+                        self.issue_counts[category] += 1
+                        logger.debug(f"Found match for {category} in text: {text[:100]}...")
             
-            # Sort issues by frequency
-            sorted_issues = sorted(grouped_issues.items(), key=lambda x: len(x[1]), reverse=True)
+            # Output category counts with text wrapping
+            analysis.append("## Email-Related Categories")
+            category_text = []
+            for category, count in self.issue_counts.items():
+                category_text.append(f"- {category}: {count} cases")
+            analysis.append(self._wrap_text('\n'.join(category_text), width=80))
             
-            # Show top issues
-            for i, (main_text, similar_texts) in enumerate(sorted_issues[:5], 1):
-                count = len(similar_texts)
-                percentage = (count / len(texts)) * 100
+            # Log category counts
+            logger.info("Category counts:")
+            for category, count in self.issue_counts.items():
+                logger.info(f"{category}: {count} cases")
+            
+            # Get total number of cases
+            analysis.append("# Analysis Based on Generated Prompt")
+            analysis.append(f"\nTotal Cases Analyzed: {total_cases}")
+            
+            # Sort categories by count and get top issues
+            try:
+                # Log current state
+                logger.info("Preparing to sort categories")
+                logger.info(f"Current issue counts: {self.issue_counts}")
                 
-                analysis.append(f"\n### Issue {i}: {count} occurrences ({percentage:.1f}%)")
-                analysis.append("\n**Main Example:**")
-                analysis.append(f"- {main_text}")
+                # Sort categories
+                sorted_categories = sorted(
+                    [(k, v) for k, v in self.issue_counts.items() if v > 0],  # Only include categories with matches
+                    key=lambda x: x[1],
+                    reverse=True
+                )
                 
-                if len(similar_texts) > 1:
-                    analysis.append("\n**Similar Cases:**")
-                    for j, text in enumerate(similar_texts[1:3], 1):  # Show up to 2 similar cases
-                        analysis.append(f"{j}. {text}")
+                logger.info(f"Sorted categories: {sorted_categories}")
                 
-                # Add sentiment analysis
-                sentiments = [self._analyze_sentiment(text)['polarity'] for text in similar_texts]
-                avg_sentiment = sum(sentiments) / len(sentiments)
-                analysis.append(f"\n**Customer Sentiment:** {self._describe_sentiment(avg_sentiment)}")
+                # Get top 3 issues
+                top_3_issues = sorted_categories[:3]
+                logger.info(f"Top 3 issues: {top_3_issues}")
+                
+                # Validate we have issues to analyze
+                if not top_3_issues:
+                    logger.warning("No issues found in the analysis")
+                    return "No issues found to analyze. Please check the data."
+                    
+                # Add separator for readability
+                analysis.append("\n" + "="*50 + "\n")
+                
+            except Exception as e:
+                logger.error(f"Error during category sorting: {e}")
+                raise
+            # Analyze top 3 issues
+            for i, (category, count) in enumerate(top_3_issues, 1):
+                analysis.append(f"\n### Issue {i}: {category}")
+                analysis.append(f"**Frequency**: {count} cases")
+                
+                # Find examples for this category
+                examples = []
+                for text in texts:
+                    text_lower = text.lower()
+                    # Match based on category keywords
+                    if category == 'Email Configuration' and any(word in text_lower for word in ['smtp', 'imap', 'pop3', 'email setup', 'email config', 'email settings']):
+                        examples.append(text)
+                    elif category == 'DNS Settings' and any(word in text_lower for word in ['dns', 'mx record', 'nameserver', 'domain name system', 'dns zone']):
+                        examples.append(text)
+                    elif category == 'Email Migration' and any(word in text_lower for word in ['migrate', 'transfer email', 'move email', 'import email', 'export email']):
+                        examples.append(text)
+                    elif category == 'Email Security' and any(word in text_lower for word in ['spam', 'phishing', 'security', 'authentication', 'encryption', 'password']):
+                        examples.append(text)
+                
+                # Add examples
+                if examples:
+                    analysis.append("\n**Representative Examples:**")
+                    for j, example in enumerate(examples[:2], 1):  # Show up to 2 examples
+                        analysis.append(f"{j}. {example}")
+                
+                # Add impact analysis
+                analysis.append("\n**Impact Analysis:**")
+                analysis.append(f"- Customer Impact: {self._determine_impact(count, total_cases)}")
+                
+                # Add recommendation
+                analysis.append("\n**Key Recommendation:**")
+                if category == 'Email Configuration':
+                    analysis.append("- Implement automated configuration wizard")
+                    analysis.append("- Expected Impact: 60% reduction in setup issues")
+                    analysis.append("- Timeline: 3-4 weeks")
+                elif category == 'DNS Settings':
+                    analysis.append("- Create DNS verification tool")
+                    analysis.append("- Expected Impact: 70% faster DNS resolution")
+                    analysis.append("- Timeline: 2-3 weeks")
+                elif category == 'Email Migration':
+                    analysis.append("- Develop migration assistant")
+                    analysis.append("- Expected Impact: 50% faster migrations")
+                    analysis.append("- Timeline: 4-5 weeks")
+                elif category == 'Email Security':
+                    analysis.append("- Enhance security monitoring")
+                    analysis.append("- Expected Impact: 80% faster threat detection")
+                    analysis.append("- Timeline: 3-4 weeks")
+                
+                # Add success metrics
+                analysis.append("\n**Success Metrics:**")
+                analysis.append("- Reduction in support tickets")
+                analysis.append("- Improved customer satisfaction")
+                analysis.append("- Decreased resolution time")
+                
+                # Add sentiment analysis for this category
+                if examples:
+                    sentiments = [self._analyze_sentiment(text)['polarity'] for text in examples]
+                    avg_sentiment = sum(sentiments) / len(sentiments)
+                    analysis.append(f"\n**Customer Sentiment:** {self._describe_sentiment(avg_sentiment)}")
                 
                 analysis.append("")  # Add spacing between issues
             
@@ -926,7 +1096,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                     -sum(i['sentiment'] for i in x[1])/len(x[1])  # negative sentiment (higher priority)
                 ),
                 reverse=True
-            )[:5]  # Top 5 most significant issues
+            )[:3]  # Top 3 most significant issues
             
             # Present each issue with full context
             for i, (issue_key, instances) in enumerate(sorted_issues, 1):
@@ -1106,13 +1276,37 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 severe_cases = []
                 normal_cases = []
                 for instance in instances:
-                    text = instance['text']
-                    # Check for urgency/severity in the text
-                    is_urgent = any(word in text.lower() for word in ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down'])
-                    if is_urgent:
-                        severe_cases.append(text)
-                    else:
-                        normal_cases.append(text)
+                    try:
+                        # Try to get text from either 'text' or 'full_text' key
+                        text = instance.get('text', instance.get('full_text', ''))
+                        if not text:
+                            logger.warning(f"Instance missing text content: {instance}")
+                            continue
+                            
+                        # Check for urgency/severity in the text
+                        urgency_words = [
+                            'urgent', 'asap', 'emergency', 'critical', 
+                            'immediate', 'blocking', 'production down',
+                            'high priority', 'outage', 'severe'
+                        ]
+                        text_lower = text.lower()
+                        is_urgent = any(word in text_lower for word in urgency_words)
+                        
+                        # Also check technical indicators for severity
+                        tech_indicators = [
+                            'error', 'failed', 'broken', 'crash',
+                            'not working', 'down', 'unavailable'
+                        ]
+                        has_tech_issues = any(indicator in text_lower for indicator in tech_indicators)
+                        
+                        # Combine urgency indicators
+                        if is_urgent or (has_tech_issues and 'urgent' in text_lower):
+                            severe_cases.append(text)
+                        else:
+                            normal_cases.append(text)
+                            
+                    except Exception as e:
+                        logger.error(f"Error processing instance: {e}")
 
                 if severe_cases:
                     analysis.append("\n### Critical Case Example:")
@@ -1192,90 +1386,17 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                         for p in category_points
                     ]
                     
-                    # Create a prompt for the LLM using our summary of summaries structure
-                    analysis_prompt = f"""Analyze these customer service issues in the {category} category following this exact structure:
+                    # Use the stored analysis prompt and add the specific data
+                    analysis_prompt = f"""Using the following analysis framework:
 
-[Task Introduction]
-Analyze these customer service conversation summaries from GoDaddy.com to identify patterns, trends, and actionable insights.
+{self.current_analysis_prompt}
 
-### Quantitative Analysis
-1. Issue Distribution
-   - Count and categorize issues by type
-   - Calculate frequency and percentage for each category
-   - Identify most common problems and their patterns
-   - Track product/feature mentions and context
-
-2. Pain Point Analysis
-   - Identify and categorize customer pain points
-   - Determine severity and impact levels
-   - Extract root causes and contributing factors
-   - Map customer journey friction points
-
-3. Impact Assessment
-   - Business impact (revenue, retention, etc.)
-   - Customer experience impact
-   - Technical implications
-   - Resource utilization impact
-
-### Top Issues Analysis
-For each major issue identified:
-
-1. Problem Profile
-   - Clear problem statement
-   - Root cause analysis
-   - Frequency and trends
-   - Affected customer segments
-
-2. Impact Analysis
-   - Customer experience impact
-   - Business impact
-   - Technical implications
-   - Resource requirements
-
-3. Supporting Evidence
-   - Representative examples
-   - Customer quotes
-   - Context and circumstances
-   - Related issues and dependencies
-
-### Recommendations
-For each top issue:
-
-1. Solution Strategy
-   - Immediate actions
-   - Short-term improvements
-   - Long-term solutions
-   - Resource requirements
-
-2. Implementation Plan
-   - Priority level
-   - Timeline
-   - Success metrics
-   - Risk factors
-
-### Additional Insights
-1. Emerging Trends
-   - New issue patterns
-   - Customer behavior shifts
-   - Product/feature impacts
-   - Support efficiency trends
-
-2. Opportunity Areas
-   - Process improvements
-   - Feature enhancements
-   - Documentation needs
-   - Training requirements
-
-### Not Found
-- Document expected but missing elements
-- Data gaps and limitations
-- Areas needing further investigation
+Please analyze these specific customer service issues in the {category} category:
 
 Issues to analyze:
 {json.dumps(category_texts[:5], indent=2)}
 
-Focus on actionable insights, provide specific examples, include quantitative metrics, note data limitations, and highlight priority areas.
-"""
+Follow the exact structure and requirements specified in the framework above. Focus on actionable insights, provide specific examples, include quantitative metrics, note data limitations, and highlight priority areas."""
                     
                     # Get analysis from OpenAI
                     response = self.client.chat.completions.create(
@@ -1385,17 +1506,29 @@ Focus on actionable insights, provide specific examples, include quantitative me
                 category_points = [p for p in all_pain_points if p['category'] == category]
                 common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(3)
                 
-                analysis.append("\n### Solution Package")
-                for j, (issue, _) in enumerate(common_issues, 1):
-                    analysis.append(f"{j}. **{issue}**")
-                    analysis.append(f"   - Immediate Action: Address through automated detection and response")
-                    analysis.append(f"   - Short-term: Enhance documentation and user guides")
-                    analysis.append(f"   - Long-term: Implement preventive measures")
-                
-                analysis.append("\n### Implementation Guide")
-                analysis.append("- **Priority**: High")
-                analysis.append("- **Timeline**: 2-3 months")
-                analysis.append("- **Success Metrics**: Reduction in related issues")
+                analysis.append("\n### Key Recommendation")
+                if common_issues:
+                    main_issue = common_issues[0][0]  # Get the most common issue
+                    analysis.append(f"**Primary Action**: Based on the analysis of {len(instances)} related cases")
+                    
+                    # Determine recommendation based on issue type
+                    if 'technical' in main_issue.lower() or any(word in main_issue.lower() for word in ['error', 'bug', 'crash']):
+                        analysis.append("- Implement automated monitoring and early warning system")
+                        analysis.append("- Expected Impact: Reduce issue detection time by 70%")
+                        analysis.append("- Timeline: 4-6 weeks for implementation")
+                    elif 'configuration' in main_issue.lower() or 'setup' in main_issue.lower():
+                        analysis.append("- Create interactive setup wizard with validation checks")
+                        analysis.append("- Expected Impact: 50% reduction in setup-related issues")
+                        analysis.append("- Timeline: 2-3 weeks for development")
+                    else:
+                        analysis.append("- Enhance user documentation and support resources")
+                        analysis.append("- Expected Impact: 40% reduction in related support tickets")
+                        analysis.append("- Timeline: 1-2 weeks for completion")
+                        
+                    analysis.append("\n**Success Metrics**:")
+                    analysis.append("- Reduction in related support tickets")
+                    analysis.append("- Improved customer satisfaction scores")
+                    analysis.append("- Decreased resolution time")
             
             # What's Working Well
             analysis.append("\n# ✅ What's Working Well")
@@ -1446,9 +1579,92 @@ Focus on actionable insights, provide specific examples, include quantitative me
             return result
         except Exception as e:
             error_msg = str(e)
-            print(f"Error during analysis: {error_msg}")
-            return f"Error during analysis: {error_msg}\n\nPlease try again or contact support if the issue persists."
+            logger.error(f"Error during analysis: {error_msg}")
+            logger.error(f"Current state - prompt_generated: {self.prompt_generated}")
+            logger.error(f"Current state - has_prompt: {bool(self.current_analysis_prompt)}")
+            logger.error(f"Current state - has_data: {bool(self.current_csv_data)}")
+            
+            if "top_3_issues" in str(e):
+                return "Error during analysis: Issue categorization failed. Please ensure the CSV data contains valid entries."
+            elif "current_analysis_prompt" in str(e):
+                return "Error during analysis: No valid prompt found. Please generate a new analysis prompt."
+            else:
+                return f"Error during analysis: {error_msg}\n\nPlease try again or contact support if the issue persists."
         
+    def _get_latest_prompt(self) -> str:
+        """Get the latest generated prompt from conversation history."""
+        latest_prompt = None
+        
+        # First, look for the most recent complete prompt in conversation history
+        for message in reversed(self.conversation_history):
+            if message["role"] == "assistant":
+                if "Here is your complete analysis prompt:" in message["content"]:
+                    latest_prompt = message["content"]
+                    break
+                elif "Task Introduction" in message["content"]:
+                    latest_prompt = message["content"]
+                    break
+        
+        if latest_prompt:
+            return self._extract_prompt_content(latest_prompt)
+        return None
+
+    def _extract_prompt_content(self, text: str) -> str:
+        """Extract the actual prompt content from the generated prompt text."""
+        # Look for the prompt content between the header and the final question
+        start_markers = [
+            "Here is your complete analysis prompt:",
+            "[Task Introduction]"
+        ]
+        end_marker = "Would you like to customize any part of this prompt"
+        
+        # Find the start of the prompt content
+        start_idx = -1
+        for marker in start_markers:
+            if marker in text:
+                start_idx = text.find(marker) + len(marker)
+                break
+        
+        if start_idx == -1:
+            return text  # Return original text if no start marker found
+            
+        # Find the end of the prompt content
+        end_idx = text.find(end_marker)
+        if end_idx == -1:
+            end_idx = len(text)
+            
+        # Extract and clean the prompt content
+        prompt_content = text[start_idx:end_idx].strip()
+        return prompt_content
+
+    def _format_prompt_for_display(self, prompt: str) -> str:
+        """Format a prompt for the dedicated prompt display area."""
+        # Add the required header
+        formatted_prompt = "Here is your complete analysis prompt:\n\n"
+        
+        # If this is a summary of summaries prompt, add the emoji header
+        if self.current_mode == 'summary':
+            formatted_prompt = "📊 Summary of Summaries Analysis Selected\n\n" + formatted_prompt
+            
+        # Add the transcript framework if not present
+        if "[transcript]" not in prompt:
+            formatted_prompt += "[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: \"System\", \"Bot\", \"Customer\", \"Consumer\", or \"Agent\". \"Customer\" and \"Consumer\" are synonymous. \"Agent\" refers to a human support representative, while \"Bot\" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.\n\n"
+            
+        # Replace [count] placeholders with actual counts if available
+        if hasattr(self, 'issue_counts'):
+            for category, count in self.issue_counts.items():
+                # Replace both [count] and X in "Category: X cases"
+                prompt = prompt.replace(f"{category}: [count]", f"{category}: {count}")
+                prompt = prompt.replace(f"{category}: X", f"{category}: {count}")
+        
+        # Add the main prompt content with text wrapping
+        formatted_prompt += self._wrap_text(prompt, width=80)
+        
+        # Add a final question to ensure it's displayed properly
+        formatted_prompt += "\n\nWould you like to customize any part of this prompt before we proceed with the analysis?"
+        
+        return formatted_prompt
+
     def _describe_sentiment(self, polarity: float) -> str:
         """Convert sentiment polarity to descriptive text."""
         if polarity >= 0.5: return "Very Positive"
@@ -1480,6 +1696,52 @@ Focus on actionable insights, provide specific examples, include quantitative me
         elif percentage >= 25: return "Moderate Impact - Affects some users"
         return "Limited Impact - Affects few users"
         
+    def _wrap_text(self, text: str, width: int = 80) -> str:
+        """
+        Wrap text to ensure it fits within a specified width.
+        
+        Args:
+            text: Text to wrap
+            width: Maximum line width (default 80 characters)
+            
+        Returns:
+            str: Wrapped text
+        """
+        import textwrap
+        
+        # Handle bullet points and indentation
+        lines = text.split('\n')
+        wrapped_lines = []
+        
+        for line in lines:
+            # Determine indentation level
+            indent = len(line) - len(line.lstrip())
+            stripped_line = line.lstrip()
+            
+            # Check if line starts with list markers
+            list_markers = ['- ', '* ', '• ', '1. ', '2. ', '3. ']
+            is_list_item = any(stripped_line.startswith(marker) for marker in list_markers)
+            
+            if is_list_item:
+                # Preserve list marker and indent subsequent lines
+                marker = next(marker for marker in list_markers if stripped_line.startswith(marker))
+                content = stripped_line[len(marker):]
+                subsequent_indent = ' ' * (indent + len(marker))
+                wrapped = textwrap.fill(content,
+                                      width=width - indent,
+                                      initial_indent=' ' * indent + marker,
+                                      subsequent_indent=subsequent_indent)
+            else:
+                # Regular text wrapping
+                wrapped = textwrap.fill(stripped_line,
+                                      width=width,
+                                      initial_indent=' ' * indent,
+                                      subsequent_indent=' ' * indent)
+            
+            wrapped_lines.append(wrapped)
+        
+        return '\n'.join(wrapped_lines)
+
     def _text_similarity(self, text1: str, text2: str) -> float:
         """
         Calculate similarity between two texts using TF-IDF and cosine similarity.
