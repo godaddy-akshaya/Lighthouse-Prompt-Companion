@@ -3,6 +3,7 @@ GOCAAS Agents SDK implementation.
 """
 
 import os
+import re
 import asyncio
 import json
 import pandas as pd
@@ -251,85 +252,51 @@ class ConversationalAgent:
                 elif message.lower() in ['2', 'summary of summaries', 'summary of summaries prompt']:
                     self.current_mode = 'summary'
                     self.prompt_generated = False
-                    return """📊 Summary of Summaries Analysis Selected
+                    return """Analyze customer call transcripts between customers and customer service guides regarding commerce website development issues. Provide a detailed breakdown of the following:
 
-Here is your complete analysis prompt for analyzing multiple conversation summaries:
+Output Format:
+1. Executive Summary:
+   - Provide a concise overview of key findings and general sentiment.
 
-[Task Introduction]
-You are tasked with analyzing multiple customer service conversation summaries from GoDaddy.com to identify patterns, trends, and actionable insights.
+2. Quantitative Analysis:
+   - Count and percentage of specific feature mentions (list all features mentioned)
+   - Frequency distribution of all complaints by category
+   - Overall sentiment analysis with percentages (positive, neutral, negative) and identification of the most common sentiment mode
 
-### Issue Counts
-1. Email-Related Categories
-   - Email Configuration: [count] cases
-   - DNS Settings: [count] cases
-   - Email Migration: [count] cases
-   - Email Security: [count] cases
-   
-2. Key Metrics
-   - Total cases analyzed
-   - Most common issue type
-   - Distribution across categories
+3. What's Working Well:
+   - Identify positive aspects of the commerce website mentioned by customers
+   - Highlight features receiving praise or positive feedback
+   - Note any compliments about recent improvements
 
-2. Pain Point Analysis
-   - Identify and categorize customer pain points
-   - Determine severity and impact levels
-   - Extract root causes and contributing factors
-   - Map customer journey friction points
+4. Categories of Pain Points:
+   - Categorize all identified issues into logical groupings (e.g., checkout problems, navigation issues, mobile compatibility, etc.)
+   - Include an "Other" category for issues that don't fit neatly into the main categories
+   - For each category (including "Other"), provide representative examples from the transcripts
 
-3. Impact Assessment
-   - Business impact (revenue, retention, etc.)
-   - Customer experience impact
-   - Technical implications
-   - Resource utilization impact
+5. Top 3 Issues:
+   - Identify and detail the three most frequently mentioned problems
+   - For each top issue, include:
+     * Number of mentions and percentage of total complaints
+     * Specific customer quotes illustrating the problem
+     * Impact on customer experience and business outcomes
 
-### Top 3 Issues Analysis
-For each of the top 3 issues:
+6. Top 3 Recommendations:
+   - For each of the top 3 issues, provide very specific, actionable recommendations
+   - Include overall strategic recommendations for improving the commerce website experience
 
-1. Problem Profile
-   - Clear problem statement
-   - Frequency (count and %)
-   - Root cause analysis
-   - Affected customer segments
+7. Additional Insights:
+   - Note any patterns in customer behavior or expectations
+   - Identify emerging trends or concerns not captured in the main categories
+   - Highlight any competitive comparisons mentioned by customers
 
-2. Impact Analysis
-   - Customer experience impact
-   - Business impact
-   - Technical implications
+8. Not Found:
+   - List any important commerce website elements or features specifically looked for but were not mentioned in the transcripts
 
-3. Supporting Evidence
-   - 2-3 representative customer quotes
-   - Context and circumstances
+9. Other Observations:
+   - Include any relevant findings that don't fit into the above categories
+   - Note any unusual or unexpected patterns in the customer interactions
 
-4. Key Recommendation
-   - One clear, actionable recommendation
-   - Expected impact
-   - Implementation timeline
-   - Success metrics
-
-### Additional Insights
-1. Emerging Trends
-   - New issue patterns
-   - Customer behavior shifts
-   - Product/feature impacts
-   - Support efficiency trends
-
-2. Opportunity Areas
-   - Process improvements
-   - Feature enhancements
-   - Documentation needs
-   - Training requirements
-
-### Not Found
-- Document expected but missing elements
-- Data gaps and limitations
-- Areas needing further investigation
-
-### Analysis Instructions
-1. Focus on actionable insights
-2. Provide specific examples
-3. Include quantitative metrics
-4. Note data limitations
-5. Highlight priority areas
+Ensure all recommendations are specific, actionable, and directly address the identified issues. Support your analysis with direct quotes or examples from the transcripts whenever possible.
 
 Would you like to customize any part of this prompt before we proceed with the analysis?"""
                 elif not any(mode in message.lower() for mode in ['1', '2', 'initial prompt', 'summary of summaries']):
@@ -943,14 +910,32 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 logger.error("No analysis prompt found")
                 return "Error: Please generate an analysis prompt first. Type '2' or 'summary of summaries' to create a prompt."
 
-            # Analyze customer call transcripts between customers and customer service guides
-            analysis.append("Customer Call Transcripts Analysis - Commerce Website Development Issues")
-            analysis.append("=" * 75)
-            analysis.append("")
+            # Extract domain from prompt
+            domain = "Customer Service"  # Default domain
+            if self.current_analysis_prompt:
+                if "domain issues" in self.current_analysis_prompt.lower():
+                    domain_match = re.search(r"regarding\s+(\w+(?:\s+\w+)*)\s+issues", self.current_analysis_prompt.lower())
+                    if domain_match:
+                        domain = domain_match.group(1).title()
+                elif "Task:" in self.current_analysis_prompt:
+                    task_match = re.search(r"Task:.*?regarding\s+(\w+(?:\s+\w+)*)\s+issues", self.current_analysis_prompt, re.DOTALL)
+                    if task_match:
+                        domain = task_match.group(1).title()
 
+            # Format as a professional report
+            analysis.append("=" * 80)
+            analysis.append("CUSTOMER SERVICE CONVERSATION ANALYSIS REPORT")
+            analysis.append(f"{domain} Issues Analysis")
+            analysis.append("=" * 80)
+            analysis.append("\nReport Generated: " + pd.Timestamp.now().strftime("%Y-%m-%d"))
+            analysis.append("Total Conversations Analyzed: " + str(total_cases))
+            analysis.append("=" * 80)
+            analysis.append("")
+            
             # 1. Executive Summary
-            analysis.append("1. Executive Summary")
-            analysis.append("-------------------")
+            analysis.append("\nI. EXECUTIVE SUMMARY")
+            analysis.append("=" * 20)
+            analysis.append("Key Findings Overview:")
             
             # Process all conversations for key themes and sentiment
             themes = defaultdict(int)
@@ -1002,7 +987,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             
             analysis.extend([' '.join(summary)])
             analysis.append("")
-
+            
             # Quantitative Analysis
             analysis.append("Quantitative Analysis")
             analysis.append("--------------------")
@@ -1055,23 +1040,27 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                     feature_mentions['security features'] += 1
 
             # 2. Quantitative Analysis
-            analysis.append("2. Quantitative Analysis")
-            analysis.append("----------------------")
+            analysis.append("\nII. QUANTITATIVE ANALYSIS")
+            analysis.append("=" * 25)
             
             # Feature Mentions
-            analysis.append("Feature Mentions (count and percentage):")
+            analysis.append("\nA. Feature Mentions")
+            analysis.append("-" * 15)
+            analysis.append("Distribution of features mentioned across conversations:")
             sorted_features = sorted(themes.items(), key=lambda x: x[1], reverse=True)
             for feature, count in sorted_features:
                 percentage = (count / total_cases) * 100
                 analysis.append(f"- {feature}: {count} mentions ({percentage:.1f}% of conversations)")
-            analysis.append("")
+                analysis.append("")
             
             # Complaint Distribution
-            analysis.append("Complaint Distribution by Category:")
+            analysis.append("\nB. Issue Distribution")
+            analysis.append("-" * 15)
+            analysis.append("Breakdown of reported issues by category:")
             total_complaints = sum(len(issues) for issues in key_issues.values())
             for category, issues in sorted(key_issues.items(), key=lambda x: len(x[1]), reverse=True):
                 percentage = (len(issues) / total_complaints * 100) if total_complaints > 0 else 0
-                analysis.append(f"- {category}: {len(issues)} complaints ({percentage:.1f}%)")
+                analysis.append(f"• {category}: {len(issues)} complaints ({percentage:.1f}%)")
             analysis.append("")
             
             # Overall Sentiment Analysis
@@ -1079,12 +1068,14 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             negative = sum(1 for s in sentiments if s < -0.1)
             neutral = len(sentiments) - positive - negative
             
-            analysis.append("Sentiment Analysis:")
-            analysis.append(f"- Positive: {(positive/len(sentiments)*100):.1f}% of conversations")
-            analysis.append(f"- Negative: {(negative/len(sentiments)*100):.1f}% of conversations")
-            analysis.append(f"- Neutral: {(neutral/len(sentiments)*100):.1f}% of conversations")
+            analysis.append("\nC. Customer Sentiment Analysis")
+            analysis.append("-" * 15)
+            analysis.append("Overall sentiment distribution in conversations:")
+            analysis.append(f"• Positive Feedback: {(positive/len(sentiments)*100):.1f}% of conversations")
+            analysis.append(f"• Negative Feedback: {(negative/len(sentiments)*100):.1f}% of conversations")
+            analysis.append(f"• Neutral Comments: {(neutral/len(sentiments)*100):.1f}% of conversations")
             most_common = "Neutral" if neutral > positive and neutral > negative else "Positive" if positive > negative else "Negative"
-            analysis.append(f"Most common sentiment mode: {most_common}")
+            analysis.append(f"\nPredominant Sentiment: {most_common}")
             analysis.append("")
 
             # Complaint Categories
@@ -1129,10 +1120,11 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append(f"- Neutral: {(neutral/len(sentiments)*100):.1f}%")
             analysis.append(f"Most common: {'Neutral' if neutral > positive and neutral > negative else 'Positive' if positive > negative else 'Negative'}")
             analysis.append("")
-
+            
             # What's Working Well
-            analysis.append("What's Working Well")
-            analysis.append("-----------------")
+            analysis.append("\nIII. POSITIVE ASPECTS")
+            analysis.append("=" * 20)
+            analysis.append("Key strengths and successful features identified:")
             
             # Find positive examples with context
             positive_examples = []
@@ -1152,7 +1144,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                     analysis.append("   Multiple customers mentioned that agents were helpful in resolving complex issues.")
                     analysis.append(f'   Customer Quote: "{service_examples[0]}"')
             analysis.append("")
-
+            
             # 2. Platform Reliability
             reliability_examples = [text for text in positive_examples 
                                  if any(word in text.lower() for word in ['reliable', 'stable', 'consistent', 'works'])]
@@ -1160,8 +1152,8 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append("2. Platform Reliability:")
                 analysis.append("   Customers appreciate the platform's consistent performance and dependable core features.")
                 analysis.append(f'   Customer Quote: "{reliability_examples[0]}"')
-                analysis.append("")
-
+            analysis.append("")
+            
             # 3. Feature Satisfaction
             feature_examples = [text for text in positive_examples 
                              if any(word in text.lower() for word in ['feature', 'functionality', 'capability'])]
@@ -1181,8 +1173,9 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append("")
             
             # Categories of Pain Points
-            analysis.append("Categories of Pain Points")
-            analysis.append("------------------------")
+            analysis.append("\nIV. IDENTIFIED CHALLENGES")
+            analysis.append("=" * 25)
+            analysis.append("Detailed analysis of key issues by category:")
             
             # 1. Payment Processing Delays
             analysis.append("1. Payment Processing Delays")
@@ -1211,7 +1204,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 if verification_issues:
                     analysis.append(f'   Customer Quote: "{verification_issues[0]}"')
             analysis.append("")
-
+            
             # 3. User Interface Navigation
             analysis.append("3. User Interface Navigation")
             navigation_issues = [text for text in texts if isinstance(text, str) and 
@@ -1225,7 +1218,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 if navigation_issues:
                     analysis.append(f'   Customer Quote: "{navigation_issues[0]}"')
             analysis.append("")
-
+            
             # 4. Technical Glitches
             analysis.append("4. Technical Glitches")
             technical_issues = [text for text in texts if isinstance(text, str) and 
@@ -1255,8 +1248,9 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append("")
             
             # Additional Insights
-            analysis.append("Additional Insights")
-            analysis.append("------------------")
+            analysis.append("\nVI. SUPPLEMENTARY FINDINGS")
+            analysis.append("=" * 25)
+            analysis.append("Additional patterns and observations:")
             
             # Customer Behavior Patterns
             analysis.append("Customer Behavior Patterns:")
@@ -1264,7 +1258,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             for pattern in patterns[:3]:  # Show top 3 patterns
                 analysis.append(f"- {pattern}")
             analysis.append("")
-
+            
             # Emerging Trends
             analysis.append("Emerging Trends:")
             trends = self._identify_emerging_trends(texts)
@@ -1279,9 +1273,10 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append(f"- {comp}")
             analysis.append("")
             
-            # Top 5 Recommendations
-            analysis.append("Top 5 Recommendations")
-            analysis.append("---------------------")
+            # Recommendations
+            analysis.append("\nV. STRATEGIC RECOMMENDATIONS")
+            analysis.append("=" * 30)
+            analysis.append("Prioritized action items for improvement:")
             recommendations = [
                 "1. Streamline Payment Verification Process",
                 "   - Implement automated verification system",
@@ -1310,6 +1305,16 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             ]
             analysis.extend(recommendations)
             analysis.append("")
+            
+            # Add conclusion
+            analysis.append("\nVII. CONCLUSION")
+            analysis.append("=" * 15)
+            analysis.append("This analysis has identified several key areas requiring immediate attention, ")
+            analysis.append("particularly in payment processing, account verification, and user interface navigation. ")
+            analysis.append("While there are positive aspects in customer service and platform reliability, ")
+            analysis.append("implementing the recommended improvements will significantly enhance the overall ")
+            analysis.append("customer experience and platform effectiveness.")
+            analysis.append("\n" + "=" * 80)  # Final border
             
             # Cache the results
             result = "\n".join(analysis)
