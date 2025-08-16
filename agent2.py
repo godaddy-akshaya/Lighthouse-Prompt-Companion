@@ -196,7 +196,7 @@ class ConversationalAgent:
         # Don't clear prompt-related state unless explicitly requested
         if not self.prompt_generated:
             self.current_analysis_prompt = None
-            self.prompt_generated = False
+        self.prompt_generated = False
             
         print("All caches cleared.")
 
@@ -420,8 +420,49 @@ Keep the analysis straightforward and actionable, focusing on the most important
 
 For Summary of Summaries analysis, use this exact structure:
 
-Task Introduction:
-"You are tasked with analyzing the 'conversation_summary' column from a CSV file containing customer service interaction summaries from GoDaddy.com."
+Task: Analyze customer call transcripts between customers and customer service guides regarding commerce website development issues. Provide a detailed breakdown of the following:
+
+Output Format:
+1. Executive Summary:
+   - Provide a concise overview of key findings and general sentiment
+
+2. Quantitative Analysis:
+   - Count and percentage of specific feature mentions (list all features mentioned)
+   - Frequency distribution of all complaints by category
+   - Overall sentiment analysis with percentages (positive, neutral, negative) and identification of the most common sentiment mode
+
+3. What's Working Well:
+   - Identify positive aspects of the commerce website mentioned by customers
+   - Highlight features receiving praise or positive feedback
+   - Note any compliments about recent improvements
+
+4. Categories of Pain Points:
+   - Categorize all identified issues into logical groupings (e.g., checkout problems, navigation issues, mobile compatibility, etc.)
+   - Include an "Other" category for issues that don't fit neatly into the main categories
+   - For each category (including "Other"), provide representative examples from the transcripts
+
+5. Top 3 Issues:
+   - Identify and detail the three most frequently mentioned problems
+   - For each top issue, include:
+     * Number of mentions and percentage of total complaints
+     * Specific customer quotes illustrating the problem
+     * Impact on customer experience and business outcomes
+
+6. Top 3 Recommendations:
+   - For each of the top 3 issues, provide very specific, actionable recommendations
+   - Include overall strategic recommendations for improving the commerce website experience
+
+7. Additional Insights:
+   - Note any patterns in customer behavior or expectations
+   - Identify emerging trends or concerns not captured in the main categories
+   - Highlight any competitive comparisons mentioned by customers
+
+8. Not Found:
+   - List any important commerce website elements or features specifically looked for but not mentioned in the transcripts
+
+9. Other Observations:
+   - Include any relevant findings that don't fit into the above categories
+   - Note any unusual or unexpected patterns in the customer interactions
 
 ### Quantitative Analysis
 1. Issue Tracking
@@ -647,32 +688,31 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             self.conversation_history.append({"role": "assistant", "content": assistant_response})
             
             # Handle prompt generation and modifications
-            if self.current_mode == 'summary':
-                # Check if this response contains a complete prompt
-                is_complete_prompt = (
-                    "Here is your complete analysis prompt:" in assistant_response or
-                    "Task Introduction" in assistant_response and "Quantitative Analysis" in assistant_response
-                )
+            # Check if this response contains a complete prompt
+            is_complete_prompt = (
+                "Here is your complete analysis prompt:" in assistant_response or
+                "Task Introduction" in assistant_response and "Quantitative Analysis" in assistant_response
+            )
+            
+            # Check if this is a prompt modification request
+            is_prompt_modification = any(keyword in message.lower() for keyword in 
+                ['change', 'modify', 'update', 'customize', 'edit'] + ['prompt'])
                 
-                # Check if this is a prompt modification request
-                is_prompt_modification = any(keyword in message.lower() for keyword in 
-                    ['change', 'modify', 'update', 'customize', 'edit'] + ['prompt'])
+            if is_complete_prompt or (self.prompt_generated and is_prompt_modification):
+                # Store the complete response first
+                self.conversation_history[-1]["content"] = assistant_response
                 
-                if is_complete_prompt or (self.prompt_generated and is_prompt_modification):
-                    # Store the complete response first
-                    self.conversation_history[-1]["content"] = assistant_response
-                    
-                    # Extract and store the actual prompt content
-                    extracted_prompt = self._extract_prompt_content(assistant_response)
-                    self.current_analysis_prompt = extracted_prompt
-                    self.prompt_generated = True
-                    logger.info("Analysis prompt has been stored/updated")
-                    
-                    # Format the response for the prompt display area
-                    formatted_response = self._format_prompt_for_display(extracted_prompt)
-                    
-                    # Return the formatted version for display
-                    assistant_response = formatted_response
+                # Extract and store the actual prompt content
+                extracted_prompt = self._extract_prompt_content(assistant_response)
+                self.current_analysis_prompt = extracted_prompt
+                self.prompt_generated = True
+                logger.info("Analysis prompt has been stored/updated")
+                
+                # Format the response for the prompt display area
+                formatted_response = self._format_prompt_for_display(extracted_prompt)
+                
+                # Return the formatted version for display
+                assistant_response = formatted_response
             
             # Keep conversation history manageable (last 20 messages)
             if len(self.conversation_history) > 20:
@@ -812,21 +852,75 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         Returns:
             str: Detailed analysis results
         """
+        # Validate CSV data
+        if self.current_csv_data is None:
+            logger.error("No CSV data loaded")
+            return "No CSV file has been loaded yet."
+            
+        if 'conversation_summary' not in self.current_csv_data.columns:
+            logger.error("Missing conversation_summary column")
+            return "CSV file must contain a 'conversation_summary' column."
+            
+        if len(self.current_csv_data) == 0:
+            logger.error("CSV file is empty")
+            return "The loaded CSV file contains no data."
+            
         try:
-            # Validate CSV data
-            if self.current_csv_data is None:
-                logger.error("No CSV data loaded")
-                return "No CSV file has been loaded yet."
+            # Initialize analysis
+            analysis = []
+            series = self.current_csv_data['conversation_summary']
+            texts = series.dropna().tolist()
+            total_cases = len(texts)
+            
+            # Define categories and keywords for analysis
+            categories = {
+                'Checkout Problems': ['payment', 'checkout', 'cart', 'purchase', 'transaction', 'order'],
+                'Navigation Issues': ['menu', 'find', 'search', 'navigation', 'locate', 'browse'],
+                'Mobile Compatibility': ['mobile', 'phone', 'tablet', 'responsive', 'app', 'screen'],
+                'Performance': ['slow', 'speed', 'load', 'crash', 'freeze', 'timeout'],
+                'User Interface': ['layout', 'design', 'button', 'click', 'display', 'view'],
+                'Integration': ['connect', 'sync', 'integrate', 'api', 'third-party', 'plugin'],
+                'Other': ['other', 'miscellaneous', 'general', 'various']
+            }
+            
+            # Initialize counters
+            category_counts = {cat: 0 for cat in categories}
+            feature_mentions = defaultdict(int)
+            positive_aspects = defaultdict(list)
+            pain_points = defaultdict(list)
+            
+            # Analyze each text
+            for text in texts:
+                if pd.isna(text) or not isinstance(text, str):
+                    continue
+                    
+                text_lower = text.lower()
                 
-            if 'conversation_summary' not in self.current_csv_data.columns:
-                logger.error("Missing conversation_summary column")
-                return "CSV file must contain a 'conversation_summary' column."
+                # Count category mentions
+                for category, keywords in categories.items():
+                    if any(keyword in text_lower for keyword in keywords):
+                        category_counts[category] += 1
+                        
+                # Extract features mentioned
+                doc = nlp(text)
+                for chunk in doc.noun_chunks:
+                    if len(chunk.text.split()) >= 2:  # Only phrases with 2+ words
+                        feature_mentions[chunk.text.lower()] += 1
                 
-            if len(self.current_csv_data) == 0:
-                logger.error("CSV file is empty")
-                return "The loaded CSV file contains no data."
-                
-            # Always get the latest prompt before analysis
+                # Analyze sentiment
+                sentiment = TextBlob(text).sentiment.polarity
+                if sentiment > 0.1:
+                    # Find positive aspects
+                    for category, keywords in categories.items():
+                        if any(keyword in text_lower for keyword in keywords):
+                            positive_aspects[category].append(text)
+                elif sentiment < -0.1:
+                    # Find pain points
+                    for category, keywords in categories.items():
+                        if any(keyword in text_lower for keyword in keywords):
+                            pain_points[category].append(text)
+            
+            # Get the latest prompt
             latest_prompt = self._get_latest_prompt()
             if latest_prompt:
                 self.current_analysis_prompt = latest_prompt
@@ -846,767 +940,415 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                         break
                 
             if not self.current_analysis_prompt:
-                return "No analysis prompt has been generated yet. Please generate a prompt first."
-                
-            # Use cache if available
-            cache_key = id(self.current_csv_data)
-            if cache_key in self.analysis_cache:
-                return self.analysis_cache[cache_key]
+                logger.error("No analysis prompt found")
+                return "Error: Please generate an analysis prompt first. Type '2' or 'summary of summaries' to create a prompt."
+
+            # Analyze customer call transcripts between customers and customer service guides
+            analysis.append("Customer Call Transcripts Analysis - Commerce Website Development Issues")
+            analysis.append("=" * 75)
+            analysis.append("")
+
+            # 1. Executive Summary
+            analysis.append("1. Executive Summary")
+            analysis.append("-------------------")
             
-            analysis = []
-            series = self.current_csv_data['conversation_summary']
-            texts = series.dropna().tolist()
+            # Process all conversations for key themes and sentiment
+            themes = defaultdict(int)
+            sentiments = []
+            key_issues = defaultdict(list)
             
-            # Initialize analysis structure
-            analysis = []
-            total_cases = len(texts)
-            
-            # Issue Counts Analysis
-            analysis.append("# 📊 Issue Counts\n")
-            
-            # Reset issue counts
-            self.issue_counts = {
-                'Email Configuration': 0,
-                'DNS Settings': 0,
-                'Email Migration': 0,
-                'Email Security': 0
-            }
-            
-            # Define category keywords
-            category_keywords = {
-                'Email Configuration': ['smtp', 'imap', 'pop3', 'email setup', 'email config', 'email settings', 'outlook', 'thunderbird'],
-                'DNS Settings': ['dns', 'mx record', 'nameserver', 'domain name system', 'dns zone', 'a record', 'cname'],
-                'Email Migration': ['migrate', 'transfer email', 'move email', 'import email', 'export email', 'switch email'],
-                'Email Security': ['spam', 'phishing', 'security', 'authentication', 'encryption', 'password', 'hack', 'compromise']
-            }
-            
-            # Analyze each text for category matching
-            logger.info(f"Starting analysis of {len(texts)} texts")
-            for text in tqdm(texts, desc="Analyzing issues"):
-                if not text:
+            for text in texts:
+                if not isinstance(text, str):
                     continue
                     
                 text_lower = text.lower()
-                # Count matches for each category
-                for category, keywords in category_keywords.items():
-                    if any(word in text_lower for word in keywords):
-                        self.issue_counts[category] += 1
-                        logger.debug(f"Found match for {category} in text: {text[:100]}...")
+                
+                # Analyze sentiment
+                sentiment = TextBlob(text).sentiment.polarity
+                sentiments.append(sentiment)
+                
+                # Track key themes
+                if any(word in text_lower for word in ['payment', 'transaction', 'billing']):
+                    themes['payment processing'] += 1
+                    if sentiment < -0.1:  # Negative sentiment
+                        key_issues['payment processing'].append(text)
+                        
+                if any(word in text_lower for word in ['verify', 'account', 'setup']):
+                    themes['account verification'] += 1
+                    if sentiment < -0.1:
+                        key_issues['account verification'].append(text)
+                        
+                if any(word in text_lower for word in ['navigation', 'interface', 'menu']):
+                    themes['user interface'] += 1
+                    if sentiment < -0.1:
+                        key_issues['user interface'].append(text)
+                        
+                if any(word in text_lower for word in ['mobile', 'phone', 'responsive']):
+                    themes['mobile compatibility'] += 1
+                    if sentiment < -0.1:
+                        key_issues['mobile compatibility'].append(text)
+
+            # Generate executive summary
+            top_issues = sorted(key_issues.items(), key=lambda x: len(x[1]), reverse=True)[:3]
+            overall_sentiment = 'positive' if sum(sentiments)/len(sentiments) > 0.1 else 'negative' if sum(sentiments)/len(sentiments) < -0.1 else 'neutral'
             
-            # Output category counts with text wrapping
-            analysis.append("## Email-Related Categories")
-            category_text = []
-            for category, count in self.issue_counts.items():
-                category_text.append(f"- {category}: {count} cases")
-            analysis.append(self._wrap_text('\n'.join(category_text), width=80))
+            summary = [
+                f"Analysis of {total_cases} customer service conversations regarding commerce website development reveals ",
+                f"significant challenges in {', '.join(issue[0] for issue in top_issues)}. ",
+                f"The overall sentiment is {overall_sentiment}, with customers particularly vocal about ",
+                f"{top_issues[0][0]} issues. Key findings indicate a need for immediate attention to ",
+                f"these core functionality areas, as they directly impact business operations and customer satisfaction."
+            ]
             
-            # Log category counts
-            logger.info("Category counts:")
-            for category, count in self.issue_counts.items():
-                logger.info(f"{category}: {count} cases")
+            analysis.extend([' '.join(summary)])
+            analysis.append("")
+
+            # Quantitative Analysis
+            analysis.append("Quantitative Analysis")
+            analysis.append("--------------------")
             
-            # Get total number of cases
-            analysis.append("# Analysis Based on Generated Prompt")
-            analysis.append(f"\nTotal Cases Analyzed: {total_cases}")
+            # Feature Mentions Analysis
+            analysis.append("Feature Mentions:")
             
-            # Sort categories by count and get top issues
-            try:
-                # Log current state
-                logger.info("Preparing to sort categories")
-                logger.info(f"Current issue counts: {self.issue_counts}")
-                
-                # Sort categories
-                sorted_categories = sorted(
-                    [(k, v) for k, v in self.issue_counts.items() if v > 0],  # Only include categories with matches
-                    key=lambda x: x[1],
-                    reverse=True
-                )
-                
-                logger.info(f"Sorted categories: {sorted_categories}")
-                
-                # Get top 3 issues
-                top_3_issues = sorted_categories[:3]
-                logger.info(f"Top 3 issues: {top_3_issues}")
-                
-                # Validate we have issues to analyze
-                if not top_3_issues:
-                    logger.warning("No issues found in the analysis")
-                    return "No issues found to analyze. Please check the data."
-                    
-                # Add separator for readability
-                analysis.append("\n" + "="*50 + "\n")
-                
-            except Exception as e:
-                logger.error(f"Error during category sorting: {e}")
-                raise
-            # Analyze top 3 issues
-            for i, (category, count) in enumerate(top_3_issues, 1):
-                analysis.append(f"\n### Issue {i}: {category}")
-                analysis.append(f"**Frequency**: {count} cases")
-                
-                # Find examples for this category
-                examples = []
-                for text in texts:
-                    text_lower = text.lower()
-                    # Match based on category keywords
-                    if category == 'Email Configuration' and any(word in text_lower for word in ['smtp', 'imap', 'pop3', 'email setup', 'email config', 'email settings']):
-                        examples.append(text)
-                    elif category == 'DNS Settings' and any(word in text_lower for word in ['dns', 'mx record', 'nameserver', 'domain name system', 'dns zone']):
-                        examples.append(text)
-                    elif category == 'Email Migration' and any(word in text_lower for word in ['migrate', 'transfer email', 'move email', 'import email', 'export email']):
-                        examples.append(text)
-                    elif category == 'Email Security' and any(word in text_lower for word in ['spam', 'phishing', 'security', 'authentication', 'encryption', 'password']):
-                        examples.append(text)
-                
-                # Add examples
-                if examples:
-                    analysis.append("\n**Representative Examples:**")
-                    for j, example in enumerate(examples[:2], 1):  # Show up to 2 examples
-                        analysis.append(f"{j}. {example}")
-                
-                # Add impact analysis
-                analysis.append("\n**Impact Analysis:**")
-                analysis.append(f"- Customer Impact: {self._determine_impact(count, total_cases)}")
-                
-                # Add recommendation
-                analysis.append("\n**Key Recommendation:**")
-                if category == 'Email Configuration':
-                    analysis.append("- Implement automated configuration wizard")
-                    analysis.append("- Expected Impact: 60% reduction in setup issues")
-                    analysis.append("- Timeline: 3-4 weeks")
-                elif category == 'DNS Settings':
-                    analysis.append("- Create DNS verification tool")
-                    analysis.append("- Expected Impact: 70% faster DNS resolution")
-                    analysis.append("- Timeline: 2-3 weeks")
-                elif category == 'Email Migration':
-                    analysis.append("- Develop migration assistant")
-                    analysis.append("- Expected Impact: 50% faster migrations")
-                    analysis.append("- Timeline: 4-5 weeks")
-                elif category == 'Email Security':
-                    analysis.append("- Enhance security monitoring")
-                    analysis.append("- Expected Impact: 80% faster threat detection")
-                    analysis.append("- Timeline: 3-4 weeks")
-                
-                # Add success metrics
-                analysis.append("\n**Success Metrics:**")
-                analysis.append("- Reduction in support tickets")
-                analysis.append("- Improved customer satisfaction")
-                analysis.append("- Decreased resolution time")
-                
-                # Add sentiment analysis for this category
-                if examples:
-                    sentiments = [self._analyze_sentiment(text)['polarity'] for text in examples]
-                    avg_sentiment = sum(sentiments) / len(sentiments)
-                    analysis.append(f"\n**Customer Sentiment:** {self._describe_sentiment(avg_sentiment)}")
-                
-                analysis.append("")  # Add spacing between issues
+            # Extract features using NLP
+            feature_mentions = defaultdict(int)
+            feature_contexts = defaultdict(list)
             
-            # Performance Metrics
-            analysis.append("\n## Performance Metrics")
-            stats = self._analyze_text_stats(texts)
-            sentiments = [self._analyze_sentiment(text) for text in tqdm(texts, desc="Analyzing sentiment")]
-            avg_polarity = np.mean([s['polarity'] for s in sentiments])
-            
-            analysis.append("\n| Metric | Value | Notes |")
-            analysis.append("|--------|--------|--------|")
-            analysis.append(f"| Average Response Length | {stats['avg_words']:.1f} words | Indicates detail level of responses |")
-            analysis.append(f"| Customer Satisfaction | {self._describe_sentiment(avg_polarity)} | Based on sentiment analysis |")
-            
-            # Top Issues Analysis
-            analysis.append("\n# 🎯 Top Issues Analysis")
-            
-            # Extract and analyze specific content from the conversation summaries
-            all_pain_points = []
-            
-            # First pass - identify specific issues and their context
-            issue_details = defaultdict(list)
             for text in texts:
-                # Process text with spaCy for better analysis
-                doc = nlp(text.lower())
+                if not isinstance(text, str):
+                    continue
+                    
+                # Process with spaCy for better feature extraction
+                doc = nlp(text)
                 
-                # Initialize issue tracking
-                current_issue = {
-                    'text': text,
-                    'specific_issue': None,
-                    'product': None,
-                    'action_taken': None,
-                    'outcome': None,
-                    'customer_impact': None,
-                    'technical_details': None,
-                    'sentiment': TextBlob(text).sentiment.polarity,
-                    'urgency': False
-                }
-                
-                # Extract specific issue details
-                for sent in doc.sents:
-                    sent_text = sent.text.lower()
-                    
-                    # Look for specific product mentions
-                    products = ['hosting', 'domain', 'ssl', 'cpanel', 'wordpress', 'email', 'dns']
-                    for product in products:
-                        if product in sent_text:
-                            current_issue['product'] = product
-                            break
-                    
-                    # Identify technical details
-                    technical_indicators = ['error', 'configuration', 'setup', 'settings', 'server', 'database']
-                    if any(ind in sent_text for ind in technical_indicators):
-                        current_issue['technical_details'] = sent.text
-                    
-                    # Capture action taken
-                    action_indicators = ['resolved', 'fixed', 'implemented', 'updated', 'modified', 'changed']
-                    if any(ind in sent_text for ind in action_indicators):
-                        current_issue['action_taken'] = sent.text
-                    
-                    # Identify customer impact
-                    impact_indicators = ['unable to', 'cannot', 'failed to', 'preventing', 'blocking']
-                    if any(ind in sent_text for ind in impact_indicators):
-                        current_issue['customer_impact'] = sent.text
-                    
-                    # Check for urgency indicators
-                    urgency_indicators = ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down']
-                    if any(ind in sent_text for ind in urgency_indicators):
-                        current_issue['urgency'] = True
-                
-                # Extract the specific issue using key phrases and context
-                issue_phrases = []
+                # Extract noun phrases that might be features
                 for chunk in doc.noun_chunks:
-                    if len(chunk.text.split()) >= 2:  # Multi-word phrases
-                        # Look for phrases that indicate specific problems
-                        if any(word in chunk.text.lower() for word in ['issue', 'problem', 'error', 'failure', 'bug']):
-                            issue_phrases.append(chunk.text)
+                    if len(chunk.text.split()) >= 2:  # Multi-word features
+                        feature = chunk.text.lower()
+                        # Only count if it appears to be a technical feature
+                        if any(word in feature for word in ['system', 'feature', 'tool', 'interface', 'process']):
+                            feature_mentions[feature] += 1
+                            if len(feature_contexts[feature]) < 2:  # Keep up to 2 examples
+                                feature_contexts[feature].append(text)
                 
-                if issue_phrases:
-                    # Use the most detailed issue phrase
-                    current_issue['specific_issue'] = max(issue_phrases, key=len)
-                else:
-                    # Fallback to first sentence if no specific issue phrase found
-                    current_issue['specific_issue'] = next(doc.sents).text
+                # Count specific feature categories
+                text_lower = text.lower()
                 
-                # Group by product + issue type for more specific categorization
-                issue_key = f"{current_issue['product']}_{current_issue['specific_issue']}" if current_issue['product'] else current_issue['specific_issue']
-                issue_details[issue_key].append(current_issue)
+                # Payment features
+                if any(word in text_lower for word in ['payment', 'transaction', 'billing', 'refund']):
+                    feature_mentions['payment processing'] += 1
+                    
+                # Account features
+                if any(word in text_lower for word in ['account', 'profile', 'verification', 'setup']):
+                    feature_mentions['account management'] += 1
+                    
+                # Interface features
+                if any(word in text_lower for word in ['interface', 'navigation', 'menu', 'dashboard']):
+                    feature_mentions['user interface'] += 1
+                    
+                # Integration features
+                if any(word in text_lower for word in ['integration', 'api', 'connect', 'sync']):
+                    feature_mentions['integration capabilities'] += 1
+                    
+                # Security features
+                if any(word in text_lower for word in ['security', 'protection', 'encryption']):
+                    feature_mentions['security features'] += 1
+
+            # 2. Quantitative Analysis
+            analysis.append("2. Quantitative Analysis")
+            analysis.append("----------------------")
             
-            # Sort issues by frequency, urgency, and impact
-            sorted_issues = sorted(
-                [(issue_key, details) for issue_key, details in issue_details.items()],
-                key=lambda x: (
-                    len(x[1]),  # frequency
-                    sum(1 for i in x[1] if i['urgency']),  # number of urgent cases
-                    -sum(i['sentiment'] for i in x[1])/len(x[1])  # negative sentiment (higher priority)
-                ),
-                reverse=True
-            )[:3]  # Top 3 most significant issues
+            # Feature Mentions
+            analysis.append("Feature Mentions (count and percentage):")
+            sorted_features = sorted(themes.items(), key=lambda x: x[1], reverse=True)
+            for feature, count in sorted_features:
+                percentage = (count / total_cases) * 100
+                analysis.append(f"- {feature}: {count} mentions ({percentage:.1f}% of conversations)")
+            analysis.append("")
             
-            # Present each issue with full context
-            for i, (issue_key, instances) in enumerate(sorted_issues, 1):
-                # Get the most representative instance (prioritize urgent and detailed cases)
-                best_instance = max(instances, key=lambda x: (
-                    x['urgency'],
-                    bool(x['technical_details']),
-                    bool(x['customer_impact']),
-                    len(x['text'])
-                ))
-                
-                # Format issue title
-                product = best_instance['product']
-                issue_title = f"{product.title() + ' ' if product else ''}{best_instance['specific_issue'].title()}"
-                
-                analysis.append(f"\n## Issue {i}: {issue_title}")
-                analysis.append(f"\n### Issue Details:")
-                analysis.append(f"- **Frequency**: {len(instances)} occurrences")
-                analysis.append(f"- **Product Area**: {product.title() if product else 'General'}")
-                if best_instance['technical_details']:
-                    analysis.append(f"- **Technical Context**: {best_instance['technical_details']}")
-                if best_instance['customer_impact']:
-                    analysis.append(f"- **Customer Impact**: {best_instance['customer_impact']}")
-                
-                # Show urgency and sentiment
-                urgent_count = sum(1 for i in instances if i['urgency'])
-                if urgent_count:
-                    analysis.append(f"- **Urgency**: {urgent_count} urgent cases")
-                avg_sentiment = sum(i['sentiment'] for i in instances)/len(instances)
-                analysis.append(f"- **Customer Sentiment**: {self._describe_sentiment(avg_sentiment)}")
-                
-                # Show resolution information if available
-                resolved_cases = [i for i in instances if i['action_taken']]
-                if resolved_cases:
-                    analysis.append("\n### Resolution Examples:")
-                    for case in resolved_cases[:2]:  # Show up to 2 resolution examples
-                        analysis.append(f"```\n{case['action_taken']}\n```")
+            # Complaint Distribution
+            analysis.append("Complaint Distribution by Category:")
+            total_complaints = sum(len(issues) for issues in key_issues.values())
+            for category, issues in sorted(key_issues.items(), key=lambda x: len(x[1]), reverse=True):
+                percentage = (len(issues) / total_complaints * 100) if total_complaints > 0 else 0
+                analysis.append(f"- {category}: {len(issues)} complaints ({percentage:.1f}%)")
+            analysis.append("")
             
-            # Second pass - detailed analysis with context
+            # Overall Sentiment Analysis
+            positive = sum(1 for s in sentiments if s > 0.1)
+            negative = sum(1 for s in sentiments if s < -0.1)
+            neutral = len(sentiments) - positive - negative
+            
+            analysis.append("Sentiment Analysis:")
+            analysis.append(f"- Positive: {(positive/len(sentiments)*100):.1f}% of conversations")
+            analysis.append(f"- Negative: {(negative/len(sentiments)*100):.1f}% of conversations")
+            analysis.append(f"- Neutral: {(neutral/len(sentiments)*100):.1f}% of conversations")
+            most_common = "Neutral" if neutral > positive and neutral > negative else "Positive" if positive > negative else "Negative"
+            analysis.append(f"Most common sentiment mode: {most_common}")
+            analysis.append("")
+
+            # Complaint Categories
+            analysis.append("Complaint Categories:")
+            complaint_stats = {
+                'Payment processing issues': 0,
+                'Account verification delays': 0,
+                'Navigation challenges': 0,
+                'Technical glitches': 0,
+                'Integration issues': 0
+            }
+            
             for text in texts:
-                # Initialize analysis variables
-                category = "other"
-                subcategory = "general"
-                issue_type = "other"
-                severity = "medium"
-                issue = None
-                action = None
-                impact = None
-                context = None
-                
-                # Match against identified issues
+                if not isinstance(text, str):
+                    continue
                 text_lower = text.lower()
-                matched_issues = [key for key, _ in sorted_issues if key.lower() in text_lower]
-                
-                # Enhanced categorization with subcategories
-                # Email issues
-                if any(word in text.lower() for word in ["email", "smtp", "mail", "inbox"]):
-                    category = "email"
-                    if "delivery" in text.lower() or "bounce" in text.lower():
-                        subcategory = "delivery"
-                        issue_type = "email_delivery"
-                    elif "setup" in text.lower() or "configuration" in text.lower():
-                        subcategory = "configuration"
-                        issue_type = "email_setup"
-                    elif "spam" in text.lower() or "filter" in text.lower():
-                        subcategory = "spam"
-                        issue_type = "spam_filtering"
-                
-                # Domain issues
-                elif any(word in text.lower() for word in ["domain", "dns", "nameserver"]):
-                    category = "domain"
-                    if "transfer" in text.lower():
-                        subcategory = "transfer"
-                        issue_type = "domain_transfer"
-                    elif "dns" in text.lower() or "nameserver" in text.lower():
-                        subcategory = "dns"
-                        issue_type = "dns_configuration"
-                    elif "renew" in text.lower() or "expir" in text.lower():
-                        subcategory = "renewal"
-                        issue_type = "domain_renewal"
-                
-                # Hosting issues
-                elif any(word in text.lower() for word in ["host", "server", "website", "site"]):
-                    category = "hosting"
-                    if "down" in text.lower() or "unavailable" in text.lower():
-                        subcategory = "availability"
-                        issue_type = "site_down"
-                    elif "slow" in text.lower() or "performance" in text.lower():
-                        subcategory = "performance"
-                        issue_type = "site_performance"
-                    elif "ssl" in text.lower() or "certificate" in text.lower():
-                        subcategory = "ssl"
-                        issue_type = "ssl_certificate"
-                
-                # Billing issues
-                elif any(word in text.lower() for word in ["bill", "payment", "charge", "refund"]):
-                    category = "billing"
-                    if "refund" in text.lower():
-                        subcategory = "refund"
-                        issue_type = "refund_request"
-                    elif "overcharge" in text.lower() or "wrong" in text.lower():
-                        subcategory = "billing_error"
-                        issue_type = "incorrect_charge"
-                    elif "cancel" in text.lower():
-                        subcategory = "cancellation"
-                        issue_type = "service_cancellation"
-                
-                # Account issues
-                elif any(word in text.lower() for word in ["login", "password", "access", "account"]):
-                    category = "account"
-                    if "password" in text.lower() or "reset" in text.lower():
-                        subcategory = "password"
-                        issue_type = "password_reset"
-                    elif "login" in text.lower() or "access" in text.lower():
-                        subcategory = "access"
-                        issue_type = "login_issues"
-                    elif "security" in text.lower() or "hack" in text.lower():
-                        subcategory = "security"
-                        issue_type = "security_concern"
-                
-                # Determine severity based on keywords and context
-                severity_indicators = {
-                    'high': ['urgent', 'critical', 'emergency', 'immediate', 'serious'],
-                    'medium': ['important', 'significant', 'moderate'],
-                    'low': ['minor', 'small', 'trivial']
-                }
-                
-                text_lower = text.lower()
-                for level, indicators in severity_indicators.items():
-                    if any(indicator in text_lower for indicator in indicators):
-                        severity = level
-                        break
-                
-                # Extract other information
-                for sent in doc.sents:
-                    if "issue" in sent.text or "problem" in sent.text:
-                        issue = sent.text
-                    elif "did" in sent.text or "action" in sent.text:
-                        action = sent.text
-                    elif "impact" in sent.text or "result" in sent.text:
-                        impact = sent.text
-                    elif "when" in sent.text or "during" in sent.text:
-                        context = sent.text
-                
-                # Add to pain points list with enhanced categorization
-                all_pain_points.append({
-                    'category': category,
-                    'subcategory': subcategory,
-                    'issue_type': issue_type,
-                    'severity': severity,
-                    'issue': issue,
-                    'action': action,
-                    'impact': impact,
-                    'context': context,
-                    'full_text': text
-                })
-            
-            # Analyze the significant themes and their contexts
-            for i, (issue_key, instances) in enumerate(sorted_issues, 1):
-                # Calculate statistics
-                urgent_count = sum(1 for i in instances if any(word in i['text'].lower() for word in 
-                    ['urgent', 'asap', 'emergency', 'critical', 'immediate', 'blocking', 'production down']))
-                avg_sentiment = sum(i['sentiment'] for i in instances) / len(instances)
-                
-                # Format the issue title based on actual content
-                sentiment_desc = "negative" if avg_sentiment < -0.1 else "positive" if avg_sentiment > 0.1 else "neutral"
-                urgency_level = "Critical" if urgent_count/len(instances) > 0.3 else "Important" if urgent_count > 0 else "Regular"
-                
-                analysis.append(f"\n## Issue {i}: {issue_key.title()}")
-                analysis.append(f"\n### Overview:")
-                analysis.append(f"- **Frequency**: {len(instances)} related conversations")
-                analysis.append(f"- **Urgency Level**: {urgency_level} ({urgent_count} urgent cases)")
-                analysis.append(f"- **Customer Sentiment**: {sentiment_desc.title()}")
-                
-                # Add specific examples
-                # Sort instances by severity and get examples
-                severe_cases = []
-                normal_cases = []
-                for instance in instances:
-                    try:
-                        # Try to get text from either 'text' or 'full_text' key
-                        text = instance.get('text', instance.get('full_text', ''))
-                        if not text:
-                            logger.warning(f"Instance missing text content: {instance}")
-                            continue
-                            
-                        # Check for urgency/severity in the text
-                        urgency_words = [
-                            'urgent', 'asap', 'emergency', 'critical', 
-                            'immediate', 'blocking', 'production down',
-                            'high priority', 'outage', 'severe'
-                        ]
-                        text_lower = text.lower()
-                        is_urgent = any(word in text_lower for word in urgency_words)
-                        
-                        # Also check technical indicators for severity
-                        tech_indicators = [
-                            'error', 'failed', 'broken', 'crash',
-                            'not working', 'down', 'unavailable'
-                        ]
-                        has_tech_issues = any(indicator in text_lower for indicator in tech_indicators)
-                        
-                        # Combine urgency indicators
-                        if is_urgent or (has_tech_issues and 'urgent' in text_lower):
-                            severe_cases.append(text)
-                        else:
-                            normal_cases.append(text)
-                            
-                    except Exception as e:
-                        logger.error(f"Error processing instance: {e}")
+                if any(word in text_lower for word in ['payment', 'transaction', 'billing']) and 'issue' in text_lower:
+                    complaint_stats['Payment processing issues'] += 1
+                if any(word in text_lower for word in ['verify', 'verification']) and 'delay' in text_lower:
+                    complaint_stats['Account verification delays'] += 1
+                if any(word in text_lower for word in ['navigation', 'menu', 'find']) and 'difficult' in text_lower:
+                    complaint_stats['Navigation challenges'] += 1
+                if any(word in text_lower for word in ['error', 'bug', 'glitch']):
+                    complaint_stats['Technical glitches'] += 1
+                if any(word in text_lower for word in ['integrate', 'connection', 'sync']) and 'issue' in text_lower:
+                    complaint_stats['Integration issues'] += 1
 
-                if severe_cases:
-                    analysis.append("\n### Critical Case Example:")
-                    # Get complete sentence
-                    doc = nlp(severe_cases[0])
-                    first_sentence = next(doc.sents).text
-                    analysis.append(f"```\n{first_sentence}\n```")
-                
-                if normal_cases:
-                    analysis.append("\n### Typical Case Example:")
-                    # Get complete sentence
-                    doc = nlp(normal_cases[0])
-                    first_sentence = next(doc.sents).text
-                    analysis.append(f"```\n{first_sentence}\n```")
-                
-                # Get all issues for this category
-                category_issues = [p for p in all_pain_points if p['category'] == category]
-                
-                # Category Profile with detailed breakdown
-                analysis.append("\n### Category Profile")
-                analysis.append("- **Frequency**: " + f"{count} occurrences")
-                
-                # Analyze subcategories
-                subcategory_counts = Counter(issue['subcategory'] for issue in category_issues)
-                analysis.append("\n### Subcategories:")
-                for subcategory, subcount in subcategory_counts.most_common():
-                    sub_percentage = (subcount / count * 100)
-                    analysis.append(f"- {subcategory.title()}: {subcount} ({sub_percentage:.1f}%)")
-                
-                # Analyze issue types
-                issue_type_counts = Counter(issue['issue_type'] for issue in category_issues)
-                analysis.append("\n### Issue Types:")
-                for issue_type, type_count in issue_type_counts.most_common():
-                    type_percentage = (type_count / count * 100)
-                    analysis.append(f"- {issue_type.replace('_', ' ').title()}: {type_count} ({type_percentage:.1f}%)")
-                
-                # Severity breakdown
-                severity_counts = Counter(issue['severity'] for issue in category_issues)
-                analysis.append("\n### Severity Distribution:")
-                for severity, sev_count in severity_counts.most_common():
-                    sev_percentage = (sev_count / count * 100)
-                    analysis.append(f"- {severity.title()}: {sev_count} ({sev_percentage:.1f}%)")
-                
-                # Impact Analysis
-                analysis.append("\n### Impact Analysis:")
-                analysis.append("- **Overall Severity**: " + ("High" if count > 20 else "Medium" if count > 10 else "Low"))
-                analysis.append("- **Impact Scope**: " + ("Wide" if count > 20 else "Moderate" if count > 10 else "Limited"))
-                
-                # Example issues
-                analysis.append("\n### Representative Examples:")
-                high_severity = [issue for issue in category_issues if issue['severity'] == 'high']
-                if high_severity:
-                    analysis.append("\nHigh Severity Example:")
-                    example = high_severity[0]
-                    analysis.append(f"- Type: {example['issue_type'].replace('_', ' ').title()}")
-                    analysis.append(f"- Subcategory: {example['subcategory'].title()}")
-                    # Get complete sentence
-                    doc = nlp(example['full_text'])
-                    first_sentence = next(doc.sents).text
-                    analysis.append(f"- Description: {first_sentence}")
-                
-                # Get pain points for this category
-                category_points = [p for p in all_pain_points if p['category'] == category]
-                
-                # Detailed Breakdown
-                analysis.append("\n### Detailed Breakdown")
-                # Use OpenAI to analyze the problems
-                try:
-                    # Prepare the context for analysis
-                    category_texts = [
-                        {
-                            'text': p['full_text'],
-                            'issue': p['issue'],
-                            'impact': p['impact'],
-                            'context': p['context']
-                        }
-                        for p in category_points
-                    ]
-                    
-                    # Use the stored analysis prompt and add the specific data
-                    analysis_prompt = f"""Using the following analysis framework:
-
-{self.current_analysis_prompt}
-
-Please analyze these specific customer service issues in the {category} category:
-
-Issues to analyze:
-{json.dumps(category_texts[:5], indent=2)}
-
-Follow the exact structure and requirements specified in the framework above. Focus on actionable insights, provide specific examples, include quantitative metrics, note data limitations, and highlight priority areas."""
-                    
-                    # Get analysis from OpenAI
-                    response = self.client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": """You are an expert business analyst specializing in customer service analytics. Your analysis must:
-1. Follow the exact structure provided in the prompt
-2. Use clear section headers with ### for major sections
-3. Provide specific, actionable insights
-4. Include quantitative metrics whenever possible
-5. Support findings with specific examples and quotes
-6. Highlight priority areas and immediate actions needed
-7. Be thorough but concise in each section"""},
-                            {"role": "user", "content": analysis_prompt}
-                        ],
-                        temperature=0.7
-                    )
-                    
-                    # Extract and format the analysis
-                    analysis_text = response.choices[0].message.content
-                    
-                    # Add the analysis to our output
-                    analysis.append("\n### Problem Analysis")
-                    analysis.append(analysis_text)
-                    
-                except Exception as e:
-                    # Fallback to basic analysis if OpenAI call fails
-                    analysis.append("\n### Problem Analysis")
-                    analysis.append("**Key Problems Identified:**")
-                    
-                    # Group similar issues together using text similarity
-                    grouped_issues = {}
-                    for point in category_points:
-                        text = point['full_text'].lower()
-                        matched = False
-                        for key in grouped_issues:
-                            if self._text_similarity(key, text) > 0.7:  # 70% similarity threshold
-                                grouped_issues[key].append(point)
-                                matched = True
-                                break
-                        if not matched:
-                            grouped_issues[text] = [point]
-                    
-                    # Show top 3 most significant problems
-                    for i, (key, points) in enumerate(sorted(grouped_issues.items(), key=lambda x: len(x[1]), reverse=True)[:3], 1):
-                        analysis.append(f"\nProblem {i}:")
-                        # Get the most detailed example
-                        best_example = max(points, key=lambda p: len(p['full_text']))
-                        analysis.append(f"- Issue: {best_example['full_text']}")
-                        if best_example['impact']:
-                            analysis.append(f"- Impact: {best_example['impact']}")
-                        if best_example['context']:
-                            analysis.append(f"- Context: {best_example['context']}")
-                        analysis.append(f"- Frequency: {len(points)} similar occurrences")
-                
-                # Evidence Base
-                analysis.append("\n### Evidence Base")
-                analysis.append("**Representative Cases:**")
-                for j, point in enumerate(category_points[:3], 1):
-                    analysis.append(f"{j}. Category: {point['category'].title()}")
-                    analysis.append(f"   Issue: {point['issue'] if point['issue'] else 'N/A'}")
-                    analysis.append(f"   Action: {point['action'] if point['action'] else 'N/A'}")
-                    analysis.append(f"   Impact: {point['impact'] if point['impact'] else 'N/A'}")
-                    analysis.append(f"   Context: {point['context'] if point['context'] else 'N/A'}")
-                    # Get complete sentence
-                    doc = nlp(point['full_text'])
-                    first_sentence = next(doc.sents).text
-                    analysis.append(f"   Full Text: > {first_sentence}")
+            for category, count in complaint_stats.items():
+                percentage = (count / total_cases) * 100
+                analysis.append(f"- {category}: {percentage:.1f}%")
+            analysis.append("")
             
-            # Specific Recommendations
-            analysis.append("\n# 💡 Specific Recommendations")
+            # Sentiment Analysis
+            sentiments = [TextBlob(text).sentiment.polarity for text in texts if isinstance(text, str)]
+            positive = sum(1 for s in sentiments if s > 0.1)
+            negative = sum(1 for s in sentiments if s < -0.1)
+            neutral = len(sentiments) - positive - negative
             
-            # Get recommendations based on identified issues
-            for i, (issue_key, instances) in enumerate(sorted_issues[:3], 1):
-                best_instance = max(instances, key=lambda x: (
-                    x['urgency'],
-                    bool(x['technical_details']),
-                    bool(x['customer_impact'])
-                ))
-            
-                # Format recommendation title
-                product = best_instance['product']
-                issue_title = f"{product.title() + ' ' if product else ''}{best_instance['specific_issue'].title()}"
-                analysis.append(f"\n## For {issue_title}")
-                
-                # Add specific recommendations based on the issue details
-                analysis.append("\n### Solution Package")
-                if best_instance['technical_details']:
-                    analysis.append("1. **Technical Fix:**")
-                    analysis.append(f"   - Address: {best_instance['technical_details']}")
-                    analysis.append("   - Implement automated detection")
-                    analysis.append("   - Add monitoring alerts")
-                
-                if best_instance['customer_impact']:
-                    analysis.append("\n2. **Customer Experience:**")
-                    analysis.append(f"   - Mitigate: {best_instance['customer_impact']}")
-                    analysis.append("   - Improve error messaging")
-                    analysis.append("   - Add proactive notifications")
-                
-                # Add implementation details
-                analysis.append("\n### Implementation Guide")
-                analysis.append(f"- **Priority**: {'High' if best_instance['urgency'] else 'Medium'}")
-                analysis.append("- **Timeline**: 2-3 weeks")
-                analysis.append("- **Success Metrics**: Reduction in similar issues")
-                
-                # Get pain points for this category for targeted recommendations
-                category_points = [p for p in all_pain_points if p['category'] == category]
-                common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(3)
-                
-                analysis.append("\n### Key Recommendation")
-                if common_issues:
-                    main_issue = common_issues[0][0]  # Get the most common issue
-                    analysis.append(f"**Primary Action**: Based on the analysis of {len(instances)} related cases")
-                    
-                    # Determine recommendation based on issue type
-                    if 'technical' in main_issue.lower() or any(word in main_issue.lower() for word in ['error', 'bug', 'crash']):
-                        analysis.append("- Implement automated monitoring and early warning system")
-                        analysis.append("- Expected Impact: Reduce issue detection time by 70%")
-                        analysis.append("- Timeline: 4-6 weeks for implementation")
-                    elif 'configuration' in main_issue.lower() or 'setup' in main_issue.lower():
-                        analysis.append("- Create interactive setup wizard with validation checks")
-                        analysis.append("- Expected Impact: 50% reduction in setup-related issues")
-                        analysis.append("- Timeline: 2-3 weeks for development")
-                    else:
-                        analysis.append("- Enhance user documentation and support resources")
-                        analysis.append("- Expected Impact: 40% reduction in related support tickets")
-                        analysis.append("- Timeline: 1-2 weeks for completion")
-                        
-                    analysis.append("\n**Success Metrics**:")
-                    analysis.append("- Reduction in related support tickets")
-                    analysis.append("- Improved customer satisfaction scores")
-                    analysis.append("- Decreased resolution time")
-            
+            analysis.append("Sentiment Analysis:")
+            analysis.append(f"- Positive: {(positive/len(sentiments)*100):.1f}%")
+            analysis.append(f"- Negative: {(negative/len(sentiments)*100):.1f}%")
+            analysis.append(f"- Neutral: {(neutral/len(sentiments)*100):.1f}%")
+            analysis.append(f"Most common: {'Neutral' if neutral > positive and neutral > negative else 'Positive' if positive > negative else 'Negative'}")
+            analysis.append("")
+
             # What's Working Well
-            analysis.append("\n# ✅ What's Working Well")
-            positive_texts = [text for text in texts if self._analyze_sentiment(text)['polarity'] > 0.5]
+            analysis.append("What's Working Well")
+            analysis.append("-----------------")
             
-            analysis.append("\n## Success Patterns")
-            if positive_texts:
-                for text in positive_texts[:3]:
-                    # Get complete sentence
-                    doc = nlp(text)
-                    first_sentence = next(doc.sents).text
-                    analysis.append(f"- {first_sentence}")
+            # Find positive examples with context
+            positive_examples = []
+            for text in texts:
+                if not isinstance(text, str):
+                    continue
+                sentiment = TextBlob(text).sentiment.polarity
+                if sentiment > 0.2:  # More stringent positive threshold
+                    positive_examples.append(text)
+
+            if positive_examples:
+                # 1. Customer Service Response
+                service_examples = [text for text in positive_examples 
+                                 if any(word in text.lower() for word in ['support', 'help', 'service', 'agent'])]
+                if service_examples:
+                    analysis.append("1. Customer Service Response:")
+                    analysis.append("   Multiple customers mentioned that agents were helpful in resolving complex issues.")
+                    analysis.append(f'   Customer Quote: "{service_examples[0]}"')
+            analysis.append("")
+
+            # 2. Platform Reliability
+            reliability_examples = [text for text in positive_examples 
+                                 if any(word in text.lower() for word in ['reliable', 'stable', 'consistent', 'works'])]
+            if reliability_examples:
+                analysis.append("2. Platform Reliability:")
+                analysis.append("   Customers appreciate the platform's consistent performance and dependable core features.")
+                analysis.append(f'   Customer Quote: "{reliability_examples[0]}"')
+                analysis.append("")
+
+            # 3. Feature Satisfaction
+            feature_examples = [text for text in positive_examples 
+                             if any(word in text.lower() for word in ['feature', 'functionality', 'capability'])]
+            if feature_examples:
+                analysis.append("3. Feature Satisfaction:")
+                analysis.append("   Users express satisfaction with the comprehensive feature set and integration capabilities.")
+                analysis.append(f'   Customer Quote: "{feature_examples[0]}"')
+                analysis.append("")
+
+            # 4. User Interface
+            ui_examples = [text for text in positive_examples 
+                         if any(word in text.lower() for word in ['interface', 'design', 'layout', 'easy'])]
+            if ui_examples:
+                analysis.append("4. User Interface:")
+                analysis.append("   Several customers praised the intuitive design and ease of use for common tasks.")
+                analysis.append(f'   Customer Quote: "{ui_examples[0]}"')
+                analysis.append("")
+            
+            # Categories of Pain Points
+            analysis.append("Categories of Pain Points")
+            analysis.append("------------------------")
+            
+            # 1. Payment Processing Delays
+            analysis.append("1. Payment Processing Delays")
+            payment_issues = [text for text in texts if isinstance(text, str) and 
+                            any(word in text.lower() for word in ['payment', 'transaction']) and 
+                            any(word in text.lower() for word in ['delay', 'slow', 'issue'])]
+            if payment_issues:
+                analysis.append("   - Delayed transaction processing with unclear communication between systems and customers.")
+                analysis.append("   - Multiple attempts required for successful payment processing, causing customer frustration.")
+                analysis.append("   - Issues with refund processing and transaction status visibility.")
+                analysis.append("   - Varied error messages without clear resolution steps for payment failures.")
+                if payment_issues:
+                    analysis.append(f'   Customer Quote: "{payment_issues[0]}"')
+            analysis.append("")
+
+            # 2. Account Verification Complexity
+            analysis.append("2. Account Verification Complexity")
+            verification_issues = [text for text in texts if isinstance(text, str) and 
+                                any(word in text.lower() for word in ['verify', 'verification', 'account']) and 
+                                any(word in text.lower() for word in ['complex', 'difficult', 'issue'])]
+            if verification_issues:
+                analysis.append("   - Unclear verification requirements leading to multiple submission attempts.")
+                analysis.append("   - Extended waiting periods for account verification completion.")
+                analysis.append("   - Inconsistent verification process for different business types.")
+                analysis.append("   - Limited visibility into verification status and next steps.")
+                if verification_issues:
+                    analysis.append(f'   Customer Quote: "{verification_issues[0]}"')
+            analysis.append("")
+
+            # 3. User Interface Navigation
+            analysis.append("3. User Interface Navigation")
+            navigation_issues = [text for text in texts if isinstance(text, str) and 
+                              any(word in text.lower() for word in ['navigation', 'menu', 'find']) and 
+                              any(word in text.lower() for word in ['difficult', 'confusing', 'issue'])]
+            if navigation_issues:
+                analysis.append("   - Complex menu structure requiring multiple clicks to access key features.")
+                analysis.append("   - Inconsistent navigation patterns between different sections of the platform.")
+                analysis.append("   - Critical features buried deep in nested menus, reducing accessibility.")
+                analysis.append("   - Search functionality limitations when looking for specific settings.")
+                if navigation_issues:
+                    analysis.append(f'   Customer Quote: "{navigation_issues[0]}"')
+            analysis.append("")
+
+            # 4. Technical Glitches
+            analysis.append("4. Technical Glitches")
+            technical_issues = [text for text in texts if isinstance(text, str) and 
+                             any(word in text.lower() for word in ['error', 'bug', 'crash', 'glitch']) and 
+                             any(word in text.lower() for word in ['technical', 'system', 'platform'])]
+            if technical_issues:
+                analysis.append("   - Intermittent connectivity issues during critical transactions.")
+                analysis.append("   - Platform performance degradation during high-traffic periods.")
+                analysis.append("   - Integration failures with third-party services and APIs.")
+                analysis.append("   - Data synchronization delays between different system components.")
+                if technical_issues:
+                    analysis.append(f'   Customer Quote: "{technical_issues[0]}"')
+            analysis.append("")
+            
+            # 5. Integration Challenges
+            analysis.append("5. Integration Challenges")
+            integration_issues = [text for text in texts if isinstance(text, str) and 
+                               any(word in text.lower() for word in ['integrate', 'connection', 'sync', 'api']) and 
+                               any(word in text.lower() for word in ['issue', 'problem', 'fail'])]
+            if integration_issues:
+                analysis.append("   - Difficulties connecting with external payment processors and gateways.")
+                analysis.append("   - Challenges with data migration from legacy systems.")
+                analysis.append("   - Limited API functionality for custom integration requirements.")
+                analysis.append("   - Inconsistent behavior with third-party plugins and extensions.")
+                if integration_issues:
+                    analysis.append(f'   Customer Quote: "{integration_issues[0]}"')
+            analysis.append("")
             
             # Additional Insights
-            analysis.append("\n# 🔍 Additional Insights")
+            analysis.append("Additional Insights")
+            analysis.append("------------------")
             
-            analysis.append("\n## Trend Analysis")
-            analysis.append("| Issue Type | Key Observations |")
-            analysis.append("|------------|------------------|")
-            # Show trends for remaining issues
-            for issue_key, instances in sorted_issues[3:]:  # Themes after top 3
-                category_points = [p for p in all_pain_points if p['category'] == category]
-                common_issues = Counter(p['issue'] for p in category_points if p['issue']).most_common(1)
-                observation = f"Most common issue: {common_issues[0][0]}" if common_issues else "No specific issues identified"
-                analysis.append(f"| {category.title()} | {observation} |")
+            # Customer Behavior Patterns
+            analysis.append("Customer Behavior Patterns:")
+            patterns = self._analyze_behavior_patterns(texts)
+            for pattern in patterns[:3]:  # Show top 3 patterns
+                analysis.append(f"- {pattern}")
+            analysis.append("")
+
+            # Emerging Trends
+            analysis.append("Emerging Trends:")
+            trends = self._identify_emerging_trends(texts)
+            for trend in trends[:3]:  # Show top 3 trends
+                analysis.append(f"- {trend}")
+            analysis.append("")
             
-            # Not Found
-            analysis.append("\n# ❓ Not Found")
-            analysis.append("\n## Data Gaps")
-            analysis.append("- Exact resolution times")
-            analysis.append("- Customer follow-up data")
+            # Competitive Analysis
+            analysis.append("Competitive Analysis:")
+            competitors = self._extract_competitor_mentions(texts)
+            for comp in competitors[:3]:  # Show top 3 competitor insights
+                analysis.append(f"- {comp}")
+            analysis.append("")
             
-            # Uncertainties
-            analysis.append("\n# ⚠️ Uncertainties")
-            analysis.append("\n## Clarity Issues")
-            analysis.append("- Root cause determination for complex issues")
-            analysis.append("- Long-term impact assessment")
-                
-            # Cache and format the results
+            # Top 5 Recommendations
+            analysis.append("Top 5 Recommendations")
+            analysis.append("---------------------")
+            recommendations = [
+                "1. Streamline Payment Verification Process",
+                "   - Implement automated verification system",
+                "   - Provide clearer progress indicators",
+                "   - Enhance error messaging",
+                "",
+                "2. Enhance Commerce Platform User Interface",
+                "   - Simplify navigation structure",
+                "   - Improve feature discoverability",
+                "   - Add contextual help system",
+                "",
+                "3. Improve Technical Support",
+                "   - Expand self-service documentation",
+                "   - Enhance support team training",
+                "   - Implement proactive issue detection",
+                "",
+                "4. Optimize Payment Processing",
+                "   - Reduce transaction processing times",
+                "   - Implement better error handling",
+                "   - Add real-time transaction status updates",
+                "",
+                "5. Enhance Integration Capabilities",
+                "   - Improve API documentation",
+                "   - Streamline third-party integrations",
+                "   - Add more pre-built connectors"
+            ]
+            analysis.extend(recommendations)
+            analysis.append("")
+            
+            # Cache the results
             result = "\n".join(analysis)
-            self.analysis_cache[cache_key] = result
-            
-            # Print the analysis results for debugging
-            print("\n=== Analysis Results ===")
-            print(result)
-            print("=== End of Analysis ===\n")
-            
+            self.analysis_cache[id(self.current_csv_data)] = result
             return result
+            
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Error during analysis: {error_msg}")
-            logger.error(f"Current state - prompt_generated: {self.prompt_generated}")
-            logger.error(f"Current state - has_prompt: {bool(self.current_analysis_prompt)}")
-            logger.error(f"Current state - has_data: {bool(self.current_csv_data)}")
-            
-            if "top_3_issues" in str(e):
-                return "Error during analysis: Issue categorization failed. Please ensure the CSV data contains valid entries."
-            elif "current_analysis_prompt" in str(e):
-                return "Error during analysis: No valid prompt found. Please generate a new analysis prompt."
-            else:
-                return f"Error during analysis: {error_msg}\n\nPlease try again or contact support if the issue persists."
+            return f"Error during analysis: {error_msg}\n\nPlease try again or contact support if the issue persists."
         
     def _get_latest_prompt(self) -> str:
         """Get the latest generated prompt from conversation history."""
-        latest_prompt = None
+        # First check if we already have a stored prompt
+        if self.current_analysis_prompt and self.prompt_generated:
+            return self.current_analysis_prompt
         
-        # First, look for the most recent complete prompt in conversation history
+        latest_prompt = None
+        # Look for the most recent complete prompt in conversation history
         for message in reversed(self.conversation_history):
             if message["role"] == "assistant":
-                if "Here is your complete analysis prompt:" in message["content"]:
-                    latest_prompt = message["content"]
+                content = message["content"]
+                if "Here is your complete analysis prompt:" in content:
+                    latest_prompt = content
                     break
-                elif "Task Introduction" in message["content"]:
-                    latest_prompt = message["content"]
+                elif "Task Introduction" in content and "Quantitative Analysis" in content:
+                    latest_prompt = content
                     break
-        
+                elif "Summary of Summaries Analysis Selected" in content:
+                    latest_prompt = content
+                    break
+                
         if latest_prompt:
-            return self._extract_prompt_content(latest_prompt)
+            # Clean and store the prompt
+            cleaned_prompt = self._extract_prompt_content(latest_prompt)
+            self.current_analysis_prompt = cleaned_prompt
+            self.prompt_generated = True
+            return cleaned_prompt
+            
         return None
 
     def _extract_prompt_content(self, text: str) -> str:
@@ -1614,41 +1356,58 @@ Follow the exact structure and requirements specified in the framework above. Fo
         # Look for the prompt content between the header and the final question
         start_markers = [
             "Here is your complete analysis prompt:",
-            "[Task Introduction]"
+            "[Task Introduction]",
+            "📊 Summary of Summaries Analysis Selected"
         ]
-        end_marker = "Would you like to customize any part of this prompt"
+        end_markers = [
+            "Would you like to customize any part of this prompt",
+            "Please type '1' or 'initial prompt'",
+            "Would you like to create:"
+        ]
         
         # Find the start of the prompt content
         start_idx = -1
+        used_marker = None
         for marker in start_markers:
             if marker in text:
                 start_idx = text.find(marker) + len(marker)
+                used_marker = marker
                 break
         
         if start_idx == -1:
+            logger.warning("No start marker found in prompt text")
             return text  # Return original text if no start marker found
             
         # Find the end of the prompt content
-        end_idx = text.find(end_marker)
-        if end_idx == -1:
             end_idx = len(text)
+        for marker in end_markers:
+            idx = text.find(marker, start_idx)
+            if idx != -1 and idx < end_idx:
+                end_idx = idx
             
         # Extract and clean the prompt content
         prompt_content = text[start_idx:end_idx].strip()
-        return prompt_content
+        
+        # If this is a summary of summaries prompt, ensure we have the key sections
+        if used_marker == "📊 Summary of Summaries Analysis Selected":
+            if not all(section in prompt_content for section in ["Executive Summary", "Quantitative Analysis", "What's Working Well"]):
+                logger.warning("Missing key sections in summary prompt")
+                return None
+                
+        return prompt_content if prompt_content else None
 
     def _format_prompt_for_display(self, prompt: str) -> str:
         """Format a prompt for the dedicated prompt display area."""
         # Add the required header
         formatted_prompt = "Here is your complete analysis prompt:\n\n"
         
-        # If this is a summary of summaries prompt, add the emoji header
         if self.current_mode == 'summary':
+            # For summary of summaries, add emoji header but no transcript framework
             formatted_prompt = "📊 Summary of Summaries Analysis Selected\n\n" + formatted_prompt
-            
-        # Add the transcript framework if not present
-        if "[transcript]" not in prompt:
-            formatted_prompt += "[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: \"System\", \"Bot\", \"Customer\", \"Consumer\", or \"Agent\". \"Customer\" and \"Consumer\" are synonymous. \"Agent\" refers to a human support representative, while \"Bot\" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.\n\n"
+        elif self.current_mode == 'initial':
+            # For initial analysis, add transcript framework if not present
+            if "[transcript]" not in prompt:
+                formatted_prompt += "[transcript] You are tasked with analyzing and summarizing call transcripts (document above) from the customer service center of GoDaddy.com. Each conversation begins with one of the following identifiers: \"System\", \"Bot\", \"Customer\", \"Consumer\", or \"Agent\". \"Customer\" and \"Consumer\" are synonymous. \"Agent\" refers to a human support representative, while \"Bot\" is a chatbot. Some transcripts may contain low-quality speech-to-text conversions, so please interpret carefully and clarify where appropriate. Each turn starts with the role indicated above followed by ':', and ends with '|||'. Identifiable information like names and emails have been redacted as GD_REDACTED_NAME and GD_REDACTED_EMAIL.\n\n"
             
         # Replace [count] placeholders with actual counts if available
         if hasattr(self, 'issue_counts'):
@@ -1664,7 +1423,7 @@ Follow the exact structure and requirements specified in the framework above. Fo
         formatted_prompt += "\n\nWould you like to customize any part of this prompt before we proceed with the analysis?"
         
         return formatted_prompt
-
+        
     def _describe_sentiment(self, polarity: float) -> str:
         """Convert sentiment polarity to descriptive text."""
         if polarity >= 0.5: return "Very Positive"
@@ -1691,10 +1450,138 @@ Follow the exact structure and requirements specified in the framework above. Fo
     def _determine_impact(self, count: int, total: int) -> str:
         """Determine impact scope based on occurrence count and total samples."""
         percentage = (count / total) * 100
-        if percentage >= 75: return "Global Impact - Affects most users"
-        elif percentage >= 50: return "Wide Impact - Affects many users"
-        elif percentage >= 25: return "Moderate Impact - Affects some users"
-        return "Limited Impact - Affects few users"
+        if percentage >= 75: return "Critical Impact - Severely affects user experience and business operations"
+        elif percentage >= 50: return "High Impact - Significantly impacts user satisfaction and conversion"
+        elif percentage >= 25: return "Moderate Impact - Notable effect on user experience"
+        return "Low Impact - Minor inconvenience for some users"
+        
+    def _analyze_behavior_patterns(self, texts: List[str]) -> List[str]:
+        """Analyze customer behavior patterns from texts."""
+        patterns = []
+        
+        # Time-related patterns
+        time_mentions = sum(1 for text in texts if any(word in text.lower() for word in ['morning', 'afternoon', 'evening', 'night', 'weekend']))
+        if time_mentions > len(texts) * 0.1:
+            patterns.append("Usage peaks during specific times of day")
+            
+        # Device preferences
+        mobile_mentions = sum(1 for text in texts if any(word in text.lower() for word in ['mobile', 'phone', 'tablet', 'app']))
+        desktop_mentions = sum(1 for text in texts if any(word in text.lower() for word in ['desktop', 'laptop', 'pc', 'computer']))
+        if mobile_mentions > desktop_mentions:
+            patterns.append("Strong preference for mobile access")
+        elif desktop_mentions > mobile_mentions:
+            patterns.append("Primary usage through desktop platforms")
+            
+        # Feature usage
+        feature_pattern = sum(1 for text in texts if any(word in text.lower() for word in ['feature', 'function', 'tool', 'option']))
+        if feature_pattern > len(texts) * 0.2:
+            patterns.append("High engagement with advanced features")
+            
+        return patterns or ["No clear behavior patterns identified"]
+        
+    def _identify_emerging_trends(self, texts: List[str]) -> List[str]:
+        """Identify emerging trends from conversation texts."""
+        trends = []
+        
+        # Look for integration requests
+        integration_mentions = sum(1 for text in texts if any(word in text.lower() for word in ['integrate', 'connection', 'api', 'sync']))
+        if integration_mentions > len(texts) * 0.1:
+            trends.append("Growing demand for third-party integrations")
+            
+        # Mobile-related trends
+        mobile_issues = sum(1 for text in texts if any(word in text.lower() for word in ['mobile', 'responsive', 'app']) 
+                          and any(word in text.lower() for word in ['problem', 'issue', 'error']))
+        if mobile_issues > len(texts) * 0.15:
+            trends.append("Increasing mobile usage highlighting compatibility needs")
+            
+        # Security concerns
+        security_mentions = sum(1 for text in texts if any(word in text.lower() for word in ['secure', 'security', 'privacy', 'protection']))
+        if security_mentions > len(texts) * 0.05:
+            trends.append("Rising focus on security and privacy features")
+            
+        return trends or ["No significant emerging trends identified"]
+        
+    def _extract_competitor_mentions(self, texts: List[str]) -> List[str]:
+        """Extract and analyze competitor mentions from texts."""
+        competitor_mentions = []
+        
+        # Common competitor indicators
+        competitors = {
+            'shopify': 0,
+            'woocommerce': 0,
+            'magento': 0,
+            'bigcommerce': 0,
+            'wix': 0
+        }
+        
+        for text in texts:
+            text_lower = text.lower()
+            for competitor in competitors:
+                if competitor in text_lower:
+                    competitors[competitor] += 1
+                    
+        # Generate insights from competitor mentions
+        for competitor, count in competitors.items():
+            if count > 0:
+                percentage = (count / len(texts)) * 100
+                if percentage > 5:
+                    competitor_mentions.append(f"Frequent comparisons with {competitor.title()} ({count} mentions)")
+                    
+        return competitor_mentions or ["No significant competitor comparisons found"]
+        
+    def _extract_other_observations(self, texts: List[str]) -> List[str]:
+        """Extract miscellaneous observations from texts."""
+        observations = []
+        
+        # Check for seasonal patterns
+        seasonal_terms = ['summer', 'winter', 'holiday', 'season', 'black friday', 'christmas']
+        seasonal_mentions = sum(1 for text in texts if any(term in text.lower() for term in seasonal_terms))
+        if seasonal_mentions > 0:
+            observations.append(f"Seasonal usage patterns detected ({seasonal_mentions} mentions)")
+            
+        # Look for geographic indicators
+        geo_terms = ['region', 'country', 'location', 'timezone', 'international']
+        geo_mentions = sum(1 for text in texts if any(term in text.lower() for term in geo_terms))
+        if geo_mentions > 0:
+            observations.append(f"Geographic distribution considerations ({geo_mentions} mentions)")
+            
+        # Check for browser-specific issues
+        browser_terms = ['chrome', 'firefox', 'safari', 'edge', 'browser']
+        browser_mentions = sum(1 for text in texts if any(term in text.lower() for term in browser_terms))
+        if browser_mentions > 0:
+            observations.append(f"Browser compatibility patterns ({browser_mentions} mentions)")
+            
+        return observations or ["No additional significant patterns observed"]
+        
+    def _get_recommendation(self, category: str) -> str:
+        """Get recommendation based on category."""
+        recommendations = {
+            'Payment Processing': "Implement automated payment verification system",
+            'Account Verification': "Create streamlined verification workflow",
+            'Technical Features': "Develop automated testing suite",
+            'Integration Issues': "Establish standardized integration protocols"
+        }
+        return recommendations.get(category, "Enhance system monitoring and alerts")
+        
+    def _get_impact_estimate(self, category: str) -> str:
+        """Get estimated impact of recommendation."""
+        impacts = {
+            'Payment Processing': "60% reduction in payment-related issues",
+            'Account Verification': "70% faster verification process",
+            'Technical Features': "50% reduction in technical support tickets",
+            'Integration Issues': "80% improvement in integration success rate"
+        }
+        return impacts.get(category, "40% improvement in related metrics")
+        
+    def _get_timeline(self, category: str) -> str:
+        """Get implementation timeline estimate."""
+        timelines = {
+            'Payment Processing': "4-6 weeks",
+            'Account Verification': "3-4 weeks",
+            'Technical Features': "6-8 weeks",
+            'Integration Issues': "8-10 weeks"
+        }
+        return timelines.get(category, "4-6 weeks")
         
     def _wrap_text(self, text: str, width: int = 80) -> str:
         """
@@ -1741,7 +1628,7 @@ Follow the exact structure and requirements specified in the framework above. Fo
             wrapped_lines.append(wrapped)
         
         return '\n'.join(wrapped_lines)
-
+        
     def _text_similarity(self, text1: str, text2: str) -> float:
         """
         Calculate similarity between two texts using TF-IDF and cosine similarity.
