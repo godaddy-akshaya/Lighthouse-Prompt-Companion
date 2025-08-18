@@ -184,12 +184,32 @@ def handle_csv_upload():
 
 @socketio.on('analyze_csv')
 def handle_csv_analysis():
-    """Handle CSV analysis request."""
+    """Handle CSV analysis request with enhanced formatting."""
     try:
+        # Get initial summary
+        summary = agent.get_csv_summary()
+        
+        # Get full analysis
         analysis = agent.analyze_summaries()
-        emit('analysis_result', {'success': True, 'analysis': analysis})
+        
+        # Get any learned insights
+        insights = agent.get_learned_insights()
+        
+        # Combine all information
+        full_analysis = {
+            'summary': summary,
+            'analysis': analysis,
+            'insights': insights,
+            'success': True
+        }
+        
+        emit('analysis_result', full_analysis)
     except Exception as e:
-        emit('analysis_result', {'success': False, 'error': str(e)})
+        logger.error(f"Analysis error: {str(e)}")
+        emit('analysis_result', {
+            'success': False,
+            'error': f"Error during analysis: {str(e)}. Please try again or contact support if the issue persists."
+        })
 
 @socketio.on('clear_history')
 def handle_clear_history():

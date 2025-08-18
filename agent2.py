@@ -1415,6 +1415,62 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
         
         return '\n'.join(wrapped_lines)
         
+    def _extract_prompt_content(self, text: str) -> str:
+        """
+        Extract the actual prompt content from a complete response.
+        
+        Args:
+            text: The complete response text containing the prompt
+            
+        Returns:
+            str: The extracted prompt content, or None if no valid prompt found
+        """
+        # Look for the prompt content between the header and the final question
+        start_markers = [
+            "Here is your complete analysis prompt:",
+            "Task: Analyze customer interactions",
+            "📊 Summary of Summaries Analysis Selected"
+        ]
+        end_markers = [
+            "Would you like to customize any part of this prompt",
+            "Please type '1' or 'initial prompt'",
+            "Would you like to create:",
+            "Are you ready to upload the CSV file"
+        ]
+        
+        # Find the start of the prompt content
+        start_idx = 0  # Default to start of text
+        used_marker = None
+        for marker in start_markers:
+            if marker in text:
+                start_idx = text.find(marker) + len(marker)
+                used_marker = marker
+                break
+        
+        # Initialize end_idx to end of text
+        end_idx = len(text)
+        
+        if start_idx == 0:  # No marker found
+            logger.warning("No start marker found in prompt text")
+            return text  # Return original text if no start marker found
+            
+        # Find the earliest end marker after start_idx
+        for marker in end_markers:
+            idx = text.find(marker, start_idx)
+            if idx != -1 and idx < end_idx:
+                end_idx = idx
+            
+        # Extract and clean the prompt content
+        prompt_content = text[start_idx:end_idx].strip()
+        
+        # If this is a summary of summaries prompt, ensure we have the key sections
+        if used_marker == "📊 Summary of Summaries Analysis Selected":
+            if not all(section in prompt_content for section in ["Executive Summary", "Quantitative Analysis", "What's Working Well"]):
+                logger.warning("Missing key sections in summary prompt")
+                return None
+                
+        return prompt_content if prompt_content else None
+
     def _text_similarity(self, text1: str, text2: str) -> float:
         """
         Calculate similarity between two texts using TF-IDF and cosine similarity.

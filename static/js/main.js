@@ -451,8 +451,24 @@ socket.on('analysis_result', (data) => {
     const printButton = document.getElementById('print-analysis');
     
     if (data.success) {
+        // Start with the summary
+        let htmlContent = '# Analysis Overview\n\n';
+        
+        // Add initial summary if available
+        if (data.summary) {
+            htmlContent += '## Initial Summary\n\n' + data.summary + '\n\n';
+        }
+        
+        // Add main analysis
+        htmlContent += data.analysis;
+        
+        // Add insights if available
+        if (data.insights) {
+            htmlContent += '\n\n## Learned Insights\n\n' + data.insights;
+        }
+        
         // Convert markdown to HTML with enhanced structure
-        let htmlContent = marked.parse(data.analysis);
+        htmlContent = marked.parse(htmlContent);
         
         // Enhanced section formatting
         htmlContent = htmlContent
