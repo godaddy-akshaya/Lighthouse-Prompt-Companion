@@ -406,8 +406,117 @@ button:active {
     color: #202124;
     background: white;
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Major sections */
+.analysis-content .major-section {
+    margin: 2rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.analysis-content .major-header {
+    display: flex;
+    align-items: center;
+    font-size: 1.75rem;
+    color: #1a73e8;
+    margin-bottom: 1rem;
+}
+
+.analysis-content .major-header .emoji {
+    margin-right: 0.75rem;
+    font-size: 1.75rem;
+}
+
+.analysis-content .section-content {
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Subsections */
+.analysis-content .subsection {
+    margin: 1.5rem 0;
+    padding-bottom: 0.5rem;
+}
+
+.analysis-content .subsection-header {
+    font-size: 1.25rem;
+    color: #1a73e8;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.analysis-content .subsection-content {
+    margin-left: 1rem;
+}
+
+/* Lists */
+.analysis-content .analysis-list {
+    list-style-type: none;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.analysis-content .analysis-list li {
+    position: relative;
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+    line-height: 1.6;
+}
+
+.analysis-content .analysis-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #1a73e8;
+    font-weight: bold;
+}
+
+/* Tables */
+.analysis-content .analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: white;
+}
+
+.analysis-content .analysis-table th {
+    background: #f8f9fa;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 500;
+    color: #202124;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.analysis-content .analysis-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    color: #3c4043;
+}
+
+/* Metrics display */
+.analysis-content .metrics-grid {
+    margin: 1.5rem 0;
+}
+
+.analysis-content .metric-item {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.analysis-content .metric-value {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1a73e8;
+    margin-right: 0.5rem;
+}
+
+.analysis-content .metric-label {
+    color: #5f6368;
 }
 
 .analysis-content h1 {
@@ -444,20 +553,18 @@ button:active {
     width: 100%;
     border-collapse: collapse;
     margin: 1rem 0;
-    background: white;
 }
 
 .analysis-content th {
-    background: #f8f9fa;
-    border-bottom: 2px solid #e0e0e0;
-    padding: 0.75rem;
     text-align: left;
+    padding: 0.5rem 1rem;
     font-weight: 500;
     color: #202124;
+    border-bottom: 2px solid #e0e0e0;
 }
 
 .analysis-content td {
-    padding: 0.75rem;
+    padding: 0.5rem 1rem;
     border-bottom: 1px solid #e0e0e0;
     color: #3c4043;
 }

@@ -451,8 +451,33 @@ socket.on('analysis_result', (data) => {
     const printButton = document.getElementById('print-analysis');
     
     if (data.success) {
-        // Convert markdown to HTML with Google Doc styling
-        const htmlContent = marked.parse(data.analysis);
+        // Convert markdown to HTML with enhanced structure
+        let htmlContent = marked.parse(data.analysis);
+        
+        // Enhanced section formatting
+        htmlContent = htmlContent
+            // Format major sections with emojis
+            .replace(/<h2>([^<]*Executive Summary[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">📋</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Quantitative Analysis[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">📊</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*What\'s Working Well[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">✨</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Categories of Pain Points[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">⚠️</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Top 3 Issues[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">🔍</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Top 3 Recommendations[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">🎯</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Additional Insights[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">💡</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Not Found[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">❓</span>$1</div><div class="section-content">')
+            .replace(/<h2>([^<]*Other Observations[^<]*)<\/h2>/gi, '<div class="major-section"><div class="major-header"><span class="emoji">📝</span>$1</div><div class="section-content">')
+            
+            // Format subsections
+            .replace(/<h3>([^<]*)<\/h3>/gi, '<div class="subsection"><div class="subsection-header">$1</div><div class="subsection-content">')
+            
+            // Format lists and tables
+            .replace(/<ul>/g, '<ul class="analysis-list">')
+            .replace(/<table>/g, '<table class="analysis-table">')
+            
+            // Close sections properly
+            .replace(/<\/div><h2>/g, '</div></div><h2>')
+            + '</div>'; // Close the last section
+            
         analysisResults.innerHTML = htmlContent;
         
         // Show print button

@@ -6,6 +6,7 @@ import os
 import re
 import asyncio
 import json
+import traceback
 import pandas as pd
 import numpy as np
 import logging
@@ -766,12 +767,20 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Read CSV file
             df = pd.read_csv(file_path)
             
-            # Check specifically for 'conversation_summary' column
-            if 'conversation_summary' not in df.columns:
+            # Enhanced data validation
+            # Check for required column (case-insensitive)
+            conv_col = next((col for col in df.columns if col.lower() == 'conversation_summary'), None)
+            if not conv_col:
                 raise ValueError("CSV file must contain a 'conversation_summary' column. Please check your file format.")
             
-            # Store only the conversation_summary column
-            self.current_csv_data = df[['conversation_summary']].copy()
+            # Validate data quality
+            df[conv_col] = df[conv_col].fillna('').astype(str).str.strip()
+            if df[conv_col].str.len().eq(0).all():
+                raise ValueError("The conversation_summary column contains no valid data")
+            
+            # Store only the conversation_summary column with proper name
+            self.current_csv_data = df[[conv_col]].copy()
+            self.current_csv_data.columns = ['conversation_summary']  # Normalize column name
             
             # Generate summary focused on conversation data
             summary = []
@@ -782,12 +791,26 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             summary.append(f"\nQuick Summary:")
             summary.append(f"- Total entries: {len(self.current_csv_data)}")
             
-            # Calculate statistics on all entries
+            # Calculate comprehensive statistics
             word_counts = self.current_csv_data['conversation_summary'].str.split().str.len()
-            summary.append(f"\nComplete Statistics (all {len(self.current_csv_data)} entries):")
+            sentiment_scores = [TextBlob(text).sentiment.polarity for text in self.current_csv_data['conversation_summary']]
+            
+            summary.append(f"\n📊 Complete Statistics (all {len(self.current_csv_data)} entries):")
+            summary.append(f"\nText Length Analysis:")
             summary.append(f"- Average words per summary: {word_counts.mean():.1f}")
+            summary.append(f"- Median words per summary: {word_counts.median():.1f}")
             summary.append(f"- Shortest summary: {word_counts.min()} words")
             summary.append(f"- Longest summary: {word_counts.max()} words")
+            summary.append(f"- Standard deviation: {word_counts.std():.1f} words")
+            
+            summary.append(f"\nSentiment Overview:")
+            positive = sum(1 for s in sentiment_scores if s > 0.1)
+            negative = sum(1 for s in sentiment_scores if s < -0.1)
+            neutral = len(sentiment_scores) - positive - negative
+            summary.append(f"- Positive summaries: {positive} ({(positive/len(sentiment_scores)*100):.1f}%)")
+            summary.append(f"- Neutral summaries: {neutral} ({(neutral/len(sentiment_scores)*100):.1f}%)")
+            summary.append(f"- Negative summaries: {negative} ({(negative/len(sentiment_scores)*100):.1f}%)")
+            summary.append(f"- Average sentiment: {sum(sentiment_scores)/len(sentiment_scores):.2f} [-1 to +1 scale]")
             
             # Show first 3 examples with full text
             summary.append("\nExample Summaries:")
@@ -797,11 +820,33 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             self.csv_summary = "\n".join(summary)
             return True
             
-        except Exception as e:
-            print(f"Error loading CSV file: {e}")
-            self.current_csv_data = None
-            self.csv_summary = None
+        except pd.errors.EmptyDataError:
+            error_msg = "The CSV file is empty. Please check the file content."
+            print(f"Error loading CSV file: {error_msg}")
+            self._reset_state()
             return False
+        except pd.errors.ParserError as e:
+            error_msg = f"CSV parsing error: {str(e)}. Please ensure the file is properly formatted."
+            print(f"Error loading CSV file: {error_msg}")
+            self._reset_state()
+            return False
+        except ValueError as e:
+            error_msg = str(e)
+            print(f"Error loading CSV file: {error_msg}")
+            self._reset_state()
+            return False
+        except Exception as e:
+            error_msg = f"Unexpected error while loading CSV: {str(e)}"
+            print(f"Error loading CSV file: {error_msg}")
+            print("Traceback:", traceback.format_exc())
+            self._reset_state()
+            return False
+
+    def _reset_state(self):
+        """Reset the agent's state related to CSV processing."""
+        self.current_csv_data = None
+        self.csv_summary = None
+        self.analysis_cache.clear()  # Clear any cached analysis results
 
     def get_csv_summary(self) -> str:
         """
@@ -876,67 +921,56 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             top_issues = sorted(issues.items(), key=lambda x: len(x[1]), reverse=True)[:3]
             
             # Format document header
-            analysis.append("=" * 80)
-            analysis.append("CUSTOMER SERVICE CONVERSATION ANALYSIS REPORT")
-            analysis.append(f"Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            analysis.append(f"Total Conversations Analyzed: {total_cases}")
-            analysis.append("=" * 80)
+            analysis.append("# CUSTOMER SERVICE CONVERSATION ANALYSIS REPORT")
+            analysis.append(f"*Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}*")
+            analysis.append(f"**Total Conversations Analyzed: {total_cases}**")
+            analysis.append("---")
             
             # 1. Executive Summary
-            analysis.append("\n📋 I. EXECUTIVE SUMMARY")
-            analysis.append("-" * 50)
-            analysis.append("\n**Analysis Overview**")
+            analysis.append("\n## 📋 Executive Summary")
+            analysis.append("\n### Analysis Overview")
             analysis.append(f"\n• Analysis of {total_cases} customer conversations about the commerce website")
             analysis.append(f"• Overall sentiment is predominantly {sentiment_mode.lower()}")
             analysis.append(f"• Most discussed features: {', '.join(k.title() for k,v in sorted(feature_mentions.items(), key=lambda x: x[1], reverse=True)[:3])}")
             analysis.append(f"• Primary concerns: {', '.join(issue[0].title() for issue in top_issues)}")
             
             # 2. Quantitative Analysis
-            analysis.append("\n📊 II. QUANTITATIVE ANALYSIS")
-            analysis.append("-" * 50)
+            analysis.append("\n## 📊 Quantitative Analysis")
             
             # Feature Distribution Analysis
-            analysis.append("\n**A. Feature Distribution Analysis**")
-            analysis.append("\n{:<30} {:<15} {:<15} {:<15}".format(
-                "**Feature**", "**Mentions**", "**Percentage**", "**Trend**"))
-            analysis.append("-" * 75)
+            analysis.append("\n### Feature Distribution Analysis")
+            analysis.append("\n| Feature | Mentions | Percentage | Trend |")
+            analysis.append("|---------|-----------|------------|-------|")
             
             for feature, count in sorted(feature_mentions.items(), key=lambda x: x[1], reverse=True):
                 percentage = (count / total_cases) * 100
                 trend = "↑ High" if percentage > 30 else "→ Medium" if percentage > 15 else "↓ Low"
-                analysis.append("{:<30} {:<15,d} {:<15.1f}% {:<15}".format(
-                    feature.title(), count, percentage, trend))
+                analysis.append(f"| {feature.title()} | {count:,d} | {percentage:.1f}% | {trend} |")
             
             # Issue Distribution Analysis
-            analysis.append("\n**B. Issue Distribution Analysis**")
-            analysis.append("\n{:<35} {:<15} {:<15} {:<15}".format(
-                "**Category**", "**Count**", "**Percentage**", "**Severity**"))
-            analysis.append("-" * 80)
+            analysis.append("\n### Issue Distribution Analysis")
+            analysis.append("\n| Category | Count | Percentage | Severity |")
+            analysis.append("|----------|--------|------------|-----------|")
             
             total_complaints = sum(len(issue_list) for issue_list in issues.values())
             for category, issue_list in sorted(issues.items(), key=lambda x: len(x[1]), reverse=True):
                 count = len(issue_list)
                 percentage = (count / total_complaints * 100) if total_complaints > 0 else 0
                 severity = "Critical" if percentage > 30 else "High" if percentage > 20 else "Medium" if percentage > 10 else "Low"
-                analysis.append("{:<35} {:<15,d} {:<15.1f}% {:<15}".format(
-                    category.title(), count, percentage, severity))
+                analysis.append(f"| {category.title()} | {count:,d} | {percentage:.1f}% | {severity} |")
             
             # Customer Sentiment Analysis
-            analysis.append("\n**C. Customer Sentiment Analysis**")
-            analysis.append("\n{:<20} {:<15} {:<15} {:<20}".format(
-                "**Type**", "**Count**", "**Percentage**", "**Indicator**"))
-            analysis.append("-" * 70)
+            analysis.append("\n### Customer Sentiment Analysis")
+            analysis.append("\n| Type | Count | Percentage | Indicator |")
+            analysis.append("|------|--------|------------|-----------|")
             
             pos_pct = (positive/len(sentiment_scores)*100)
             neg_pct = (negative/len(sentiment_scores)*100)
             neu_pct = (neutral/len(sentiment_scores)*100)
             
-            analysis.append("{:<20} {:<15,d} {:<15.1f}% {:<20}".format(
-                "Positive", positive, pos_pct, "🟢" * int(pos_pct/10)))
-            analysis.append("{:<20} {:<15,d} {:<15.1f}% {:<20}".format(
-                "Neutral", neutral, neu_pct, "⚪" * int(neu_pct/10)))
-            analysis.append("{:<20} {:<15,d} {:<15.1f}% {:<20}".format(
-                "Negative", negative, neg_pct, "🔴" * int(neg_pct/10)))
+            analysis.append(f"| Positive | {positive:,d} | {pos_pct:.1f}% | {'🟢' * int(pos_pct/10)} |")
+            analysis.append(f"| Neutral | {neutral:,d} | {neu_pct:.1f}% | {'⚪' * int(neu_pct/10)} |")
+            analysis.append(f"| Negative | {negative:,d} | {neg_pct:.1f}% | {'🔴' * int(neg_pct/10)} |")
             
             analysis.append("\n**Key Insights:**")
             analysis.append(f"• Predominant Sentiment: {sentiment_mode}")
@@ -944,11 +978,10 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             analysis.append(f"• Customer Satisfaction Index: {((pos_pct - neg_pct) / 100):.2f} [-1 to +1 scale]")
             
             # 3. What's Working Well
-            analysis.append("\n✨ III. POSITIVE ASPECTS AND STRENGTHS")
-            analysis.append("-" * 50)
+            analysis.append("\n## ✨ Positive Aspects and Strengths")
             
             # Customer Service Excellence
-            analysis.append("\n**A. Customer Service Excellence**")
+            analysis.append("\n### Customer Service Excellence")
             service_examples = [text for text in texts if isinstance(text, str) and 
                              TextBlob(text).sentiment.polarity > 0.3 and
                              any(word in text.lower() for word in ['support', 'help', 'service', 'agent'])]
@@ -958,7 +991,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append(f"\nCustomer Feedback: \"{service_examples[0]}\"")
             
             # Platform Performance
-            analysis.append("\n**B. Platform Performance**")
+            analysis.append("\n### Platform Performance")
             performance_examples = [text for text in texts if isinstance(text, str) and 
                                 TextBlob(text).sentiment.polarity > 0.3 and
                                 any(word in text.lower() for word in ['reliable', 'fast', 'stable', 'performance'])]
@@ -968,14 +1001,14 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append(f"\nCustomer Feedback: \"{performance_examples[0]}\"")
             
             # Feature Set and Usability
-            analysis.append("\n**C. Feature Set and Usability**")
+            analysis.append("\n### Feature Set and Usability")
             for feature, texts in positive_aspects.items():
                 if texts:
                     analysis.append(f"• {feature.title()}: Positive user experiences")
                     analysis.append(f"  Customer Quote: \"{texts[0]}\"")
             
             # Recent Improvements
-            analysis.append("\n**D. Recent Improvements**")
+            analysis.append("\n### Recent Improvements")
             improvements = [text for text in texts if isinstance(text, str) and
                          any(word in text.lower() for word in ['improved', 'better', 'update', 'new']) and
                          TextBlob(text).sentiment.polarity > 0]
@@ -983,8 +1016,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append(f"• {text}")
             
             # 4. Categories of Pain Points
-            analysis.append("\n⚠️ IV. CATEGORIES OF PAIN POINTS")
-            analysis.append("-" * 50)
+            analysis.append("\n## ⚠️ Categories of Pain Points")
             
             # Group issues by category
             for category, issue_list in sorted(issues.items(), key=lambda x: len(x[1]), reverse=True):
@@ -996,14 +1028,13 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                         analysis.append(f"• \"{example}\"")
             
             # 5. Top 3 Issues
-            analysis.append("\n🔍 V. TOP 3 ISSUES")
-            analysis.append("-" * 50)
+            analysis.append("\n## 🔍 Top 3 Issues")
             
             for idx, (issue, examples) in enumerate(top_issues, 1):
                 count = len(examples)
                 percentage = (count / total_complaints * 100) if total_complaints > 0 else 0
                 
-                analysis.append(f"\n**Issue {idx}: {issue.title()}**")
+                analysis.append(f"\n### Issue {idx}: {issue.title()}")
                 analysis.append(f"• Mentions: {count} ({percentage:.1f}% of total complaints)")
                 
                 # Customer quotes
@@ -1022,52 +1053,49 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                 analysis.append(f"Customer Experience Impact: {sentiment_impact}")
             
             # 6. Top 3 Recommendations
-            analysis.append("\n🎯 VI. TOP 3 RECOMMENDATIONS")
-            analysis.append("-" * 50)
+            analysis.append("\n## 🎯 Top 3 Recommendations")
             
             # Implementation Strategy
-            analysis.append("\n**📈 Implementation Strategy**")
+            analysis.append("\n### 📈 Implementation Strategy")
             
-            analysis.append("\n**A. Quick Wins**")
+            analysis.append("\n#### Quick Wins")
             analysis.append("• Implement high-impact, low-effort improvements")
             analysis.append("• Address critical user experience issues")
             analysis.append("• Enhance existing documentation")
             
-            analysis.append("\n**B. Monitoring & Metrics**")
+            analysis.append("\n#### Monitoring & Metrics")
             analysis.append("• Establish clear success metrics")
             analysis.append("• Track improvement impact")
             analysis.append("• Regular progress reviews")
             
-            analysis.append("\n**C. Long-term Success**")
+            analysis.append("\n#### Long-term Success")
             analysis.append("• Consider dependencies between improvements")
             analysis.append("• Plan for scalability")
             analysis.append("• Regular stakeholder updates")
             
             # 7. Additional Insights
-            analysis.append("\n🔍 VII. ADDITIONAL INSIGHTS")
-            analysis.append("-" * 50)
+            analysis.append("\n## 🔍 Additional Insights")
             
             # Customer behavior patterns
-            analysis.append("\n**A. Customer Behavior Patterns**")
+            analysis.append("\n### Customer Behavior Patterns")
             patterns = self._analyze_behavior_patterns(texts)
             for pattern in patterns[:3]:
                 analysis.append(f"• {pattern}")
             
             # Emerging trends
-            analysis.append("\n**B. Emerging Trends**")
+            analysis.append("\n### Emerging Trends")
             trends = self._identify_emerging_trends(texts)
             for trend in trends[:3]:
                 analysis.append(f"• {trend}")
             
             # Competitive comparisons
-            analysis.append("\n**C. Competitive Comparisons**")
+            analysis.append("\n### Competitive Comparisons")
             competitors = self._extract_competitor_mentions(texts)
             for comp in competitors:
                 analysis.append(f"• {comp}")
             
             # 8. Not Found
-            analysis.append("\n❓ VIII. NOT FOUND")
-            analysis.append("-" * 50)
+            analysis.append("\n## ❓ Not Found")
             
             expected_features = [
                 "Advanced search functionality",
@@ -1083,25 +1111,23 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                     analysis.append(f"• {feature}")
             
             # 9. Other Observations
-            analysis.append("\n📝 IX. OTHER OBSERVATIONS")
-            analysis.append("-" * 50)
+            analysis.append("\n## 📝 Other Observations")
             
             # Unusual patterns
-            analysis.append("\n**A. Unusual Patterns**")
+            analysis.append("\n### Unusual Patterns")
             observations = self._extract_other_observations(texts)
             for obs in observations:
                 analysis.append(f"• {obs}")
             
             # Customer interaction patterns
-            analysis.append("\n**B. Customer Interaction Patterns**")
+            analysis.append("\n### Customer Interaction Patterns")
             analysis.append("• Peak interaction times and duration trends")
             analysis.append("• Common escalation triggers")
             analysis.append("• Repeat contact patterns")
             
             # Report footer
-            analysis.append("\n" + "=" * 80)
-            analysis.append("End of Analysis Report")
-            analysis.append("=" * 80)
+            analysis.append("\n---")
+            analysis.append("*End of Analysis Report*")
             
             # Join all analysis sections
             result = "\n".join(analysis)
