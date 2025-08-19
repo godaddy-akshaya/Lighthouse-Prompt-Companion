@@ -988,40 +988,19 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Get top issues
             top_issues = sorted(issues.items(), key=lambda x: len(x[1]), reverse=True)[:3]
             
-            # Format analysis in terminal style
-            analysis.append("### Quantitative Analysis")
+            # Format document header
+            analysis.append("# CUSTOMER SERVICE CONVERSATION ANALYSIS REPORT")
+            analysis.append(f"*Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}*")
+            analysis.append(f"**Total Conversations Analyzed: {total_cases}**")
+            analysis.append("---")
             
-            # Specific Issues Analysis
-            server_issues = sum(1 for text in texts if any(word in text.lower() for word in ['server', 'downtime', 'outage', 'down']))
-            loading_issues = sum(1 for text in texts if any(word in text.lower() for word in ['slow', 'loading', 'performance']))
-            ssl_issues = sum(1 for text in texts if any(word in text.lower() for word in ['ssl', 'certificate', 'security']))
-            
-            analysis.append("\n- **Specific Hosting Issues:**")
-            analysis.append(f"  - Server Downtime: {server_issues} mentions ({(server_issues/total_cases*100):.0f}%)")
-            analysis.append(f"  - Slow Website Loading: {loading_issues} mentions ({(loading_issues/total_cases*100):.0f}%)")
-            analysis.append(f"  - SSL Certificate Errors: {ssl_issues} mentions ({(ssl_issues/total_cases*100):.0f}%)")
-            
-            # Hosting Complaints Categories
-            tech_issues = sum(1 for text in texts if any(word in text.lower() for word in ['technical', 'server', 'performance', 'slow', 'loading']))
-            security_issues = sum(1 for text in texts if any(word in text.lower() for word in ['security', 'ssl', 'certificate', 'hack', 'breach']))
-            billing_issues = sum(1 for text in texts if any(word in text.lower() for word in ['billing', 'price', 'cost', 'charge', 'payment']))
-            total_categorized = tech_issues + security_issues + billing_issues
-            
-            analysis.append("\n- **Hosting Complaints Categories:**")
-            analysis.append(f"  - Technical Performance: {(tech_issues/total_categorized*100):.0f}%")
-            analysis.append(f"  - Security Concerns: {(security_issues/total_categorized*100):.0f}%")
-            analysis.append(f"  - Billing and Pricing: {(billing_issues/total_categorized*100):.0f}%")
-            
-            # Sentiment Analysis
-            positive_pct = (positive/len(sentiment_scores)*100)
-            neutral_pct = (neutral/len(sentiment_scores)*100)
-            negative_pct = (negative/len(sentiment_scores)*100)
-            
-            analysis.append("\n- **Sentiment Analysis:**")
-            analysis.append(f"  - Positive: {positive_pct:.0f}%")
-            analysis.append(f"  - Neutral: {neutral_pct:.0f}%")
-            analysis.append(f"  - Negative: {negative_pct:.0f}%")
-            analysis.append(f"  - Most Common Sentiment: {sentiment_mode}")
+            # 1. Executive Summary
+            analysis.append("\n## 📋 Executive Summary")
+            analysis.append("\n### Analysis Overview")
+            analysis.append(f"\n• Analysis of {total_cases} customer conversations about the commerce website")
+            analysis.append(f"• Overall sentiment is predominantly {sentiment_mode.lower()}")
+            analysis.append(f"• Most discussed features: {', '.join(k.title() for k,v in sorted(feature_mentions.items(), key=lambda x: x[1], reverse=True)[:3])}")
+            analysis.append(f"• Primary concerns: {', '.join(issue[0].title() for issue in top_issues)}")
             
             # 2. Quantitative Analysis
             analysis.append("\n## 📊 Quantitative Analysis")
@@ -1163,81 +1142,194 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
                     for example in issue_list[:2]:  # Show up to 2 examples
                         analysis.append(f"• \"{example}\"")
             
-            # Top 3 Issues
-            analysis.append("\n### Top 3 Hosting Issues")
+            # 5. Top 3 Issues
+            analysis.append("\n## 🔍 Top 3 Issues")
             
-            # 1. Server Downtime
-            analysis.append("\n1. **Server Downtime:**")
-            analysis.append(f"   - Frequency: {server_issues} mentions ({(server_issues/total_cases*100):.0f}%)")
-            analysis.append("   - Pain Points:")
-            analysis.append('     - "Our website is down multiple times a week."')
-            analysis.append("     - Impact on Experience: Frustration and lost revenue.")
-            server_quotes = [text for text in texts if any(word in text.lower() for word in ['server', 'downtime', 'outage', 'down'])]
-            if server_quotes:
-                analysis.append(f'   - Customer Quote: "{server_quotes[0]}"')
+            for idx, (issue, examples) in enumerate(top_issues, 1):
+                count = len(examples)
+                percentage = (count / total_complaints * 100) if total_complaints > 0 else 0
+                
+                analysis.append(f"\n### Issue {idx}: {issue.title()}")
+                analysis.append(f"• Mentions: {count} ({percentage:.1f}% of total complaints)")
+                
+                # Customer quotes
+                analysis.append("\nRepresentative Customer Quotes:")
+                for quote in examples[:2]:
+                    analysis.append(f"• \"{quote}\"")
+                
+                # Impact analysis
+                impact = self._determine_impact(count, total_cases)
+                analysis.append(f"\nBusiness Impact: {impact}")
+                
+                # Customer experience impact
+                sentiment_scores = [TextBlob(ex).sentiment.polarity for ex in examples]
+                avg_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+                sentiment_impact = "Severe Negative" if avg_sentiment < -0.5 else "Moderate Negative" if avg_sentiment < -0.2 else "Slight Negative"
+                analysis.append(f"Customer Experience Impact: {sentiment_impact}")
             
-            # 2. Slow Website Loading
-            analysis.append("\n2. **Slow Website Loading:**")
-            analysis.append(f"   - Frequency: {loading_issues} mentions ({(loading_issues/total_cases*100):.0f}%)")
-            analysis.append("   - Pain Points:")
-            analysis.append('     - "Our webpages take forever to load."')
-            analysis.append("     - Impact on Experience: Poor user engagement.")
-            loading_quotes = [text for text in texts if any(word in text.lower() for word in ['slow', 'loading', 'performance'])]
-            if loading_quotes:
-                analysis.append(f'   - Customer Quote: "{loading_quotes[0]}"')
+            # 6. Top 3 Recommendations
+            analysis.append("\n## 🎯 Top 3 Recommendations")
             
-            # 3. SSL Certificate Errors
-            analysis.append("\n3. **SSL Certificate Errors:**")
-            analysis.append(f"   - Frequency: {ssl_issues} mentions ({(ssl_issues/total_cases*100):.0f}%)")
-            analysis.append("   - Pain Points:")
-            analysis.append('     - "Our users see security warnings on our site."')
-            analysis.append("     - Impact on Experience: Loss of trust.")
-            ssl_quotes = [text for text in texts if any(word in text.lower() for word in ['ssl', 'certificate', 'security'])]
-            if ssl_quotes:
-                analysis.append(f'   - Customer Quote: "{ssl_quotes[0]}"')
+            # Implementation Strategy
+            analysis.append("\n### 📈 Implementation Strategy")
+            
+            analysis.append("\n#### Quick Wins")
+            analysis.append("• Implement high-impact, low-effort improvements")
+            analysis.append("• Address critical user experience issues")
+            analysis.append("• Enhance existing documentation")
+            
+            analysis.append("\n#### Monitoring & Metrics")
+            analysis.append("• Establish clear success metrics")
+            analysis.append("• Track improvement impact")
+            analysis.append("• Regular progress reviews")
+            
+            analysis.append("\n#### Long-term Success")
+            analysis.append("• Consider dependencies between improvements")
+            analysis.append("• Plan for scalability")
+            analysis.append("• Regular stakeholder updates")
+            
+            # 7. Additional Insights
+            analysis.append("\n## 🔍 Additional Insights")
+            
+            # Customer behavior patterns
+            analysis.append("\n### Customer Behavior Patterns")
+            patterns = self._analyze_behavior_patterns(texts)
+            for pattern in patterns[:3]:
+                analysis.append(f"• {pattern}")
+            
+            # Emerging trends
+            analysis.append("\n### Emerging Trends")
+            trends = self._identify_emerging_trends(texts)
+            for trend in trends[:3]:
+                analysis.append(f"• {trend}")
+            
+            # Competitive comparisons
+            analysis.append("\n### Competitive Comparisons")
+            competitors = self._extract_competitor_mentions(texts)
+            for comp in competitors:
+                analysis.append(f"• {comp}")
+            
+            # 8. Not Found
+            analysis.append("\n## ❓ Not Found")
+            
+            expected_features = [
+                "Advanced search functionality",
+                "Bulk operations",
+                "Custom reporting tools",
+                "API documentation",
+                "Developer tools"
+            ]
+            
+            analysis.append("\nFeatures Not Mentioned in Transcripts:")
+            for feature in expected_features:
+                if not any(feature.lower() in text.lower() for text in texts if isinstance(text, str)):
+                    analysis.append(f"• {feature}")
+            
+            # 9. Other Observations
+            analysis.append("\n## 📝 Other Observations")
+            
+            # Unusual patterns
+            analysis.append("\n### Unusual Patterns")
+            observations = self._extract_other_observations(texts)
+            for obs in observations:
+                analysis.append(f"• {obs}")
+            
+            # Customer interaction patterns
+            analysis.append("\n### Customer Interaction Patterns")
+            analysis.append("• Peak interaction times and duration trends")
+            analysis.append("• Common escalation triggers")
+            analysis.append("• Repeat contact patterns")
+            
+            # Report footer
+            analysis.append("\n---")
+            analysis.append("*End of Analysis Report*")
+            
+            # Format the analysis in the terminal style
+            terminal_format = []
+            
+            # Quantitative Analysis
+            terminal_format.append("### Quantitative Analysis")
+            terminal_format.append("- **Specific Hosting Issues:**")
+            for feature, count in sorted(feature_mentions.items(), key=lambda x: x[1], reverse=True)[:3]:
+                percentage = (count / total_cases) * 100
+                terminal_format.append(f"  - {feature.title()}: {count} mentions ({percentage:.0f}%)")
+            
+            # Hosting Complaints Categories
+            terminal_format.append("\n- **Hosting Complaints Categories:**")
+            categories = {
+                "Technical Performance": sum(len(v) for k, v in issues.items() if "performance" in k.lower()),
+                "Security Concerns": sum(len(v) for k, v in issues.items() if "security" in k.lower()),
+                "Billing and Pricing": sum(len(v) for k, v in issues.items() if any(x in k.lower() for x in ["billing", "price", "cost"]))
+            }
+            total_complaints = sum(categories.values())
+            for category, count in categories.items():
+                percentage = (count / total_complaints * 100) if total_complaints > 0 else 0
+                terminal_format.append(f"  - {category}: {percentage:.0f}%")
+            
+            # Sentiment Analysis
+            terminal_format.append("\n- **Sentiment Analysis:**")
+            total_sentiments = len(sentiment_scores)
+            pos_pct = (positive/total_sentiments*100)
+            neu_pct = (neutral/total_sentiments*100)
+            neg_pct = (negative/total_sentiments*100)
+            terminal_format.append(f"  - Positive: {pos_pct:.0f}%")
+            terminal_format.append(f"  - Neutral: {neu_pct:.0f}%")
+            terminal_format.append(f"  - Negative: {neg_pct:.0f}%")
+            terminal_format.append(f"  - Most Common Sentiment: {sentiment_mode}")
+            
+            # Top 3 Hosting Issues
+            terminal_format.append("\n### Top 3 Hosting Issues")
+            for idx, (issue, examples) in enumerate(top_issues[:3], 1):
+                count = len(examples)
+                percentage = (count / total_complaints * 100) if total_complaints > 0 else 0
+                
+                terminal_format.append(f"{idx}. **{issue.title()}:**")
+                terminal_format.append(f"   - Frequency: {count} mentions ({percentage:.0f}%)")
+                terminal_format.append("   - Pain Points:")
+                
+                # Extract a representative pain point
+                if examples:
+                    terminal_format.append(f"     - \"{examples[0]}\"")
+                    terminal_format.append("     - Impact on Experience: " + self._determine_impact(count, total_cases).split(" - ")[0])
+                
+                # Add a customer quote
+                if len(examples) > 1:
+                    terminal_format.append(f"   - Customer Quote: \"{examples[1]}\"")
+                terminal_format.append("")
             
             # Specific Recommendations
-            analysis.append("\n### Specific Recommendations")
-            
-            # 1. Server Downtime
-            analysis.append("\n1. **Server Downtime:**")
-            analysis.append("   - Invest in a more reliable hosting provider.")
-            analysis.append("   - Implement automated monitoring for immediate issue detection.")
-            analysis.append("   - Offer compensation for downtime to affected customers.")
-            
-            # 2. Slow Website Loading
-            analysis.append("\n2. **Slow Website Loading:**")
-            analysis.append("   - Optimize website images and content for faster loading.")
-            analysis.append("   - Upgrade hosting plan for better performance.")
-            analysis.append("   - Implement a content delivery network (CDN) for speed optimization.")
-            
-            # 3. SSL Certificate Errors
-            analysis.append("\n3. **SSL Certificate Errors:**")
-            analysis.append("   - Renew SSL certificates promptly to avoid errors.")
-            analysis.append("   - Conduct regular security audits for proactive maintenance.")
-            analysis.append("   - Provide customer support for resolving SSL-related issues.")
+            terminal_format.append("### Specific Recommendations")
+            for idx, (issue, _) in enumerate(top_issues[:3], 1):
+                terminal_format.append(f"{idx}. **{issue.title()}:**")
+                terminal_format.append("   - " + self._get_recommendation(issue))
+                terminal_format.append("   - Implement automated monitoring for immediate issue detection")
+                terminal_format.append("   - Offer compensation or solutions to affected customers")
+                terminal_format.append("")
             
             # What's Working Well
-            analysis.append("\n### What's Working Well")
-            analysis.append("\n- **Positive Aspects:**")
-            analysis.append("  - Responsive customer support.")
-            analysis.append("  - Easy account management features.")
-            analysis.append("  - Transparent billing practices.")
+            terminal_format.append("### What's Working Well")
+            terminal_format.append("- **Positive Aspects:**")
+            for feature, texts in positive_aspects.items():
+                positive_texts = [text for text in texts if TextBlob(text).sentiment.polarity > 0.3]
+                if positive_texts:
+                    terminal_format.append(f"  - {feature.title()}")
             
             # Additional Insights
-            analysis.append("\n### Additional Insights")
-            analysis.append("\n- **Emerging Trends:**")
-            analysis.append("  - Increased demand for security-focused hosting solutions.")
-            analysis.append("  - Growing awareness of website performance importance.")
+            terminal_format.append("\n### Additional Insights")
+            terminal_format.append("- **Emerging Trends:**")
+            trends = self._identify_emerging_trends(texts)
+            for trend in trends[:2]:
+                terminal_format.append(f"  - {trend}")
             
             # Not Found
-            analysis.append("\n### Not Found")
-            analysis.append("\n- **Elements Not Mentioned:**")
-            analysis.append("  - Specific feedback on customer support response times.")
-            analysis.append("  - Comments on the user interface of the hosting control panel.")
+            terminal_format.append("\n### Not Found")
+            terminal_format.append("- **Elements Not Mentioned:**")
+            for feature in expected_features[:2]:
+                if not any(feature.lower() in text.lower() for text in texts if isinstance(text, str)):
+                    terminal_format.append(f"  - {feature}")
             
-            # Join all analysis sections
-            result = "\n".join(analysis)
+            # Join all sections
+            result = "\n".join(terminal_format)
             self.analysis_cache[id(self.current_csv_data)] = result
             return result
         except Exception as e:
