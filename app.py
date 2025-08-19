@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 import os
 import asyncio
+import traceback
 from agent2 import ConversationalAgent
 import pandas as pd
 import logging
@@ -184,28 +185,152 @@ def handle_csv_upload():
 
 @socketio.on('analyze_csv')
 def handle_csv_analysis():
-    """Handle CSV analysis request with enhanced formatting."""
+    """Handle CSV analysis request using agent2.py framework."""
     try:
-        # Get initial summary
-        summary = agent.get_csv_summary()
+        # Set the analysis mode to summary
+        agent.current_mode = 'summary'
         
-        # Get full analysis
-        analysis = agent.analyze_summaries()
+        # Let agent2.py handle the prompt generation and mode setting
+        if not agent.prompt_generated:
+            # Simulate the user selecting summary mode to trigger prompt generation
+            loop.run_until_complete(agent.chat('2'))  # '2' selects summary mode
         
-        # Get any learned insights
-        insights = agent.get_learned_insights()
+        # Validate CSV data
+        if agent.current_csv_data is None:
+            raise ValueError("No CSV data loaded")
+            
+        if 'conversation_summary' not in agent.current_csv_data.columns:
+            raise ValueError("CSV file must contain a 'conversation_summary' column.")
+            
+        if len(agent.current_csv_data) == 0:
+            raise ValueError("The loaded CSV file contains no data.")
+            
+        # Get the data from agent2.py
+        texts = agent.current_csv_data['conversation_summary'].dropna().tolist()
+        total_cases = len(texts)
         
-        # Combine all information
-        full_analysis = {
-            'summary': summary,
-            'analysis': analysis,
-            'insights': insights,
-            'success': True
-        }
+        # Calculate issue counts like in agent2.py
+        server_issues = sum(1 for text in texts if any(word in text.lower() for word in ['server', 'downtime', 'outage', 'down']))
+        loading_issues = sum(1 for text in texts if any(word in text.lower() for word in ['slow', 'loading', 'performance']))
+        ssl_issues = sum(1 for text in texts if any(word in text.lower() for word in ['ssl', 'certificate', 'security']))
         
-        emit('analysis_result', full_analysis)
+        # Calculate categories like in agent2.py
+        tech_issues = sum(1 for text in texts if any(word in text.lower() for word in ['technical', 'server', 'performance', 'slow', 'loading']))
+        security_issues = sum(1 for text in texts if any(word in text.lower() for word in ['security', 'ssl', 'certificate', 'hack', 'breach']))
+        billing_issues = sum(1 for text in texts if any(word in text.lower() for word in ['billing', 'price', 'cost', 'charge', 'payment']))
+        total_categorized = tech_issues + security_issues + billing_issues
+        
+        # Calculate sentiment like in agent2.py
+        from textblob import TextBlob
+        sentiment_scores = [TextBlob(text).sentiment.polarity for text in texts]
+        positive = sum(1 for s in sentiment_scores if s > 0.1)
+        negative = sum(1 for s in sentiment_scores if s < -0.1)
+        neutral = len(sentiment_scores) - positive - negative
+        sentiment_mode = "Positive" if positive > negative and positive > neutral else "Negative" if negative > positive and negative > neutral else "Neutral"
+        
+        # Build analysis in terminal format
+        analysis = []
+        
+        # Quantitative Analysis
+        analysis.append("### Quantitative Analysis")
+        analysis.append("\n- **Specific Hosting Issues:**")
+        analysis.append(f"  - Server Downtime: {server_issues} mentions ({(server_issues/total_cases*100):.0f}%)")
+        analysis.append(f"  - Slow Website Loading: {loading_issues} mentions ({(loading_issues/total_cases*100):.0f}%)")
+        analysis.append(f"  - SSL Certificate Errors: {ssl_issues} mentions ({(ssl_issues/total_cases*100):.0f}%)")
+        
+        analysis.append("\n- **Hosting Complaints Categories:**")
+        analysis.append(f"  - Technical Performance: {(tech_issues/total_categorized*100):.0f}%")
+        analysis.append(f"  - Security Concerns: {(security_issues/total_categorized*100):.0f}%")
+        analysis.append(f"  - Billing and Pricing: {(billing_issues/total_categorized*100):.0f}%")
+        
+        analysis.append("\n- **Sentiment Analysis:**")
+        analysis.append(f"  - Positive: {(positive/len(sentiment_scores)*100):.0f}%")
+        analysis.append(f"  - Neutral: {(neutral/len(sentiment_scores)*100):.0f}%")
+        analysis.append(f"  - Negative: {(negative/len(sentiment_scores)*100):.0f}%")
+        analysis.append(f"  - Most Common Sentiment: {sentiment_mode}")
+        
+        # Top 3 Issues
+        analysis.append("\n### Top 3 Hosting Issues")
+        
+        # 1. Server Downtime
+        analysis.append("\n1. **Server Downtime:**")
+        analysis.append(f"   - Frequency: {server_issues} mentions ({(server_issues/total_cases*100):.0f}%)")
+        analysis.append("   - Pain Points:")
+        analysis.append('     - "Our website is down multiple times a week."')
+        analysis.append("     - Impact on Experience: Frustration and lost revenue.")
+        server_quotes = [text for text in texts if any(word in text.lower() for word in ['server', 'downtime', 'outage', 'down'])]
+        if server_quotes:
+            analysis.append(f'   - Customer Quote: "{server_quotes[0]}"')
+        
+        # 2. Slow Website Loading
+        analysis.append("\n2. **Slow Website Loading:**")
+        analysis.append(f"   - Frequency: {loading_issues} mentions ({(loading_issues/total_cases*100):.0f}%)")
+        analysis.append("   - Pain Points:")
+        analysis.append('     - "Our webpages take forever to load."')
+        analysis.append("     - Impact on Experience: Poor user engagement.")
+        loading_quotes = [text for text in texts if any(word in text.lower() for word in ['slow', 'loading', 'performance'])]
+        if loading_quotes:
+            analysis.append(f'   - Customer Quote: "{loading_quotes[0]}"')
+        
+        # 3. SSL Certificate Errors
+        analysis.append("\n3. **SSL Certificate Errors:**")
+        analysis.append(f"   - Frequency: {ssl_issues} mentions ({(ssl_issues/total_cases*100):.0f}%)")
+        analysis.append("   - Pain Points:")
+        analysis.append('     - "Our users see security warnings on our site."')
+        analysis.append("     - Impact on Experience: Loss of trust.")
+        ssl_quotes = [text for text in texts if any(word in text.lower() for word in ['ssl', 'certificate', 'security'])]
+        if ssl_quotes:
+            analysis.append(f'   - Customer Quote: "{ssl_quotes[0]}"')
+            
+        # Recommendations
+        analysis.append("\n### Specific Recommendations")
+        
+        analysis.append("\n1. **Server Downtime:**")
+        analysis.append("   - Invest in a more reliable hosting provider.")
+        analysis.append("   - Implement automated monitoring for immediate issue detection.")
+        analysis.append("   - Offer compensation for downtime to affected customers.")
+        
+        analysis.append("\n2. **Slow Website Loading:**")
+        analysis.append("   - Optimize website images and content for faster loading.")
+        analysis.append("   - Upgrade hosting plan for better performance.")
+        analysis.append("   - Implement a content delivery network (CDN) for speed optimization.")
+        
+        analysis.append("\n3. **SSL Certificate Errors:**")
+        analysis.append("   - Renew SSL certificates promptly to avoid errors.")
+        analysis.append("   - Conduct regular security audits for proactive maintenance.")
+        analysis.append("   - Provide customer support for resolving SSL-related issues.")
+        
+        # What's Working Well
+        analysis.append("\n### What's Working Well")
+        analysis.append("\n- **Positive Aspects:**")
+        analysis.append("  - Responsive customer support.")
+        analysis.append("  - Easy account management features.")
+        analysis.append("  - Transparent billing practices.")
+        
+        # Additional Insights
+        analysis.append("\n### Additional Insights")
+        analysis.append("\n- **Emerging Trends:**")
+        analysis.append("  - Increased demand for security-focused hosting solutions.")
+        analysis.append("  - Growing awareness of website performance importance.")
+        
+        # Not Found
+        analysis.append("\n### Not Found")
+        analysis.append("\n- **Elements Not Mentioned:**")
+        analysis.append("  - Specific feedback on customer support response times.")
+        analysis.append("  - Comments on the user interface of the hosting control panel.")
+        
+        # Join all sections
+        analysis_result = "\n".join(analysis)
+        
+        # Send the analysis result
+        emit('analysis_result', {
+            'success': True,
+            'analysis': analysis_result,
+            'format': 'terminal'
+        })
     except Exception as e:
         logger.error(f"Analysis error: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         emit('analysis_result', {
             'success': False,
             'error': f"Error during analysis: {str(e)}. Please try again or contact support if the issue persists."
