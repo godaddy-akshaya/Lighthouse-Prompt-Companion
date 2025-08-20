@@ -1,0 +1,70 @@
+name: "Example Agent A"
+title: "My Custom Agent Title"
+description: "Description of what this agent does"
+endpoint: "https://api.example.com/my-agent"
+slack_channel: "#my-channel"  # Channel for user redirection if AI agent is not working
+visibility: "public"  # Anyone with GoCaaS OI access can use this agent
+deploy_envs: "dev"
+
+suggestion_prompts:
+  - "Give me all the registered tables in lake?"
+  - "How can I onboard myself using this agent?"
+
+# Timeout settings (using defaults)
+connection_timeout: 15  # 15 seconds connection timeout
+read_timeout: 90       # 90 seconds read timeout
+
+# AWS Secret Manager ARNs for different environments
+secret_arns: [ "AI Agent's AWS Account Secret Arn" ]
+
+# Tags (AI Agents tag is automatically added)
+tags:
+  - "AI Agents"
+
+# SSO configuration for IAM JWT authentication
+sso_host:
+  dev-private: "sso.dev-godaddy.com"
+  dev: "sso.dev-godaddy.com"
+  test: "sso.test-godaddy.com"
+  prod: "sso.godaddy.com"
+
+sso_token_type: "iam"  # Using IAM JWT token
+
+# Additional payload to be included in requests
+additional_payload:
+  project_id: "12345"
+  metadata:
+    api_key: "secret:api_key"  # Reference to secret in AWS Secrets Manager
+
+# Example resulting request payload:
+# {
+#   "prompt": "user's message",
+#   "conversationId": "...",
+#   "messageId": "...",
+#   "project_id": 12345,
+#   "metadata": {
+#     "key": "value",
+#     "api_key": "1231232"
+#   }
+# }
+
+field_mappings:
+  user_message: "prompt"
+  chat_id: "conversationId"
+  message_id: "messageId"
+  output: "output"
+
+additional_headers:
+  api_key: "secret:YOUR_API_KEY"
+
+# Streaming response format:
+# - Each chunk must be a JSON string
+# - Each chunk must contain the field mapped as 'output' in field_mappings
+# - For status updates, use the following schema:
+#   event-type: status
+#   This will display as a status message rather than final output
+stream: true
+
+# Enable file upload capability (disabled by default)
+capabilities:
+  file_upload: true  # Required for handling file/KB references during conversation
