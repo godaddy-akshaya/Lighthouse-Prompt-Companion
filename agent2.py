@@ -757,7 +757,7 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
 
     def load_csv_from_buffer(self, csv_buffer, filename: str = "") -> bool:
         """
-        Load and process a CSV from a StringIO buffer.
+        Load and process a CSV from a StringIO buffer, optimized to only read conversation_summary column.
         Args:
             csv_buffer: StringIO object containing CSV data
             filename: Optional filename for logging
@@ -765,9 +765,8 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             bool: True if successful, False otherwise
         """
         try:
-            # Try to read first few lines to validate format
+            # First check if the column exists using a small chunk
             header = pd.read_csv(csv_buffer, nrows=0)
-            
             if 'conversation_summary' not in [col.lower() for col in header.columns]:
                 logger.error("CSV must contain a 'conversation_summary' column")
                 return False
@@ -775,44 +774,49 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
             # Reset buffer position
             csv_buffer.seek(0)
             
-            # Read CSV with proper column name handling
+            # Find the conversation_summary column (case-insensitive)
+            conv_summary_col = next(col for col in header.columns if col.lower() == 'conversation_summary')
+            
+            # Read only the conversation_summary column with optimized settings
             df = pd.read_csv(
                 csv_buffer,
-                dtype=str,  # Read all columns as strings initially
+                usecols=[conv_summary_col],  # Only read the conversation_summary column
+                dtype=str,  # Read as string
                 encoding='utf-8',
-                on_bad_lines='warn'  # More permissive CSV parsing
+                on_bad_lines='skip',  # Skip bad lines instead of warning
+                memory_map=True,  # Use memory mapping for large files
+                low_memory=True  # Use less memory
             )
             
-            logger.info(f"DataFrame loaded: {len(df)} rows, {len(df.columns)} columns")
-            logger.info("Columns found: " + ', '.join(df.columns))
+            logger.info(f"Loaded {len(df)} conversation summaries")
             
-            # Find the conversation_summary column (case-insensitive)
-            conv_summary_col = next(col for col in df.columns if col.lower() == 'conversation_summary')
-            
-            # Store only the required column and clean data
-            self.current_csv_data = df[[conv_summary_col]].copy()
+            # Store and clean the data
+            self.current_csv_data = df.copy()
             self.current_csv_data.columns = ['conversation_summary']  # Normalize column name
             self.current_csv_data['conversation_summary'] = self.current_csv_data['conversation_summary'].fillna('').str.strip()
             
-            # Generate summary
+            # Generate summary focused on conversation summaries
             summary = []
             if len(self.current_csv_data) > 0:
-                first_row = self.current_csv_data['conversation_summary'].iloc[0]
-                total_rows = len(self.current_csv_data)
+                first_summary = self.current_csv_data['conversation_summary'].iloc[0]
+                total_summaries = len(self.current_csv_data)
+                
+                # Calculate some basic stats
+                avg_length = self.current_csv_data['conversation_summary'].str.len().mean()
                 
                 summary.extend([
-                    f"✅ Successfully loaded CSV{' file: ' + filename if filename else ''}",
-                    f"\n📊 File Overview:",
-                    f"- Total rows: {total_rows}",
-                    f"- First row length: {len(first_row)} characters",
-                    f"\n📝 First Row Content:",
-                    f"{first_row}",
-                    f"\n👉 {total_rows - 1} more rows available for analysis"
+                    f"✅ Successfully loaded conversation summaries{' from: ' + filename if filename else ''}",
+                    f"\n📊 Summary Overview:",
+                    f"- Total conversation summaries: {total_summaries}",
+                    f"- Average summary length: {int(avg_length)} characters",
+                    f"\n📝 Sample Summary:",
+                    f"{first_summary[:200]}{'...' if len(first_summary) > 200 else ''}",  # Show first 200 chars
+                    f"\n👉 {total_summaries - 1} more summaries available for analysis"
                 ])
             else:
                 summary.extend([
-                    "⚠️ No data found in the CSV file",
-                    "Please check if the file contains valid data with a 'conversation_summary' column"
+                    "⚠️ No conversation summaries found in the CSV file",
+                    "Please check if the file contains valid data in the 'conversation_summary' column"
                 ])
             
             self.csv_summary = "\n".join(summary)
@@ -825,29 +829,42 @@ Always maintain a helpful, educational tone that builds the user's prompt engine
 
     def load_csv(self, file_path: str) -> bool:
         """
-        Load and process a CSV file, focusing only on the 'conversation_summary' column.
+        Load and process a CSV file, optimized to only read the 'conversation_summary' column.
         Args:
             file_path: Path to the CSV file
         Returns:
             bool: True if successful, False otherwise
         """
         try:
-            # Read CSV file
-            df = pd.read_csv(file_path)
-            
-            # Enhanced data validation
-            # Check for required column (case-insensitive)
-            conv_col = next((col for col in df.columns if col.lower() == 'conversation_summary'), None)
+            # First check if conversation_summary column exists using a small chunk
+            header = pd.read_csv(file_path, nrows=0)
+            conv_col = next((col for col in header.columns if col.lower() == 'conversation_summary'), None)
             if not conv_col:
                 raise ValueError("CSV file must contain a 'conversation_summary' column. Please check your file format.")
             
-            # Validate data quality
+            # Read only the conversation_summary column with optimized settings
+            df = pd.read_csv(
+                file_path,
+                usecols=[conv_col],  # Only read the conversation_summary column
+                dtype=str,  # Read as string
+                encoding='utf-8',
+                on_bad_lines='skip',  # Skip bad lines instead of warning
+                memory_map=True,  # Use memory mapping for large files
+                low_memory=True,  # Use less memory
+                chunksize=10000  # Process in chunks for very large files
+            )
+            
+            # Combine chunks if chunked reading was used
+            if hasattr(df, '__iter__'):  # Check if we got an iterator (chunked reading)
+                df = pd.concat(df, ignore_index=True)
+            
+            # Validate and clean data
             df[conv_col] = df[conv_col].fillna('').astype(str).str.strip()
             if df[conv_col].str.len().eq(0).all():
                 raise ValueError("The conversation_summary column contains no valid data")
             
-            # Store only the conversation_summary column with proper name
-            self.current_csv_data = df[[conv_col]].copy()
+            # Store the data with normalized column name
+            self.current_csv_data = df.copy()
             self.current_csv_data.columns = ['conversation_summary']  # Normalize column name
             
             # Generate summary focused on conversation data
@@ -1717,7 +1734,7 @@ async def main():
     """Main interactive chat loop."""
     print("Starting application...")
     print("-" * 50)
-    print(":robot_face: AI Prompt Engineering Assistant with Learning Capabilities")
+    print("🤖: AI Prompt Engineering Assistant with Learning Capabilities")
     print("I help create effective prompts for analyzing customer service interactions!")
     print("I learn from our interactions to provide better assistance over time.")
     print("\nPlease type one of these options to begin:")
@@ -1792,7 +1809,7 @@ async def main():
                 continue
                 
             # Get agent response
-            print(":robot_face: Assistant: ", end="", flush=True)
+            print("🤖: Assistant: ", end="", flush=True)
             response = await conv_agent.chat(user_input)
             print(response)
             
